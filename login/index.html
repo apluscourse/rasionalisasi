@@ -173,7 +173,14 @@ button:disabled {
 }
 
 @media (max-width: 480px) {
-    .nav-links { display: none; } /* Sembunyikan link di mobile agar bersih */
+    .nav-links { 
+        display: flex; /* Aktifkan kembali menu */
+        gap: 10px;    /* Perkecil jarak antar menu */
+    }
+
+    .nav-links a { 
+        font-size: 12px; /* Perkecil ukuran font agar muat di layar HP */
+    }
 }
 </style>
 </head>
@@ -199,7 +206,7 @@ button:disabled {
         <p>Login untuk analisis peluang masuk PTN</p>
       </div>
 
-      <input id="email" placeholder="Email">
+      <input id="email" placeholder="User">
       <input id="pass" type="password" placeholder="Password">
 
       <button id="loginBtn" onclick="login()">LOGIN</button>
