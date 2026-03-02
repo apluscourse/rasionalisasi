@@ -180,13 +180,13 @@ button:disabled {
 <body>
 
 <nav>
-    <a href="index.html" class="logo-nav">
+    <a href="index" class="logo-nav">
         <img src="https://i.imgur.com/zyRxiIM.png" alt="Logo" style="height: 100%;">
     </a>
     <div class="nav-links">
-        <a href="index.html#about">Tentang</a>
-        <a href="index.html#contact">Kontak</a>
-        <a href="index.html" style="color: var(--blue);">Beranda</a>
+        <a href="index#about">Tentang</a>
+        <a href="index#contact">Kontak</a>
+        <a href="index" style="color: var(--blue);">Beranda</a>
     </div>
 </nav>
 
@@ -246,7 +246,7 @@ function login() {
         localStorage.setItem("masaAktif", d.masaAktif);
         localStorage.setItem("user_api_key", d.apiKey || "");
         
-        location.href = (d.role == "admin") ? "admin.html" : "publik.html";
+        location.href = (d.role == "admin") ? "admin" : "publik";
       } 
       else if (d.status == "expired") {
         alert("⚠️ Masa aktif akun anda sudah habis, silahkan hubungi admin");
