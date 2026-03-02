@@ -91,12 +91,21 @@ nav {
 
         
         @media (max-width: 480px) {
-            .hero h1 { font-size: 28px; }
-            .nav-links { display: none; } /* Simpelkan untuk mobile agar aman */
+.hero h1 { font-size: 28px; }
+    
+    /* GANTI BAGIAN INI */
+    .nav-links { 
+        display: flex; /* Aktifkan kembali menu */
+        gap: 10px;    /* Perkecil jarak antar menu */
+    }
+
+    .nav-links a { 
+        font-size: 12px; /* Perkecil ukuran font agar muat di layar HP */
+    }
        .logo-hero { 
         transform: scale(1.5); 
-        width: 200px; /* Kita kecilkan width dasarnya sedikit agar scale 1.5 tidak off-screen */
-        margin-bottom: 20px; /* Beri sedikit ruang bawah agar tidak menempel ke judul */
+        width: 230px; /* Kita kecilkan width dasarnya sedikit agar scale 1.5 tidak off-screen */
+        margin-bottom: 15px; /* Beri sedikit ruang bawah agar tidak menempel ke judul */
     }
         }
 
