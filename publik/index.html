@@ -1668,7 +1668,7 @@ function hitungTarget() {
 <script>
 if(localStorage.getItem("role")!="publik"){
   alert("Akses ditolak");
-  location.href="index";
+  location.href="/";
 }
 
 function logout() {
@@ -1678,7 +1678,7 @@ function logout() {
     localStorage.clear();
     
     // Mengarahkan kembali ke halaman login
-    window.location.href = "index";
+    window.location.href = "/";
   }
 }
     
@@ -1720,7 +1720,7 @@ function startPing() {
       if (d.status === "multi_device") {
         alert("Peringatan: Anda terdeteksi menggunakan 2 device bersamaan!");
         localStorage.clear();
-        location.href = "index";
+        location.href = "/";
       } 
       // 2. Deteksi Pelanggaran (Email dihapus dari spreadsheet)
       else if (d.status === "not_found") {
