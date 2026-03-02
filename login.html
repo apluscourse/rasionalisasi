@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
 <title>Login Rasionalisasi SNBT</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -24,15 +24,45 @@ body{
   color:var(--text);
   display:flex;
   flex-direction: column;
-  justify-content:center;
-  align-items:center;
   min-height:100vh;
-  padding: 20px 0;
 }
 
-/* LOGO - Diperbesar */
+/* HEADER NAVIGASI - Sama dengan Landing Page */
+nav {
+    background: var(--card);
+    padding: 10px 5%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    z-index: 1000;
+}
+
+.logo-nav {
+    height: 30px;
+    width: auto;
+    display: flex;
+    align-items: center;
+}
+
+.nav-links { display: flex; gap: 20px; }
+.nav-links a { text-decoration: none; color: var(--text); font-weight: 600; font-size: 14px; }
+
+/* CONTAINER UTAMA */
+.main-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+}
+
+/* LOGO LOGIN */
 .main-logo {
-  width: 180px; /* Ukuran diperbesar dari sebelumnya */
+  width: 180px; 
   height: auto;
   margin-bottom: 25px;
   filter: drop-shadow(0 4px 10px rgba(0,0,0,0.12));
@@ -41,7 +71,7 @@ body{
 /* LOGIN CARD */
 .login-card{
   background:var(--card);
-  width:92%;
+  width:100%;
   max-width:360px;
   padding:25px;
   border-radius:22px;
@@ -91,7 +121,6 @@ button:disabled {
   cursor: not-allowed;
 }
 
-/* LOADING TEXT */
 #loading-text {
   display: none;
   text-align: center;
@@ -112,14 +141,14 @@ button:disabled {
   66% { content: '...'; }
 }
 
-/* CONTACT ADMIN SECTION - Perbesar Teks */
+/* CONTACT SECTION */
 .contact-section {
   text-align:center;
-  margin-top:30px;
+  margin: 30px 0;
 }
 
 .contact-section p {
-  font-size: 16px; /* Teks Hubungi Admin Diperbesar */
+  font-size: 16px;
   font-weight: 700;
   color: var(--text);
   margin-bottom: 12px;
@@ -130,8 +159,8 @@ button:disabled {
   align-items: center;
   justify-content: center;
   text-decoration: none;
-  color: #000000; /* Warna Nomor HP Hitam */
-  font-size: 16px; /* Ukuran Nomor Diperbesar */
+  color: #000000;
+  font-size: 16px;
   font-weight: 600;
   margin-bottom: 8px;
   transition: 0.2s;
@@ -140,41 +169,53 @@ button:disabled {
 .wa-link i {
   margin-right: 10px;
   font-size: 20px;
-  color: #25d366; /* Icon tetap hijau agar familiar sebagai WA */
+  color: #25d366;
 }
 
-.wa-link:hover {
-  transform: scale(1.05);
-  color: var(--blue);
+@media (max-width: 480px) {
+    .nav-links { display: none; } /* Sembunyikan link di mobile agar bersih */
 }
 </style>
 </head>
 <body>
 
-<img src="https://i.imgur.com/zyRxiIM.png" alt="Logo" class="main-logo">
+<nav>
+    <a href="index.html" class="logo-nav">
+        <img src="https://i.imgur.com/zyRxiIM.png" alt="Logo" style="height: 100%;">
+    </a>
+    <div class="nav-links">
+        <a href="index.html#about">Tentang</a>
+        <a href="index.html#contact">Kontak</a>
+        <a href="index.html" style="color: var(--blue);">Beranda</a>
+    </div>
+</nav>
 
-<div class="login-card">
-  <div class="login-header">
-    <h2>Rasionalisasi SNBT</h2>
-    <p>Login untuk analisis peluang masuk PTN</p>
-  </div>
+<div class="main-container">
+    <img src="https://i.imgur.com/zyRxiIM.png" alt="Logo" class="main-logo">
 
-  <input id="email" placeholder="Username">
-  <input id="pass" type="password" placeholder="Password">
+    <div class="login-card">
+      <div class="login-header">
+        <h2>Rasionalisasi SNBT</h2>
+        <p>Login untuk analisis peluang masuk PTN</p>
+      </div>
 
-  <button id="loginBtn" onclick="login()">LOGIN</button>
-  
-  <div id="loading-text">Sedang mencoba login<span class="dots"></span></div>
-</div>
+      <input id="email" placeholder="Email">
+      <input id="pass" type="password" placeholder="Password">
 
-<div class="contact-section">
-  <p>Untuk Pembelian Aplikasi Hubungi Admin <br> Klik Nomor Whatsapp dibawah ini</p>
-  <a href="https://wa.me/6285815023510" class="wa-link" target="_blank">
-    <i class="fab fa-whatsapp"></i> Admin 1 : 085815023510
-  </a>
-  <a href="https://wa.me/62895423024582" class="wa-link" target="_blank">
-    <i class="fab fa-whatsapp"></i> Admin 2 : 0895423024582
-  </a>
+      <button id="loginBtn" onclick="login()">LOGIN</button>
+      
+      <div id="loading-text">Sedang mencoba login<span class="dots"></span></div>
+    </div>
+
+    <div class="contact-section">
+      <p>Untuk Pembelian Aplikasi Hubungi Admin <br> Klik Nomor Whatsapp dibawah ini</p>
+      <a href="https://wa.me/6285815023510" class="wa-link" target="_blank">
+        <i class="fab fa-whatsapp"></i> Admin 1 : 085815023510
+      </a>
+      <a href="https://wa.me/62895423024582" class="wa-link" target="_blank">
+        <i class="fab fa-whatsapp"></i> Admin 2 : 0895423024582
+      </a>
+    </div>
 </div>
 
 <script>
