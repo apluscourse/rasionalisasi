@@ -65,10 +65,36 @@
         .footer-col a { color: #ccc; text-decoration: none; display: block; margin-bottom: 8px; font-size: 13px; }
         .footer-bottom { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #333; font-size: 12px; color: #777; }
 
+/* Penyesuaian Logo di Navigasi */
+.logo-nav {
+    height: 30px; /* Tinggi ideal agar nav tetap ramping */
+    width: auto;
+    display: flex;
+    align-items: center;
+}
+
+/* Penyesuaian Logo di Hero Section */
+.logo-hero {
+    width: 100px; /* Ukuran logo kotak di tengah */
+    height: auto;
+    margin-bottom: 15px;
+}
+
+/* Memastikan Navigasi tetap rapi */
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 5%;
+}
+
+        
         @media (max-width: 480px) {
             .hero h1 { font-size: 28px; }
             .nav-links { display: none; } /* Simpelkan untuk mobile agar aman */
         }
+
+        
     </style>
 </head>
 <body>
