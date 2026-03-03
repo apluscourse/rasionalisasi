@@ -1403,17 +1403,24 @@ async function getAiRecommendation(p1, p2) {
   const idealEl = document.getElementById("idealText");
   const safeEl = document.getElementById("safeText");
 
-  // --- TAMBAHKAN BAGIAN INI: Set status loading sebelum fetch ---
+  // AMBIL API KEY MILIK USER DARI LOCALSTORAGE
+  const userApiKey = localStorage.getItem("user_api_key");
+
+  if (!userApiKey) {
+    idealEl.innerText = "Server sedang sibuk. Silakan login ulang.";
+    safeEl.innerText = "Server sedang sibuk. Silakan login ulang.";
+    return;
+  }
+
+  // --- TAMBAHKAN BAGIAN INI: Indikator Loading ---
   idealEl.style.whiteSpace = "pre-line";
   safeEl.style.whiteSpace = "pre-line";
   
-  // Anda bisa menggunakan teks sederhana atau class CSS untuk animasi
-  idealEl.innerHTML = '<span class="loading-ai">Aplus AI Sedang menganalisis mohon ditunggu...</span>';
-  safeEl.innerHTML = '<span class="loading-ai">Aplus AI Sedang menganalisis mohon ditunggu...</span>';
-  // -------------------------------------------------------------
-  
-  const GAS_URL = "https://script.google.com/macros/s/AKfycbwDcicJB50hogksank6y-U0CIeCKEiysMpSZfN24oaL9qZ7f3FRY_m2rCnSpcZyYWKAAA/exec"; 
-
+  // Memberikan feedback visual bahwa AI sedang bekerja
+  idealEl.innerHTML = '<em style="color: gray;">Aplus AI sedang menganalisis, mohon ditunggu...</em>';
+  safeEl.innerHTML = '<em style="color: gray;">Aplus AI sedang menganalisis, mohon ditunggu...</em>';
+  // ----------------------------------------------    
+    
   const prompt = `Analisis strategis SNBT 2026 untuk dua pilihan:
   Pilihan 1: ${p1[2]} di ${p1[1]} (Skor Aman: ${p1[8]}, Keketatan: ${p1[6]})
   Pilihan 2: ${p2[2]} di ${p2[1]} (Skor Aman: ${p2[8]}, Keketatan: ${p2[6]})
@@ -1442,14 +1449,29 @@ async function getAiRecommendation(p1, p2) {
 
   PENTING: Awali analisis pertama dengan kata [IDEAL] dan analisis kedua dengan kata [AMAN].`;
 
+  // URL API Gemini Langsung (Cara Baru)
+  const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${userApiKey}`;
+
   try {
-    const response = await fetch(GAS_URL, {
+    const response = await fetch(API_URL, {
       method: "POST",
-      body: JSON.stringify({ prompt: prompt })
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{ text: prompt }]
+        }]
+      })
     });
 
     const result = await response.json();
     
+    // Cek jika ada error dari API
+    if (result.error) {
+        throw new Error(result.error.message);
+    }
+
     const aiResponseText = result.candidates[0].content.parts[0].text;
 
     let idealContent = "";
@@ -1468,13 +1490,13 @@ async function getAiRecommendation(p1, p2) {
     idealEl.style.whiteSpace = "pre-line";
     safeEl.style.whiteSpace = "pre-line";
 
-    idealEl.innerText = idealContent.trim() || "Analisis selesai.";
-    safeEl.innerText = safeContent.trim() || "Analisis selesai.";
+    idealEl.innerText = idealContent.trim() || "Analisis sedang diproses...";
+    safeEl.innerText = safeContent.trim() || "Analisis sedang diproses...";
 
   } catch (e) {
     console.error("AI Error:", e);
-    idealEl.innerText = "Server AI sedang padat. Silahkan refresh aplikasi.";
-    safeEl.innerText = "Server AI sedang padat. Silahkan refresh aplikasi.";
+    idealEl.innerText = "Server AI sedang sibuk. Silakan login ulang.";
+    safeEl.innerText = "Server AI sedang sibuk. Silakan login ulang.";
   }
 }
 
