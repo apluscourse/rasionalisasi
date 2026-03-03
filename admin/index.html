@@ -1390,6 +1390,15 @@ async function getAiRecommendation(p1, p2) {
   const idealEl = document.getElementById("idealText");
   const safeEl = document.getElementById("safeText");
 
+  // --- TAMBAHKAN BAGIAN INI: Set status loading sebelum fetch ---
+  idealEl.style.whiteSpace = "pre-line";
+  safeEl.style.whiteSpace = "pre-line";
+  
+  // Anda bisa menggunakan teks sederhana atau class CSS untuk animasi
+  idealEl.innerHTML = '<span class="loading-ai">Sedang menganalisis pilihan IDEAL...</span>';
+  safeEl.innerHTML = '<span class="loading-ai">Sedang menganalisis pilihan AMAN...</span>';
+  // -------------------------------------------------------------
+  
   const GAS_URL = "https://script.google.com/macros/s/AKfycbwDcicJB50hogksank6y-U0CIeCKEiysMpSZfN24oaL9qZ7f3FRY_m2rCnSpcZyYWKAAA/exec"; 
 
   const prompt = `Analisis strategis SNBT 2026 untuk dua pilihan:
@@ -1446,8 +1455,8 @@ async function getAiRecommendation(p1, p2) {
     idealEl.style.whiteSpace = "pre-line";
     safeEl.style.whiteSpace = "pre-line";
 
-    idealEl.innerText = idealContent.trim() || "Analisis sedang diproses...";
-    safeEl.innerText = safeContent.trim() || "Analisis sedang diproses...";
+    idealEl.innerText = idealContent.trim() || "Analisis selesai.";
+    safeEl.innerText = safeContent.trim() || "Analisis selesai.";
 
   } catch (e) {
     console.error("AI Error:", e);
