@@ -6,6 +6,16 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+<script>
+function toggleUpdateBallon() {
+    const balloon = document.getElementById("updateBalloon");
+    if (balloon.style.display === "block") {
+        balloon.style.display = "none";
+    } else {
+        balloon.style.display = "block";
+    }
+}
+</script>
     
 <style>
 :root{
@@ -594,12 +604,96 @@ select,input{
   50% { opacity: 1; }
   100% { opacity: 0.4; }
 }
+
+.update-info-container {
+    position: fixed;
+    top: 70px; /* Di bawah header */
+    left: 20px;
+    z-index: 999;
+}
+
+.info-icon {
+    font-size: 24px;
+    color: var(--blue);
+    cursor: pointer;
+    position: relative;
+    background: white;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow);
+}
+
+.dot-notification {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 10px;
+    height: 10px;
+    background: red;
+    border-radius: 50%;
+    border: 2px solid white;
+    animation: pulse 2s infinite;
+}
+
+.update-balloon {
+    display: none; /* Sembunyi secara default */
+    position: absolute;
+    top: 50px;
+    left: 0;
+    width: 280px;
+    background: white;
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    border: 1px solid #e2e8f0;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.update-balloon strong {
+    display: block;
+    color: var(--blue);
+    margin-bottom: 5px;
+}
+
+.close-balloon {
+    position: absolute;
+    top: 5px;
+    right: 8px;
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    color: var(--muted);
+}
+
+@keyframes pulse {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(255, 0, 0, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 0, 0, 0); }
+}    
     
 </style>
 </head>
 
 <body>
+<div class="update-info-container">
+    <div class="info-icon" onclick="toggleUpdateBallon()">
+        <i class="fas fa-info-circle"></i>
+        <span class="dot-notification"></span>
+    </div>
+    <div id="updateBalloon" class="update-balloon">
+        <button class="close-balloon" onclick="toggleUpdateBallon()">×</button>
+        <strong>UPDATE V1.1</strong>
+        <p>Karena Fitur AI di perbandingan prodi seringkali terkendala masalah server, sekarang kami menyempurnakanya dengan sebuah prompt AI. Akan ada tombol hijau dipaling bawah Perbandingan Prodi, saat kedua prodi sudah dibandingkan. Klik tombol tersebut, nanti akan membuka halaman ChatGPT, tekan tempel atau paste saja di ChatGPT, nanti akan muncul prompt lengkap, silahkan kirim prompt tersebut.</p>
+    </div>
+</div>
 
+    
 <div class="header">
   <div class="header-logo-left">
     <img src="https://i.imgur.com/MiEDgnn.png" alt="Logo Left">
@@ -1411,7 +1505,7 @@ async function bandingkanProdi() {
       <b style="color:#16a34a; font-size:16px;">💡 Analisis Strategis AI</b>
       <p style="font-size:13px; color:#166534; margin:10px 0;">Klik tombol di bawah untuk menyalin data dan dapatkan analisis mendalam dengan AI.</p>
       <button onclick="salinPromptBanding()" class="btn-3d-primary" style="background:#22c55e; border:none; width:100%;">
-        <i class="fas fa-copy"></i> Salin Prompt Analisis AI
+        <i class="fas fa-copy"></i> Klik Untuk Analisis AI
       </button>
     </div>`;
 
@@ -1426,7 +1520,7 @@ function salinPromptBanding() {
 Pilihan 1: ${p1[2]} di ${p1[1]} (Skor Aman: ${p1[8]}, Keketatan: ${p1[6]})
 Pilihan 2: ${p2[2]} di ${p2[1]} (Skor Aman: ${p2[8]}, Keketatan: ${p2[6]})
 
-Tugas: Berikan dua analisis terpisah yaitu [IDEALIS] dan [REALISTIS], buat format penulisan teks kiri (idealis) dan kanan (realistis)
+Tugas: Berikan dua analisis terpisah yaitu [IDEALIS] dan [REALISTIS]
 FOKUS [REALISTIS]: Prioritas peluang lolos (skor & keketatan rendah).
 FOKUS [IDEALIS]: Prioritas kualitas, reputasi, dan karir.
 
@@ -1435,7 +1529,7 @@ WAJIB GUNAKAN FORMAT JAWABAN BERIKUT:
 KEPUTUSAN: (Nama PTN & Prodinya)
 ALASAN: (Berikan maksimal 3 alasan logis)
 KETERANGAN : (Penjelasan singkat studi prodinya)
-KARIR: (Sebutkan prospek karir utamanya)`;
+KARIR: (Sebutkan prospek karir utamanya dengan format bullet numbering)`;
 
   navigator.clipboard.writeText(prompt).then(() => {
     alert("Prompt Berhasil Disalin!\n\nSilakan 'Paste' ke ChatGPT atau Gemini untuk melihat hasil analisis.");
