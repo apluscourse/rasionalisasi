@@ -1409,7 +1409,7 @@ async function bandingkanProdi() {
 
 <div class="card-blue" style="margin-top:40px; background:#f0fdf4; border:1px solid #bbf7d0; text-align:center;">
       <b style="color:#16a34a; font-size:16px;">💡 Analisis Strategis AI</b>
-      <p style="font-size:13px; color:#166534; margin:10px 0;">Klik tombol di bawah untuk menyalin data dan dapatkan analisis mendalam dari AI secara gratis.</p>
+      <p style="font-size:13px; color:#166534; margin:10px 0;">Klik tombol di bawah untuk menyalin data dan dapatkan analisis mendalam dengan AI.</p>
       <button onclick="salinPromptBanding()" class="btn-3d-primary" style="background:#22c55e; border:none; width:100%;">
         <i class="fas fa-copy"></i> Salin Prompt Analisis AI
       </button>
@@ -1426,13 +1426,15 @@ function salinPromptBanding() {
 Pilihan 1: ${p1[2]} di ${p1[1]} (Skor Aman: ${p1[8]}, Keketatan: ${p1[6]})
 Pilihan 2: ${p2[2]} di ${p2[1]} (Skor Aman: ${p2[8]}, Keketatan: ${p2[6]})
 
-Tugas: Berikan dua analisis terpisah yaitu [IDEAL] dan [AMAN].
-FOKUS [AMAN]: Prioritas peluang lolos (skor & keketatan rendah).
-FOKUS [IDEAL]: Prioritas kualitas, reputasi, dan karir.
+Tugas: Berikan dua analisis terpisah yaitu [IDEALIS] dan [REALISTIS], buat format penulisan teks kiri (idealis) dan kanan (realistis)
+FOKUS [REALISTIS]: Prioritas peluang lolos (skor & keketatan rendah).
+FOKUS [IDEALIS]: Prioritas kualitas, reputasi, dan karir.
 
 WAJIB GUNAKAN FORMAT JAWABAN BERIKUT:
+
 KEPUTUSAN: (Nama PTN & Prodinya)
 ALASAN: (Berikan maksimal 3 alasan logis)
+KETERANGAN : (Penjelasan singkat studi prodinya)
 KARIR: (Sebutkan prospek karir utamanya)`;
 
   navigator.clipboard.writeText(prompt).then(() => {
