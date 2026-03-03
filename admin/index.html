@@ -1438,19 +1438,17 @@ async function getAiRecommendation(p1, p2) {
   Akreditasi : (Akreditasi)
 
   ALASAN UTAMA
-  Alasan 1 : ...
-  Alasan 2 : ...
-  ... (maksimal 5 alasan)
+  (Buatkan alasan dengan paragraf singkat)
 
   JENJANG KARIR
-  (Pengertian jurusan)
+  
   Karir Fresh Graduate : ...
   Karir Professional : ...
 
   PENTING: Awali analisis pertama dengan kata [IDEAL] dan analisis kedua dengan kata [AMAN].`;
 
   // URL API Gemini Langsung (Cara Baru)
-  const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${userApiKey}`;
+  const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${userApiKey}`;
 
   try {
     const response = await fetch(API_URL, {
