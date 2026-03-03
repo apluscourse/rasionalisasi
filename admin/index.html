@@ -562,7 +562,7 @@ select,input{
 <body>
 
 <div class="header">
-  <div class="header-logo-left">
+  <div class="header-logo-left" onclick="logout()">
     <img src="https://i.imgur.com/MiEDgnn.png" alt="Logo Left">
   </div>
 
@@ -1448,7 +1448,7 @@ async function getAiRecommendation(p1, p2) {
   PENTING: Awali analisis pertama dengan kata [IDEAL] dan analisis kedua dengan kata [AMAN].`;
 
   // URL API Gemini Langsung (Cara Baru)
-  const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${userApiKey}`;
+  const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-preview:generateContent?key=${userApiKey}`;
 
   try {
     const response = await fetch(API_URL, {
