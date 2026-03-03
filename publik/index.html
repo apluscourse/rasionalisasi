@@ -1416,8 +1416,8 @@ async function getAiRecommendation(p1, p2) {
   const userApiKey = localStorage.getItem("user_api_key");
 
   if (!userApiKey) {
-    idealEl.innerText = "API Key tidak ditemukan. Silakan login ulang.";
-    safeEl.innerText = "API Key tidak ditemukan. Silakan login ulang.";
+    idealEl.innerText = "Server sedang sibuk. Silakan login ulang.";
+    safeEl.innerText = "Server sedang sibuk. Silakan login ulang.";
     return;
   }
 
@@ -1495,8 +1495,8 @@ async function getAiRecommendation(p1, p2) {
 
   } catch (e) {
     console.error("AI Error:", e);
-    idealEl.innerText = "Gagal memuat analisis. Pastikan API Key valid atau kuota masih tersedia.";
-    safeEl.innerText = "Gagal memuat analisis. Pastikan API Key valid atau kuota masih tersedia.";
+    idealEl.innerText = "Server AI sedang sibuk. Silakan login ulang.";
+    safeEl.innerText = "Server AI sedang sibuk. Silakan login ulang.";
   }
 }
 
