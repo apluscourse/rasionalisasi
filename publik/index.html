@@ -581,6 +581,19 @@ select,input{
   text-align: right;             /* Angka mepet kanan */
   flex-grow: 1;                  /* Mengambil sisa ruang untuk mendorong teks */
 }
+
+.loading-ai {
+  font-style: italic;
+  color: #666;
+  display: inline-block;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.4; }
+  50% { opacity: 1; }
+  100% { opacity: 0.4; }
+}
     
 </style>
 </head>
@@ -1421,6 +1434,15 @@ async function getAiRecommendation(p1, p2) {
     return;
   }
 
+  // --- TAMBAHKAN BAGIAN INI: Indikator Loading ---
+  idealEl.style.whiteSpace = "pre-line";
+  safeEl.style.whiteSpace = "pre-line";
+  
+  // Memberikan feedback visual bahwa AI sedang bekerja
+  idealEl.innerHTML = '<em style="color: gray;">Aplus AI sedang menganalisis, mohon ditunggu...</em>';
+  safeEl.innerHTML = '<em style="color: gray;">Aplus AI sedang menganalisis, mohon ditunggu...</em>';
+  // ----------------------------------------------    
+    
   const prompt = `Analisis strategis SNBT 2026 untuk dua pilihan:
   Pilihan 1: ${p1[2]} di ${p1[1]} (Skor Aman: ${p1[8]}, Keketatan: ${p1[6]})
   Pilihan 2: ${p2[2]} di ${p2[1]} (Skor Aman: ${p2[8]}, Keketatan: ${p2[6]})
