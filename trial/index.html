@@ -607,42 +607,38 @@ select,input{
 
 .update-info-container {
     position: fixed;
-    top: 70px; /* Di bawah header */
+    top: 80px; /* Turun 10px dari sebelumnya (70px -> 80px) */
     left: 20px;
     z-index: 999;
 }
 
 .info-icon {
-    font-size: 24px;
-    color: var(--blue);
+    width: 35px; /* Ukuran ikon sedikit diperkecil agar elegan */
+    height: 35px;
     cursor: pointer;
-    position: relative;
     background: white;
     border-radius: 50%;
-    width: 40px;
-    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
     box-shadow: var(--shadow);
+    transition: transform 0.2s;
 }
 
-.dot-notification {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    width: 10px;
-    height: 10px;
-    background: red;
+.info-icon:hover {
+    transform: scale(1.1);
+}
+
+.info-icon img {
+    width: 100%;
+    height: 100%;
     border-radius: 50%;
-    border: 2px solid white;
-    animation: pulse 2s infinite;
 }
 
 .update-balloon {
-    display: none; /* Sembunyi secara default */
+    display: none;
     position: absolute;
-    top: 50px;
+    top: 45px;
     left: 0;
     width: 280px;
     background: white;
@@ -652,6 +648,7 @@ select,input{
     border: 1px solid #e2e8f0;
     font-size: 13px;
     line-height: 1.5;
+    color: var(--text);
 }
 
 .update-balloon strong {
@@ -669,13 +666,11 @@ select,input{
     font-size: 18px;
     cursor: pointer;
     color: var(--muted);
+    padding: 0;
+    line-height: 1;
 }
 
-@keyframes pulse {
-    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7); }
-    70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(255, 0, 0, 0); }
-    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 0, 0, 0); }
-}    
+/* Animasi pulse merah sudah dihapus agar tidak mengganggu */    
     
 </style>
 </head>
@@ -683,8 +678,7 @@ select,input{
 <body>
 <div class="update-info-container">
     <div class="info-icon" onclick="toggleUpdateBallon()">
-        <i class="fas fa-info-circle"></i>
-        <span class="dot-notification"></span>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/Information_icon.svg/1280px-Information_icon.svg.png" alt="Info">
     </div>
     <div id="updateBalloon" class="update-balloon">
         <button class="close-balloon" onclick="toggleUpdateBallon()">×</button>
