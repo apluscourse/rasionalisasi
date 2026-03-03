@@ -542,7 +542,20 @@ select,input{
   text-align: right;             /* Angka mepet kanan */
   flex-grow: 1;                  /* Mengambil sisa ruang untuk mendorong teks */
 }
-    
+
+.loading-ai {
+  font-style: italic;
+  color: #666;
+  display: inline-block;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.4; }
+  50% { opacity: 1; }
+  100% { opacity: 0.4; }
+}
+  
 </style>
 </head>
 
@@ -1395,8 +1408,8 @@ async function getAiRecommendation(p1, p2) {
   safeEl.style.whiteSpace = "pre-line";
   
   // Anda bisa menggunakan teks sederhana atau class CSS untuk animasi
-  idealEl.innerHTML = '<span class="loading-ai">Sedang menganalisis pilihan IDEAL...</span>';
-  safeEl.innerHTML = '<span class="loading-ai">Sedang menganalisis pilihan AMAN...</span>';
+  idealEl.innerHTML = '<span class="loading-ai">Aplus AI Sedang menganalisis mohon ditunggu...</span>';
+  safeEl.innerHTML = '<span class="loading-ai">Aplus AI Sedang menganalisis mohon ditunggu...</span>';
   // -------------------------------------------------------------
   
   const GAS_URL = "https://script.google.com/macros/s/AKfycbwDcicJB50hogksank6y-U0CIeCKEiysMpSZfN24oaL9qZ7f3FRY_m2rCnSpcZyYWKAAA/exec"; 
