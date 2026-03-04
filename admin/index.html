@@ -1385,38 +1385,117 @@ async function bandingkanProdi() {
       <div style="${forceSideBySide}"><div class="${cSkor[0]}"><b>${p1[8]}</b></div><div class="${cSkor[1]}"><b>${p2[8]}</b></div></div></div>
     </div>
 
-<div class="card-blue" style="margin-top:40px; background:#f0fdf4; border:1px solid #bbf7d0; text-align:center;">
-      <b style="color:#16a34a; font-size:16px;">💡 Analisis Strategis AI</b>
-      <p style="font-size:13px; color:#166534; margin:10px 0;">Klik tombol di bawah untuk menyalin data dan dapatkan analisis mendalam dengan AI.</p>
-      <button onclick="salinPromptBanding()" class="btn-3d-primary" style="background:#22c55e; border:none; width:100%;">
-        <i class="fas fa-copy"></i> Klik Untuk Analisis AI
-      </button>
+    <h3 style="text-align:center; margin-top:40px;">Saran Keputusan</h3>
+    <div class="partisi-2">
+      <div class="card-blue" style="background:#f8fafc; color:#1e293b; border:1px solid #e2e8f0;">
+        <b style="color:var(--blue)">🏆 Keputusan Ideal</b><p id="idealText">Menganalisis...</p>
+      </div>
+      <div class="card-blue" style="background:#f8fafc; color:#1e293b; border:1px solid #e2e8f0;">
+        <b style="color:#16a34a">🛡️ Keputusan Aman</b><p id="safeText">Menganalisis...</p>
+      </div>
     </div>`;
 
-  // FUNGSI BARU UNTUK SALIN PROMPT MANUAL
-function salinPromptBanding() {
-  const p1 = prodiTerpilih[0];
-  const p2 = prodiTerpilih[1];
+  // 5. Jalankan Rekomendasi AI
+  getAiRecommendation(p1, p2);
+}
 
+async function getAiRecommendation(p1, p2) {
+  const idealEl = document.getElementById("idealText");
+  const safeEl = document.getElementById("safeText");
+
+  // AMBIL API KEY MILIK USER DARI LOCALSTORAGE
+  const userApiKey = localStorage.getItem("user_api_key");
+
+  if (!userApiKey) {
+    idealEl.innerText = "Server sedang sibuk. Silakan login ulang.";
+    safeEl.innerText = "Server sedang sibuk. Silakan login ulang.";
+    return;
+  }
+
+  // --- TAMBAHKAN BAGIAN INI: Indikator Loading ---
+  idealEl.style.whiteSpace = "pre-line";
+  safeEl.style.whiteSpace = "pre-line";
+  
+  // Memberikan feedback visual bahwa AI sedang bekerja
+  idealEl.innerHTML = '<em style="color: gray;">Aplus AI sedang menganalisis, mohon ditunggu...</em>';
+  safeEl.innerHTML = '<em style="color: gray;">Aplus AI sedang menganalisis, mohon ditunggu...</em>';
+  // ----------------------------------------------    
+    
   const prompt = `Analisis strategis SNBT 2026 untuk dua pilihan:
-Pilihan 1: ${p1[2]} di ${p1[1]} (Skor Aman: ${p1[8]}, Keketatan: ${p1[6]})
-Pilihan 2: ${p2[2]} di ${p2[1]} (Skor Aman: ${p2[8]}, Keketatan: ${p2[6]})
+  Pilihan 1: ${p1[2]} di ${p1[1]} (Skor Aman: ${p1[8]}, Keketatan: ${p1[6]})
+  Pilihan 2: ${p2[2]} di ${p2[1]} (Skor Aman: ${p2[8]}, Keketatan: ${p2[6]})
 
-Tugas: Berikan dua analisis terpisah yaitu [IDEALIS] dan [REALISTIS]
-FOKUS [REALISTIS]: Prioritas peluang lolos (skor & keketatan rendah).
-FOKUS [IDEALIS]: Prioritas kualitas, reputasi, dan karir.
+  Tugas: Berikan dua analisis terpisah yaitu [IDEAL] dan [AMAN].
+  
+  FOKUS [AMAN]: Prioritas peluang lolos (skor & keketatan rendah).
+  FOKUS [IDEAL]: Prioritas kualitas, reputasi, dan karir.
+  (Jika ada prodi baru, sampaikan pengertian jurusan dan jenjang karirnya).
 
-WAJIB GUNAKAN FORMAT JAWABAN BERIKUT:
+  WAJIB GUNAKAN FORMAT JAWABAN BERIKUT:
 
-KEPUTUSAN: (Nama PTN & Prodinya)
-ALASAN: (Berikan maksimal 3 alasan logis)
-KETERANGAN : (Penjelasan singkat studi prodinya)
-KARIR: (Sebutkan prospek karir utamanya dengan format bullet numbering)`;
+  KEPUTUSAN
+  PTN : (Nama PTN & Prodinya)
+  Akreditasi : (Akreditasi)
 
-  navigator.clipboard.writeText(prompt).then(() => {
-    alert("Prompt Berhasil Disalin!\n\nSilakan 'Paste' ke ChatGPT atau Gemini untuk melihat hasil analisis.");
-    window.open("https://chatgpt.com/", "_blank");
-  });
+  ALASAN UTAMA
+  (Buatkan alasan dengan paragraf singkat)
+
+  JENJANG KARIR
+  
+  Karir Fresh Graduate : ...
+  Karir Professional : ...
+
+  PENTING: Awali analisis pertama dengan kata [IDEAL] dan analisis kedua dengan kata [AMAN].`;
+
+  // URL API Gemini Langsung (Cara Baru)
+  const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${userApiKey}`;
+
+  try {
+    const response = await fetch(API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{ text: prompt }]
+        }]
+      })
+    });
+
+    const result = await response.json();
+    
+    // Cek jika ada error dari API
+    if (result.error) {
+        throw new Error(result.error.message);
+    }
+
+    const aiResponseText = result.candidates[0].content.parts[0].text;
+
+    let idealContent = "";
+    let safeContent = "";
+
+    if (aiResponseText.includes("[IDEAL]") && aiResponseText.includes("[AMAN]")) {
+      const temp = aiResponseText.split("[IDEAL]")[1];
+      const splitLagi = temp.split("[AMAN]");
+      idealContent = splitLagi[0];
+      safeContent = splitLagi[1];
+    } else {
+      idealContent = aiResponseText;
+      safeContent = aiResponseText;
+    }
+
+    idealEl.style.whiteSpace = "pre-line";
+    safeEl.style.whiteSpace = "pre-line";
+
+    idealEl.innerText = idealContent.trim() || "Analisis sedang diproses...";
+    safeEl.innerText = safeContent.trim() || "Analisis sedang diproses...";
+
+  } catch (e) {
+    console.error("AI Error:", e);
+    idealEl.innerText = "Server AI sedang sibuk. Silakan login ulang.";
+    safeEl.innerText = "Server AI sedang sibuk. Silakan login ulang.";
+  }
 }
 
 
