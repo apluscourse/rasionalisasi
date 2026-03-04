@@ -120,9 +120,13 @@ if (userRole == "admin") {
 
 // FUNGSI LOGOUT
 function logout() {
-  if(confirm("Apakah Anda yakin ingin keluar?")) {
-    localStorage.clear(); // Hapus semua sesi
-    location.href = "/";
+  // Memberikan konfirmasi sebelum keluar
+  if (confirm("Apakah Anda yakin ingin keluar dari aplikasi?")) {
+    // Menghapus semua data sesi (Email, Role, Masa Aktif, dll)
+    localStorage.clear();
+    
+    // Mengarahkan kembali ke halaman login
+    window.location.href = "/";
   }
 }
 
