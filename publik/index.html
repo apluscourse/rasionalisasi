@@ -556,9 +556,9 @@ select,input{
 
 /* BAGIAN YANG DIUBAH: Efek menyala tanpa berputar */
 .settings-icon:hover {
-  background: #fffafa; 
-  filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.8)); 
-  border-color: #ffbaba;
+  background: #ffffff; 
+  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.9)); 
+  border-color: #ffffff;
 }
 
 .settings-icon img {
@@ -670,8 +670,8 @@ select,input{
     </div>
     <div id="updateBalloon" class="update-balloon">
         <button class="close-balloon" onclick="toggleUpdateBallon()" style="position:absolute; top:5px; right:8px; background:none; border:none; cursor:pointer; font-size:18px; color:var(--muted);">×</button>
-        <strong style="display:block; color:var(--blue); margin-bottom:5px;">UPDATE V1.1</strong>
-        <p style="margin:0;">Karena Fitur AI di perbandingan prodi seringkali terkendala masalah server, sekarang kami menyempurnakanya dengan sebuah prompt AI. Akan ada tombol hijau dipaling bawah Perbandingan Prodi, saat kedua prodi sudah dibandingkan. Klik tombol tersebut, nanti akan membuka halaman ChatGPT, tekan tempel atau paste saja di ChatGPT, nanti akan muncul prompt lengkap, silahkan kirim prompt tersebut.</p>
+        <strong style="display:block; color:var(--blue); margin-bottom:5px;">UPDATE V1.2</strong>
+        <p style="margin:0;">Kami telah menambahkan menu setting (ikon gerigi) yang letaknya dikanan atas halaman, jika dibuka akan ada pilihan untuk merubah katasandi dan logout. Segera lakukan perubahan katasandi agar akun anda aman. <br> Karena Fitur AI di perbandingan prodi seringkali terkendala masalah server, sekarang kami menyempurnakanya dengan sebuah prompt AI. Akan ada tombol hijau dipaling bawah Perbandingan Prodi, saat kedua prodi sudah dibandingkan. Klik tombol tersebut, nanti akan membuka halaman ChatGPT, tekan tempel atau paste saja di ChatGPT, nanti akan muncul prompt lengkap, silahkan kirim prompt tersebut.</p>
     </div>
 </div>
 
@@ -681,9 +681,11 @@ select,input{
     <img src="https://i.imgur.com/MiEDgnn.png" alt="Logo Left">
   </div>
 
-<div class="settings-icon" onclick="logout()" title="Logout Akun">
-  <img src="https://i.imgur.com/eTGR7ej.png" alt="Logout">
+
+<div class="settings-icon">
+  <a href="/setting" title="Pengaturan"><img src="https://cdn-icons-png.freepik.com/256/1103/1103621.png"></a>
 </div>
+
 
   <div class="header-text">
     <h1>APLIKASI RASIONALISASI SNBT 2026</h1>
@@ -1686,7 +1688,7 @@ function hitungTarget() {
 </script>
 
 <script>
-if(localStorage.getItem("role")!="publik"){
+if(localStorage.getItem("role")!="trial"){
   alert("Akses ditolak");
   location.href="/";
 }
