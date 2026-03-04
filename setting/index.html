@@ -78,7 +78,7 @@ button {
   <h2>Ubah Kata Sandi</h2>
   
   <div class="form-group">
-    <label>Email (Login Sekarang)</label>
+    <label>Username</label>
     <input type="text" id="displayEmail" disabled>
   </div>
 
@@ -108,13 +108,15 @@ if(!userEmail) {
   document.getElementById("displayEmail").value = userEmail;
 }
 
-function goBack() {
-  if(userRole === "admin") {
-    location.href = "admin.html";
-  } else {
-    location.href = "publik.html";
-  }
+  function goBack() {
+if (userRole == "admin") {
+    location.href = "/admin";
+} else if (userRole == "trial") {
+    location.href = "/trial";
+} else {
+    location.href = "/publik";
 }
+  }
 
 // FUNGSI LOGOUT
 function logout() {
