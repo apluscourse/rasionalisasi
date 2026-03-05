@@ -7,7 +7,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 <script>
-const VERSION_NOTIF = "1.2"; 
+const VERSION_NOTIF = "1.3"; 
 function toggleUpdateBallon() {
     const balloon = document.getElementById("updateBalloon");
     const dot = document.getElementById("dotNotif"); 
@@ -707,8 +707,8 @@ select,input{
     </div>
     <div id="updateBalloon" class="update-balloon">
         <button class="close-balloon" onclick="toggleUpdateBallon()" style="position:absolute; top:5px; right:8px; background:none; border:none; cursor:pointer; font-size:18px; color:var(--muted);">×</button>
-        <strong style="display:block; color:var(--blue); margin-bottom:5px;">UPDATE V1.2</strong>
-        <p style="margin:0;">Kami telah menambahkan menu setting (ikon gerigi) yang letaknya dikanan atas halaman, jika diklik akan ada pilihan untuk merubah katasandi dan ada juga tombol logout.<br>Segera lakukan perubahan katasandi agar akun anda aman.</p>
+        <strong style="display:block; color:var(--blue); margin-bottom:5px;">UPDATE V1.3</strong>
+        <p style="margin:0;">Kami telah menambahkan fitur baru yaitu TRYOUT UTBK. Bagi akun dengan paket ekslusif dan platinum dapat memanfaatkan fitur tersebut. Terimakasih</p>
     </div>
 </div>
 
@@ -740,6 +740,7 @@ select,input{
   <button onclick="showMenu('saran')">Saran Prodi</button>
   <button onclick="showMenu('perbandingan')">Perbandingan Prodi</button>
   <button onclick="showMenu('target')">Target Belajar</button>
+  <button onclick="cekAksesTryout()" style="background: #fff1f2; color: #e11d48; border: 1px solid #fda4af; font-weight: bold;">✍ Tryout UTBK</button>
 </div>
 
 <div id="content"></div>
@@ -1870,7 +1871,22 @@ function tampilkanInfoAkun() {
 document.addEventListener("DOMContentLoaded", tampilkanInfoAkun);
 </script>
 
+<script>
+function cekAksesTryout() {
+    // Mengambil data paket dari localStorage
+    const paket = localStorage.getItem("paket") || "Regular";
+    const paketClean = paket.trim().toLowerCase();
 
+    if (paketClean === "ekslusif" || paketClean === "platinum") {
+        const konfirmasi = confirm("Anda akan diarahkan ke web Tryout UTBK, hubungi admin apabila belum punya akun Tryout.");
+        if (konfirmasi) {
+            window.open("https://apluscourse.myexams.web.id/exam/login", "_blank");
+        }
+    } else {
+        alert("Paket anda sekarang: " + paket + "\n\nTryout UTBK hanya untuk akun dengan paket Ekslusif dan Platinum.");
+    }
+}
+</script>
     
 </body>
 </html>
