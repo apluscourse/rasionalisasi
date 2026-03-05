@@ -586,7 +586,9 @@ select,input{
   <button onclick="showMenu('saran')">Saran Prodi</button>
   <button onclick="showMenu('perbandingan')">Perbandingan Prodi</button>
   <button onclick="showMenu('target')">Target Belajar</button>
+  <a href="https://apluscourse.myexams.web.id/exam/login" target="_blank">
   <button onclick="cekAksesTryout()" style="background: #fff1f2; color: #e11d48; border: 1px solid #fda4af; font-weight: bold;">✍ Tryout UTBK</button>
+  </a>
 </div>
 
 <div id="content"></div>
@@ -1719,22 +1721,6 @@ function tampilkanInfoAkun() {
 
 // Jalankan saat pertama kali buka admin
 document.addEventListener("DOMContentLoaded", tampilkanInfoAkun);
-
-function cekAksesTryout() {
-    // Ambil data paket dari localStorage
-    const paket = localStorage.getItem("paket") || "Regular";
-    const paketClean = paket.trim().toLowerCase();
-
-    // Logika pengecekan paket
-    if (paketClean === "ekslusif" || paketClean === "platinum") {
-        // LANGSUNG DIARAHKAN KE LINK (Tanpa Popup Konfirmasi)
-        // Gunakan _blank agar terbuka di tab baru
-        window.open("https://apluscourse.myexams.web.id/exam/login", "_blank");
-    } else {
-        // Popup hanya muncul jika paket TIDAK SESUAI
-        alert("Paket anda sekarang: " + paket + "\n\nFitur Tryout UTBK hanya untuk akun dengan paket Ekslusif dan Platinum.");
-    }
-}
   
 </script>
 
