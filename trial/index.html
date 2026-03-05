@@ -7,6 +7,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 <script>
+const VERSION_NOTIF = "1.2"; 
 function toggleUpdateBallon() {
     const balloon = document.getElementById("updateBalloon");
     const dot = document.getElementById("dotNotif"); 
@@ -18,17 +19,16 @@ function toggleUpdateBallon() {
         
         if (dot) {
             dot.classList.add("dot-hidden"); 
-            localStorage.setItem("notifUpdateV1_read", "true");
+            // Nama kunci otomatis mengikuti versi di atas
+            localStorage.setItem("notif_read_v" + VERSION_NOTIF, "true");
         }
     }
 }
-
 document.addEventListener("DOMContentLoaded", function() {
-    if (localStorage.getItem("notifUpdateV1_read") === "true") {
-        const dot = document.getElementById("dotNotif");
-        if (dot) {
-            dot.classList.add("dot-hidden");
-        }
+    const dot = document.getElementById("dotNotif");
+    // Jika versi saat ini sudah pernah dibaca, sembunyikan titik merah
+    if (localStorage.getItem("notif_read_v" + VERSION_NOTIF) === "true") {
+        if (dot) dot.classList.add("dot-hidden");
     }
 });
 </script>
