@@ -9,10 +9,17 @@
 <script>
 function toggleUpdateBallon() {
     const balloon = document.getElementById("updateBalloon");
+    const dot = document.getElementById("dotNotif"); 
+
     if (balloon.style.display === "block") {
         balloon.style.display = "none";
     } else {
         balloon.style.display = "block";
+        
+        if (dot) {
+            dot.classList.add("dot-hidden"); 
+            localStorage.setItem("notifUpdateV1_read", "true");
+        }
     }
 }
 </script>
@@ -587,8 +594,8 @@ select,input{
 #skorVal {
   font-size: 35px;
   font-weight: bold;
-  text-align: right;             /* Angka mepet kanan */
-  flex-grow: 1;                  /* Mengambil sisa ruang untuk mendorong teks */
+  text-align: right;            
+  flex-grow: 1;                 
 }
 
 .loading-ai {
@@ -653,11 +660,35 @@ select,input{
     text-align: justify;
 }
 
-/* Responsif: Jika di layar sangat kecil balon melebar, kita batasi */
 @media (max-width: 400px) {
     .update-balloon {
         width: 250px;
     }
+}
+
+.dot-notification {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 12px;
+    height: 12px;
+    background: #ff4d4d;
+    border: 2px solid white;
+    border-radius: 50%;
+    z-index: 10;
+    /* Animasi bling-bling */
+    animation: bling 1.5s infinite;
+}
+
+@keyframes bling {
+    0% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(1.2); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+/* Sembunyikan titik jika sudah dibaca */
+.dot-hidden {
+    display: none !important;
 }
     
 </style>
@@ -671,7 +702,7 @@ select,input{
     <div id="updateBalloon" class="update-balloon">
         <button class="close-balloon" onclick="toggleUpdateBallon()" style="position:absolute; top:5px; right:8px; background:none; border:none; cursor:pointer; font-size:18px; color:var(--muted);">×</button>
         <strong style="display:block; color:var(--blue); margin-bottom:5px;">UPDATE V1.2</strong>
-        <p style="margin:0;">Kami telah menambahkan menu setting (ikon gerigi) yang letaknya dikanan atas halaman, jika dibuka akan ada pilihan untuk merubah katasandi dan logout. Segera lakukan perubahan katasandi agar akun anda aman. <br> Karena Fitur AI di perbandingan prodi seringkali terkendala masalah server, sekarang kami menyempurnakanya dengan sebuah prompt AI. Akan ada tombol hijau dipaling bawah Perbandingan Prodi, saat kedua prodi sudah dibandingkan. Klik tombol tersebut, nanti akan membuka halaman ChatGPT, tekan tempel atau paste saja di ChatGPT, nanti akan muncul prompt lengkap, silahkan kirim prompt tersebut.</p>
+        <p style="margin:0;">Kami telah menambahkan menu setting (ikon gerigi) yang letaknya dikanan atas halaman, jika diklik akan ada pilihan untuk merubah katasandi dan ada juga tombol logout.<br>Segera lakukan perubahan katasandi agar akun anda aman.</p>
     </div>
 </div>
 
