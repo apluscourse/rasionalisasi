@@ -9,12 +9,28 @@
 <script>
 function toggleUpdateBallon() {
     const balloon = document.getElementById("updateBalloon");
+    const dot = document.getElementById("dotNotif"); 
+
     if (balloon.style.display === "block") {
         balloon.style.display = "none";
     } else {
         balloon.style.display = "block";
+        
+        if (dot) {
+            dot.classList.add("dot-hidden"); 
+            localStorage.setItem("notifUpdateV1_read", "true");
+        }
     }
 }
+
+document.addEventListener("DOMContentLoaded", function() {
+    if (localStorage.getItem("notifUpdateV1_read") === "true") {
+        const dot = document.getElementById("dotNotif");
+        if (dot) {
+            dot.classList.add("dot-hidden");
+        }
+    }
+});
 </script>
     
 <style>
@@ -659,6 +675,31 @@ select,input{
         width: 250px;
     }
 }
+
+.dot-notification {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 12px;
+    height: 12px;
+    background: #ff4d4d;
+    border: 2px solid white;
+    border-radius: 50%;
+    z-index: 10;
+    /* Animasi bling-bling */
+    animation: bling 1.5s infinite;
+}
+
+@keyframes bling {
+    0% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(1.2); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+/* Sembunyikan titik jika sudah dibaca */
+.dot-hidden {
+    display: none !important;
+}
     
 </style>
 </head>
@@ -667,6 +708,7 @@ select,input{
 <div class="update-info-container">
     <div class="info-icon" onclick="toggleUpdateBallon()" title="INFORMASI UPDATE">
         <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/Information_icon.svg/1280px-Information_icon.svg.png" alt="Info">
+        <span id="dotNotif" class="dot-notification"></span>
     </div>
     <div id="updateBalloon" class="update-balloon">
         <button class="close-balloon" onclick="toggleUpdateBallon()" style="position:absolute; top:5px; right:8px; background:none; border:none; cursor:pointer; font-size:18px; color:var(--muted);">×</button>
