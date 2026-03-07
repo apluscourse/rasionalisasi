@@ -32,6 +32,8 @@ body{
   background:var(--bg);
   color:var(--text);
   padding-bottom:40px;
+
+  padding-top: 85px; /* Sesuaikan angka ini dengan tinggi header Anda */
 }
 
 /* HEADER - 3 Bagian Ramping & Berdempet */
@@ -47,6 +49,11 @@ body{
   gap: 10px; /* Jarak antar logo dan teks sangat rapat */
   border-radius: 0 0 18px 18px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+
+  position: fixed;   /* Membuatnya melayang/tetap */
+  top: 0;            /* Menempel di paling atas layar */
+  width: 100%;       /* Memenuhi lebar layar */
+  z-index: 1000;     /* Memastikan di atas elemen lain */
 }
 
 .header-logo-left {
