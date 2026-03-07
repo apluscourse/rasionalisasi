@@ -53,21 +53,24 @@ body{
   background:var(--bg);
   color:var(--text);
   padding-bottom:40px;
+  padding-top: 85px;
 }
-
-/* HEADER - 3 Bagian Ramping & Berdempet */
+ 
 .header {
   background: linear-gradient(135deg, var(--blue), var(--blue2));
   color: white;
   padding: 12px 16px;
   display: grid;
-  /* Kolom kiri & kanan otomatis seukuran logo, tengah fleksibel */
   grid-template-columns: 1fr auto 1fr; 
   align-items: center;
   justify-content: center;
-  gap: 10px; /* Jarak antar logo dan teks sangat rapat */
+  gap: 10px;  
   border-radius: 0 0 18px 18px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  position: fixed;    
+  top: 0;             
+  width: 100%;       
+  z-index: 1000;     
 }
 
 .header-logo-left {
@@ -87,8 +90,7 @@ body{
   transform: scale(1.6);
 }
 
-/* Memastikan logo menempel ke tengah */
-.header-logo-left img { margin-left: auto; }
+  .header-logo-left img { margin-left: auto; }
 .header-logo-right img { margin-right: auto; }
 
 .header-text {
@@ -568,20 +570,21 @@ select,input{
 
 /* BAGIAN YANG DIUBAH: Efek menyala tanpa berputar */
 .settings-icon:hover {
-  background: #ffffff; 
-  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.9)); 
-  border-color: #ffffff;
+    transform: scale(1.1);
+    background: #f0f7ff; /* Memberikan sedikit efek warna saat dihover */
 }
 
 .settings-icon img {
-  width: 20px; /* Ukuran ikon disesuaikan */
-  height: 20px;
-  transition: transform 0.2s;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    transform: scale(0.9);
+    margin-top: 4px;
 }
 
 /* Tambahan: Efek klik agar terasa seperti tombol asli */
 .settings-icon:active {
-  transform: scale(0.9);
+  transform: scale(0.6);
 }
 
 /* Badge Masa Aktif Pojok Kanan Bawah */
@@ -712,17 +715,14 @@ select,input{
     </div>
 </div>
 
-    
+<div class="settings-icon">
+  <a href="/setting" title="Pengaturan"><img src="https://cdn-icons-png.freepik.com/256/1103/1103621.png"></a>
+</div>
+        
 <div class="header">
   <div class="header-logo-left">
     <img src="https://i.imgur.com/MiEDgnn.png" alt="Logo Left">
   </div>
-
-
-<div class="settings-icon">
-  <a href="/setting" title="Pengaturan"><img src="https://cdn-icons-png.freepik.com/256/1103/1103621.png"></a>
-</div>
-
 
   <div class="header-text">
     <h1>APLIKASI RASIONALISASI SNBT 2026</h1>
