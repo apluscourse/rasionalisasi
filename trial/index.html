@@ -576,15 +576,14 @@ select,input{
 
 /* BAGIAN YANG DIUBAH: Efek menyala tanpa berputar */
 .settings-icon:hover {
-  background: #ffffff; 
-  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.9)); 
-  border-color: #ffffff;
+    transform: scale(1.1);
+    background: #f0f7ff; /* Memberikan sedikit efek warna saat dihover */
 }
 
 .settings-icon img {
-  width: 20px; /* Ukuran ikon disesuaikan */
-  height: 20px;
-  transition: transform 0.2s;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
 }
 
 /* Tambahan: Efek klik agar terasa seperti tombol asli */
