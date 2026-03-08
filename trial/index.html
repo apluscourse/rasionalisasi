@@ -1886,6 +1886,12 @@ function tampilkanInfoAkun() {
   const wm = document.getElementById("wm-prodi");
   if(wm) wm.innerText = "Lisensi: " + email;
 
+    // Update Teks Masa Aktif
+  const badge = document.getElementById("badgeMasaAktif");
+  if(badge) {
+    badge.innerText = "Masa aktif " + sisaHari + " hari lagi";
+  }
+
 }
 
 // Jalankan saat pertama kali buka admin
