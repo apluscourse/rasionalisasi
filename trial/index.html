@@ -1799,11 +1799,21 @@ function startPing() {
         triggerBlockScreen("AKUN ADA DIBLOKIR", "Anda telah melakukan pelanggaran", "#8b0000");
       }
       
-      // --- TAMBAHAN KROSCEK MASA AKTIF DARI SPREADSHEET ---
-      // Pastikan Apps Script Anda mengirim properti 'masaAktif'
-      else if (d.masaAktif !== undefined && parseFloat(d.masaAktif) < 0) {
-        triggerBlockScreen("MASA AKTIF HABIS", "Maaf, masa aktif akun Anda telah berakhir. Silakan hubungi admin.", "#ff0000");
-      }
+// LOGIKA BARU: Update Badge Masa Aktif secara Real-time
+      else if (d.status === "ok") {
+        // 1. Cek jika masa aktif habis (< 0)
+        if (parseFloat(d.masaAktif) < 0) {
+          triggerBlockScreen("MASA AKTIF HABIS", "Maaf, masa aktif akun Anda telah berakhir.", "#ff0000");
+        } 
+        // 2. Jika masih aktif, update tampilan angka di badge
+        else {
+          const badge = document.getElementById("badgeMasaAktif");
+          if (badge) {
+            badge.innerText = "Masa aktif " + d.masaAktif + " hari lagi";
+          }
+          // Opsional: Update localStorage agar data terbaru tersimpan jika halaman di-refresh
+          localStorage.setItem("masaAktif", d.masaAktif);
+        }
     })
     .catch(err => console.log("Ping error"));
   }, 10000); 
@@ -1875,11 +1885,6 @@ function tampilkanInfoAkun() {
   const wm = document.getElementById("wm-prodi");
   if(wm) wm.innerText = "Lisensi: " + email;
 
-  // Update Teks Masa Aktif
-  const badge = document.getElementById("badgeMasaAktif");
-  if(badge) {
-    badge.innerText = "Masa aktif " + sisaHari + " hari lagi";
-  }
 }
 
 // Jalankan saat pertama kali buka admin
