@@ -1759,13 +1759,19 @@ function logout() {
 </script>
 
 <script>
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbye4Gi6Jy4BBlNt3P3hVQ6rDi0B__7sF_nH9R8zzbOTQ_SVPO3gxba8dJjnIQPoRRV7Ng/exec"; // Ganti dengan URL deployment terbaru
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyVwhR33XAi3863WIpxhBHpno0zSbjXDgGjdtZwd7M4qcWy7YKcHZIQnSp65LY1bHsZ-Q/exec"; 
 
 function startPing() {
   const email = localStorage.getItem("email");
   const lastOpenClient = localStorage.getItem("lastOpen");
 
   setInterval(() => {
+    // 1. Cek Email di LocalStorage (Hanya sebagai syarat pengiriman ping)
+    if (!email) {
+      triggerBlockScreen("AKSES ILEGAL", "Email tidak terdeteksi. Sesi Anda telah berakhir.", "#8b0000");
+      return;
+    }
+
     fetch(WEB_APP_URL, {
       method: "POST",
       body: JSON.stringify({
@@ -1776,43 +1782,56 @@ function startPing() {
     })
     .then(r => r.json())
     .then(d => {
-      // 1. Deteksi Multi-Device
+      // --- LOGIKA LAMA YANG SUDAH WORK (JANGAN DIRUBAH) ---
       if (d.status === "multi_device") {
         alert("Peringatan: Anda terdeteksi menggunakan 2 device bersamaan!");
         localStorage.clear();
         location.href = "/";
       } 
-      // 2. Deteksi Pelanggaran (Email dihapus dari spreadsheet)
       else if (d.status === "not_found") {
-        triggerBlockScreen();
+        triggerBlockScreen("AKUN ADA DIBLOKIR", "Anda telah melakukan pelanggaran", "#8b0000");
       }
+      
+// LOGIKA BARU: Update Badge Masa Aktif secara Real-time
+      else if (d.status === "ok") {
+        // 1. Cek jika masa aktif habis (< 0)
+        if (parseFloat(d.masaAktif) < 0) {
+          triggerBlockScreen("MASA AKTIF HABIS", "Maaf, masa aktif akun Anda telah berakhir.", "#ff0000");
+        } 
+        // 2. Jika masih aktif, update tampilan angka di badge
+        else {
+          const badge = document.getElementById("badgeMasaAktif");
+          if (badge) {
+            badge.innerText = "Masa aktif " + d.masaAktif + " hari lagi";
+          }
+          // Opsional: Update localStorage agar data terbaru tersimpan jika halaman di-refresh
+          localStorage.setItem("masaAktif", d.masaAktif);
+        }
+      }  
     })
     .catch(err => console.log("Ping error"));
   }, 10000); 
 }
 
-// FUNGSI UNTUK MEMBLOKIR TAMPILAN TOTAL
-function triggerBlockScreen() {
-  // Hapus semua isi body dan ganti dengan tampilan blokir
+// FUNGSI UNTUK MEMBLOKIR TAMPILAN TOTAL (Disesuaikan agar warna bisa berubah)
+function triggerBlockScreen(judul, pesan, warnaBg) {
   document.body.innerHTML = `
     <div style="
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: #8b0000; color: white; display: flex; flex-direction: column;
+      background: ${warnaBg || '#8b0000'}; color: white; display: flex; flex-direction: column;
       justify-content: center; align-items: center; z-index: 99999;
       font-family: 'Segoe UI', Arial, sans-serif; text-align: center; padding: 20px;
     ">
       <div style="font-size: 80px; margin-bottom: 20px;">🚫</div>
-      <h1 style="font-size: 30px; font-weight: 800; margin: 0;">AKUN ANDA TERBLOKIR</h1>
+      <h1 style="font-size: 30px; font-weight: 800; margin: 0;">${judul}</h1>
       <p style="font-size: 18px; margin-top: 15px; opacity: 0.9;">
-        Terdeteksi pelanggaran pada lisensi akun Anda.<br>
-        Akses ke aplikasi telah dicabut.
+        ${pesan}
       </p>
-      <div style="margin-top: 30px; padding: 10px 20px; border: 2px solid white; border-radius: 10px; font-weight: bold;">
-        HUBUNGI ADMIN
+      <div onclick="location.href='/'" style="margin-top: 30px; padding: 12px 25px; border: 2px solid white; border-radius: 10px; font-weight: bold; cursor:pointer;">
+        LOGOUT
       </div>
     </div>
   `;
-  // Hapus data agar tidak bisa login lagi tanpa izin admin
   localStorage.clear();
 }
 
