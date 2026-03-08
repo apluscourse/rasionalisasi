@@ -1773,7 +1773,12 @@ function startPing() {
   const lastOpenClient = localStorage.getItem("lastOpen");
 
   setInterval(() => {
-    // 1. Cek Email di LocalStorage (Hanya sebagai syarat pengiriman ping)
+    // --- LOGIKA DETEKSI OFFLINE (SEBELUM FETCH) ---
+    if (!navigator.onLine) {
+      triggerBlockScreen("ANDA SEDANG OFFLINE", "Koneksi internet terputus. Aplikasi harus online untuk sinkronisasi lisensi.", "#4b5563", true);
+      return;
+    }
+
     if (!email) {
       triggerBlockScreen("AKSES ILEGAL", "Email tidak terdeteksi. Sesi Anda telah berakhir.", "#8b0000");
       return;
@@ -1799,47 +1804,56 @@ function startPing() {
         triggerBlockScreen("AKUN ADA DIBLOKIR", "Anda telah melakukan pelanggaran", "#8b0000");
       }
       
-// LOGIKA BARU: Update Badge Masa Aktif secara Real-time
+      // LOGIKA BARU: Update Badge Masa Aktif secara Real-time
       else if (d.status === "ok") {
-        // 1. Cek jika masa aktif habis (< 0)
         if (parseFloat(d.masaAktif) < 0) {
-          triggerBlockScreen("MASA AKTIF HABIS", "Maaf, masa aktif akun Anda telah berakhir.", "#ff0000");
+          triggerBlockScreen("MASA AKTIF HABIS", "Maaf, masa aktif akun Anda telah berakhir.", "#8b0000");
         } 
-        // 2. Jika masih aktif, update tampilan angka di badge
         else {
           const badge = document.getElementById("badgeMasaAktif");
           if (badge) {
             badge.innerText = "Masa aktif " + d.masaAktif + " hari lagi";
           }
-          // Opsional: Update localStorage agar data terbaru tersimpan jika halaman di-refresh
           localStorage.setItem("masaAktif", d.masaAktif);
         }
       }  
     })
-    .catch(err => console.log("Ping error"));
+    .catch(err => {
+      // Menangani jika internet mati tepat saat fetch sedang berjalan
+      if (!navigator.onLine) {
+        triggerBlockScreen("KONEKSI TERPUTUS", "Gagal menghubungi server. Pastikan internet Anda aktif.", "#4b5563", true);
+      }
+      console.log("Ping error");
+    });
   }, 10000); 
 }
 
-// FUNGSI UNTUK MEMBLOKIR TAMPILAN TOTAL (Disesuaikan agar warna bisa berubah)
-function triggerBlockScreen(judul, pesan, warnaBg) {
+// FUNGSI UNTUK MEMBLOKIR TAMPILAN TOTAL
+// Menambahkan parameter 'isOffline' agar tidak hapus localStorage jika hanya masalah sinyal
+function triggerBlockScreen(judul, pesan, warnaBg, isOffline = false) {
   document.body.innerHTML = `
     <div style="
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: ${warnaBg || '#8b0000'}; color: white; display: flex; flex-direction: column;
-      justify-content: center; align-items: center; z-index: 99999;
+      justify-content: center; align-items: center; z-index: 999999;
       font-family: 'Segoe UI', Arial, sans-serif; text-align: center; padding: 20px;
     ">
-      <div style="font-size: 80px; margin-bottom: 20px;">🚫</div>
+      <div style="font-size: 80px; margin-bottom: 20px;">${isOffline ? '📶' : '🚫'}</div>
       <h1 style="font-size: 30px; font-weight: 800; margin: 0;">${judul}</h1>
-      <p style="font-size: 18px; margin-top: 15px; opacity: 0.9;">
+      <p style="font-size: 18px; margin-top: 15px; opacity: 0.9; max-width: 500px;">
         ${pesan}
       </p>
-      <div onclick="location.href='/'" style="margin-top: 30px; padding: 12px 25px; border: 2px solid white; border-radius: 10px; font-weight: bold; cursor:pointer;">
-        LOGOUT
+      <div onclick="${isOffline ? 'location.reload()' : 'location.href=\'/\''}" 
+           style="margin-top: 30px; padding: 12px 25px; border: 2px solid white; border-radius: 10px; font-weight: bold; cursor:pointer;">
+        ${isOffline ? 'COBA LAGI' : 'LOGOUT'}
       </div>
     </div>
   `;
-  localStorage.clear();
+  
+  // HANYA hapus data jika BUKAN offline (Banned atau Masa Aktif Habis)
+  if (!isOffline) {
+    localStorage.clear();
+  }
 }
 
 // Jalankan ping jika sudah login
