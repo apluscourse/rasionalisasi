@@ -1796,7 +1796,7 @@ function startPing() {
         location.href = "/";
       } 
       else if (d.status === "not_found") {
-        triggerBlockScreen("AKUN TIDAK DITEMUKAN", "Data akun Anda tidak ditemukan di database.", "#8b0000");
+        triggerBlockScreen("AKUN ADA DIBLOKIR", "Anda telah melakukan pelanggaran", "#8b0000");
       }
       
       // --- TAMBAHAN KROSCEK MASA AKTIF DARI SPREADSHEET ---
@@ -1823,8 +1823,8 @@ function triggerBlockScreen(judul, pesan, warnaBg) {
       <p style="font-size: 18px; margin-top: 15px; opacity: 0.9;">
         ${pesan}
       </p>
-      <div onclick="location.href='login.html'" style="margin-top: 30px; padding: 12px 25px; border: 2px solid white; border-radius: 10px; font-weight: bold; cursor:pointer;">
-        LOGOUT SEKARANG
+      <div onclick="location.href='/'" style="margin-top: 30px; padding: 12px 25px; border: 2px solid white; border-radius: 10px; font-weight: bold; cursor:pointer;">
+        LOGOUT
       </div>
     </div>
   `;
