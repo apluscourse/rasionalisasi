@@ -1814,6 +1814,7 @@ function startPing() {
           // Opsional: Update localStorage agar data terbaru tersimpan jika halaman di-refresh
           localStorage.setItem("masaAktif", d.masaAktif);
         }
+      }  
     })
     .catch(err => console.log("Ping error"));
   }, 10000); 
