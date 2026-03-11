@@ -705,6 +705,16 @@ select,input{
 .dot-hidden {
     display: none !important;
 }
+
+.stat-mini {
+    background: white;
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px solid #eee;
+    text-align: center;
+    font-size: 11px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
     
 </style>
 </head>
@@ -1734,40 +1744,29 @@ function hitungTarget() {
 }
 
 
-// ================= STATISTIK PRODI ==================
+// ================= STATISTIK PRODI FINAL ==================
 function loadStatistik() {
-  // Ambil list PTN unik dari database (snbt)
   const ptnList = [...new Set(snbt.slice(1).map(row => row[1]))].sort();
   
   document.getElementById("content").innerHTML = `
   <div class="card">
-    <div style="background:linear-gradient(90deg,#1e5eff,#4fa3ff); color:white; padding:20px; text-align:center; border-radius:15px; margin-bottom:20px;">
-        <h3 style="margin:0;">📊 Statistik Prodi SNBT</h3>
-        <span class="watermark-lisensi" id="wm-prodi"></span>
+    <h3 style="margin-bottom:0;">📊 Statistik & Analisis Tren Prodi 2026</h3>
+    <span class="watermark-lisensi" id="wm-prodi"></span>
+    
+    <div style="margin-bottom:20px; margin-top:15px;">
+        <input list="ptnStatsList" id="filterPtnStats" placeholder="Pilih PTN..." oninput="updateProdiStats()" style="width:100%; padding:12px; border-radius:12px; border:1px solid #ddd; margin-bottom:10px;">
+        <datalist id="ptnStatsList">
+            ${ptnList.map(p => `<option value="${p}">`).join("")}
+        </datalist>
+
+        <input list="prodiStatsList" id="filterProdiStats" placeholder="Pilih Prodi..." oninput="renderAnalisisStatistik()" style="width:100%; padding:12px; border-radius:12px; border:1px solid #ddd;">
+        <datalist id="prodiStatsList"></datalist>
     </div>
 
-    <div class="card" style="margin-bottom:20px; border:1px solid #e3ecff;">
-        <div style="display:grid; gap:12px;">
-            <div class="selector-box">
-                <label style="font-size:12px; color:var(--muted);">1. Pilih Perguruan Tinggi (PTN)</label>
-                <select id="selPtn" onchange="updateProdiDropdown()" style="width:100%; padding:12px; border-radius:8px; border:1px solid #ccc;">
-                    <option value="">-- Pilih PTN --</option>
-                    ${ptnList.map(ptn => `<option value="${ptn}">${ptn}</option>`).join("")}
-                </select>
-            </div>
-            <div class="selector-box">
-                <label style="font-size:12px; color:var(--muted);">2. Pilih Program Studi</label>
-                <select id="selProdi" onchange="renderKontenStatistik()" style="width:100%; padding:12px; border-radius:8px; border:1px solid #ccc;">
-                    <option value="">-- Pilih Prodi --</option>
-                </select>
-            </div>
-        </div>
-    </div>
-
-    <div id="hasilStatistik">
+    <div id="hasilStatistikFull">
         <div style="text-align:center; padding:40px; color:var(--muted);">
             <img src="https://cdn-icons-png.flaticon.com/512/404/404621.png" style="width:80px; opacity:0.3; margin-bottom:15px;"><br>
-            Silakan pilih PTN dan Prodi untuk melihat data statistik.
+            Silakan tentukan PTN dan Prodi.
         </div>
     </div>
   </div>`;
@@ -1775,118 +1774,146 @@ function loadStatistik() {
   tampilkanInfoAkun();
 }
 
-function updateProdiDropdown() {
-  const ptnSelected = document.getElementById("selPtn").value;
-  const prodiSelect = document.getElementById("selProdi");
-  
-  if (!ptnSelected) {
-    prodiSelect.innerHTML = `<option value="">-- Pilih Prodi --</option>`;
-    return;
-  }
-
-  const prodiList = snbt.slice(1).filter(row => row[1] === ptnSelected);
-  prodiSelect.innerHTML = `<option value="">-- Pilih Prodi --</option>` + 
-    prodiList.map(row => `<option value="${row[2]}">${row[2]}</option>`).join("");
+function updateProdiStats() {
+  const ptn = document.getElementById("filterPtnStats").value;
+  const list = snbt.filter(r => r[1] === ptn);
+  document.getElementById("prodiStatsList").innerHTML = list.map(r => `<option value="${r[2]}">`).join("");
 }
 
-function renderKontenStatistik() {
-  const ptn = document.getElementById("selPtn").value;
-  const prodi = document.getElementById("selProdi").value;
-  const row = snbt.find(r => r[1] === ptn && r[2] === prodi);
+function renderAnalisisStatistik() {
+  const ptn = document.getElementById("filterPtnStats").value;
+  const prodi = document.getElementById("filterProdiStats").value;
+  const r = snbt.find(row => row[1] === ptn && row[2] === prodi);
 
-  if (!row) return;
+  if (!r) return;
 
-  // Pemetaan kolom berdasarkan struktur DB Anda
-  const d = {
-    namaPtn: row[1],
-    namaProdi: row[2],
-    kuota26: row[22],
-    peminat25: row[21],
-    keketatan: row[6],
-    kategori: row[7],
-    skorAman: row[8],
-    m1: row[9],
-    m2: row[10],
-    prediksi26: row[23],
-    // Data Tren Peminat
-    tren: [row[13], row[15], row[17], row[19], row[21], row[23]]
-  };
+  // -- Kalkulasi Data --
+  const p25 = parseFloat(r[21]) || 0;
+  const p26 = parseFloat(r[23]) || 0;
+  const selisihPeminat = p26 - p25;
+  const ket25 = parseFloat(r[6].replace(/[^0-9.]/g, '')) || 0; 
+  const ket26 = parseFloat(r[24]) || 0;
+  const selisihKet = (ket26 - ket25).toFixed(2);
 
-  document.getElementById("hasilStatistik").innerHTML = `
-    <div class="prodi-title" style="text-align:center; margin-bottom:25px;">
-        <h2 style="margin:0; color:#1e5eff; font-size:24px;">${d.namaProdi}</h2>
-        <p style="margin:5px; color:#666; font-weight:500;">${d.namaPtn}</p>
+  // -- Analisis Tren Popularitas --
+  const trenPeminat = [r[13], r[15], r[17], r[19], r[21]];
+  let naikCount = 0;
+  for(let i=1; i<trenPeminat.length; i++) if(trenPeminat[i] > trenPeminat[i-1]) naikCount++;
+  
+  let analisisTrenText = "";
+  if (naikCount >= 3) {
+    const persenTotal = (((p25 - trenPeminat[0]) / trenPeminat[0]) * 100).toFixed(1);
+    analisisTrenText = `Peminat naik <b>${persenTotal}%</b> selama 5 tahun terakhir. Prodi ini sedang naik daun.`;
+  } else if (naikCount <= 1) {
+    analisisTrenText = `Peminat cenderung turun, pilihan yang bijak apabila memilih prodi <b>${prodi}</b> di <b>${ptn}</b>.`;
+  } else {
+    analisisTrenText = `Tren peminat sangat labil. Rata-rata peminat 5 tahun terakhir adalah <b>${(trenPeminat.reduce((a,b)=>a+b,0)/5).toFixed(0)}</b> siswa.`;
+  }
+
+  // -- Pencarian Prodi Sejenis (Tabel) --
+  const sejenis = snbt.filter(x => x[2] === prodi && x[1] !== ptn);
+  const aman = sejenis.find(x => parseFloat(x[24]) > ket26) || {1:'-', 2:'-', 24:'-'};
+  const setara = sejenis.find(x => Math.abs(parseFloat(x[24]) - ket26) < 0.5) || {1:'-', 2:'-', 24:'-'};
+  const idealis = sejenis.find(x => parseFloat(x[24]) < ket26) || {1:'-', 2:'-', 24:'-'};
+
+  document.getElementById("hasilStatistikFull").innerHTML = `
+    <div style="text-align:center; margin-bottom:20px;">
+        <h2 style="margin:0; color:#1e5eff;">${r[2]}</h2>
+        <p style="margin:5px; color:#666;">${r[1]}</p>
     </div>
 
-    <div class="prediction-box" style="background:#f0f7ff; border:2px dashed #1e5eff; border-radius:14px; padding:20px; text-align:center; margin-bottom:25px;">
-        <h4 style="margin:0; font-size:14px; color:#1e5eff;">Prediksi Peminat 2026</h4>
-        <div style="font-size:42px; font-weight:bold; color:#1e3a8a; margin:5px 0;">${d.prediksi26}</div>
-        <p style="margin:0; color:#666; font-size:13px;">Tersedia kuota <b>${d.kuota26}</b> kursi</p>
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:20px;">
+      <div style="background:#eff6ff; padding:15px; border-radius:12px; border:1px solid #bfdbfe; text-align:center;">
+        <small style="color:#1e40af; font-weight:bold;">Prediksi Peminat 2026</small>
+        <div style="font-size:24px; font-weight:800; color:#1e3a8a;">${p26} <small style="font-size:12px;">Siswa</small></div>
+        <small style="color:${selisihPeminat > 0 ? '#dc2626' : '#16a34a'};">
+          ${selisihPeminat > 0 ? '▲ Naik' : '▼ Turun'} ${Math.abs(selisihPeminat)} dari 2025
+        </small>
+      </div>
+      <div style="background:#fff1f2; padding:15px; border-radius:12px; border:1px solid #fecaca; text-align:center;">
+        <small style="color:#9f1239; font-weight:bold;">Prediksi Keketatan 2026</small>
+        <div style="font-size:24px; font-weight:800; color:#881337;">${ket26}%</div>
+        <small style="color:${selisihKet > 0 ? '#16a34a' : '#dc2626'};">
+          ${selisihKet > 0 ? '▲ Naik' : '▼ Turun'} ${Math.abs(selisihKet)}% dari 2025
+        </small>
+      </div>
     </div>
 
-    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap:12px; margin-bottom:25px;">
-        <div class="stat-card" style="background:white; padding:15px; border-radius:10px; border:1px solid #eee; text-align:center; box-shadow:0 4px 6px rgba(0,0,0,0.02);">
-            <div style="font-size:11px; color:#666;">Peminat 2025</div>
-            <div style="font-size:18px; font-weight:bold; color:#1e5eff;">${d.peminat25}</div>
+    <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:8px; margin-bottom:20px;">
+        <div class="stat-mini"><b>Kuota 2026</b><br>${r[22]}</div>
+        <div class="stat-mini" style="grid-row: span 2; background:#1e3a8a; color:white; display:flex; flex-direction:column; justify-content:center;">
+            <b>Skor Aman</b><br><span style="font-size:20px;">${r[8]}</span>
         </div>
-        <div class="stat-card" style="background:white; padding:15px; border-radius:10px; border:1px solid #eee; text-align:center; box-shadow:0 4px 6px rgba(0,0,0,0.02);">
-            <div style="font-size:11px; color:#666;">Keketatan</div>
-            <div style="font-size:18px; font-weight:bold; color:#1e5eff;">${d.keketatan}</div>
+        <div class="stat-mini"><b>Keketatan 2025</b><br>${r[6]}</div>
+        <div class="stat-mini"><b>Peminat 2025</b><br>${p25}</div>
+        <div class="stat-mini"><b>Ranking</b><br>#${r[25]}</div>
+        <div class="stat-mini" style="grid-column: span 3; background:#f8fafc;"><b>Kategori:</b> ${r[7]}</div>
+    </div>
+
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:20px;">
+        <div style="background:white; border:1px solid #eee; padding:10px; border-radius:8px;">
+            <canvas id="chPeminat" style="height:180px;"></canvas>
         </div>
-        <div class="stat-card" style="background:white; padding:15px; border-radius:10px; border:1px solid #eee; text-align:center; box-shadow:0 4px 6px rgba(0,0,0,0.02);">
-            <div style="font-size:11px; color:#666;">Persaingan</div>
-            <div style="font-size:13px; font-weight:bold; color:#e11d48; margin-top:4px;">${d.kategori}</div>
+        <div style="background:white; border:1px solid #eee; padding:10px; border-radius:8px;">
+            <canvas id="chKeketatan" style="height:180px;"></canvas>
         </div>
     </div>
 
-    <div class="chart-card" style="background:white; padding:15px; border-radius:12px; border:1px solid #e3ecff; margin-bottom:25px;">
-        <h4 style="margin:0 0 15px; font-size:14px; color:var(--muted);">📈 Tren Peminat (2021 - 2026P)</h4>
-        <canvas id="chartPeminatStats" style="max-height:250px;"></canvas>
+    <div class="card-blue" style="margin-bottom:15px; padding:15px; background:#eef2ff; border-left:4px solid #4f46e5; border-radius:8px;">
+       <h4 style="margin:0 0 5px 0;">📈 Trend Popularitas Prodi</h4>
+       <p style="font-size:13px; margin:0;">${analisisTrenText}</p>
     </div>
 
-    <div style="background:#fff8e1; padding:15px; border-left:5px solid #ffc107; border-radius:8px; font-size:13px; color:#856404;">
-        <b>💡 Insight Analisis:</b><br>
-        Prodi ini sangat mempertimbangkan subtes <b>${d.m1}</b> dan <b>${d.m2}</b>. 
-        Pastikan skor rata-rata Anda berada di atas <b>${d.skorAman}</b> untuk peluang lebih aman.
+    <div style="background:#fff8e1; border-left:4px solid #f59e0b; padding:15px; border-radius:8px; font-size:13px; margin-bottom:20px;">
+       <b>Insight Analisis:</b><br>
+       ${ptn} - ${prodi} diperkirakan akan terjadi ${selisihPeminat > 0 ? 'kenaikan' : 'penurunan'} peminat sebesar ${Math.abs(selisihPeminat)} siswa. 
+       Keketatan 2026 diprediksi menjadi ${ket26}%. Tetap fokus ke materi <b>${r[9]}</b> dan <b>${r[10]}</b>, upayakan skor <b>${r[8]}</b>.
     </div>
+
+    <h4>Prodi Sejenis</h4>
+    <table style="width:100%; border-collapse:collapse; font-size:12px; background:white; border-radius:8px; overflow:hidden;">
+      <thead style="background:#f1f5f9;">
+        <tr><th style="padding:10px; text-align:left;">Rekomendasi</th><th style="padding:10px; text-align:left;">PTN - Prodi</th><th style="padding:10px; text-align:left;">Keketatan</th></tr>
+      </thead>
+      <tbody>
+        <tr><td style="padding:10px; color:green; font-weight:bold;">Aman</td><td style="padding:10px;">${aman[1]} - ${aman[2]}</td><td style="padding:10px;">${aman[24]}%</td></tr>
+        <tr><td style="padding:10px; color:blue; font-weight:bold;">Setara</td><td style="padding:10px;">${setara[1]} - ${setara[2]}</td><td style="padding:10px;">${setara[24]}%</td></tr>
+        <tr><td style="padding:10px; color:red; font-weight:bold;">Idealis</td><td style="padding:10px;">${idealis[1]} - ${idealis[2]}</td><td style="padding:10px;">${idealis[24]}%</td></tr>
+      </tbody>
+    </table>
   `;
 
-  // Inisialisasi Chart setelah elemen Canvas muncul di innerHTML
-  initChartStatistik(d.tren);
+  // -- Render Charts --
+  renderDualCharts(r, trenPeminat);
 }
 
-let chartInstanceStats = null;
-function initChartStatistik(dataTren) {
-  const ctx = document.getElementById('chartPeminatStats').getContext('2d');
-  
-  if (chartInstanceStats) {
-    chartInstanceStats.destroy();
-  }
+let cPeminat = null;
+let cKeketatan = null;
 
-  chartInstanceStats = new Chart(ctx, {
+function renderDualCharts(r, trenPeminat) {
+  const labels = ['21', '22', '23', '24', '25', '26P'];
+  const dataP = [...trenPeminat, r[23]];
+  
+  // Hitung data keketatan historis (Kuota/Peminat*100)
+  const dataK = [
+    ((r[12]/r[13])*100).toFixed(2), ((r[14]/r[15])*100).toFixed(2), 
+    ((r[16]/r[17])*100).toFixed(2), ((r[18]/r[19])*100).toFixed(2), 
+    ((r[20]/r[21])*100).toFixed(2), r[24]
+  ];
+
+  if (cPeminat) cPeminat.destroy();
+  if (cKeketatan) cKeketatan.destroy();
+
+  cPeminat = new Chart(document.getElementById('chPeminat'), {
     type: 'line',
-    data: {
-      labels: ['2021', '2022', '2023', '2024', '2025', '2026P'],
-      datasets: [{
-        label: 'Peminat',
-        data: dataTren,
-        borderColor: '#1e5eff',
-        backgroundColor: 'rgba(30,94,255,0.1)',
-        tension: 0.4,
-        fill: true,
-        pointBackgroundColor: '#1e5eff',
-        pointRadius: 4
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: {
-        y: { beginAtZero: false, grid: { color: '#f0f0f0' } },
-        x: { grid: { display: false } }
-      }
-    }
+    data: { labels, datasets: [{ label:'Peminat', data: dataP, borderColor:'#1e3a8a', tension:0.3, fill:true, backgroundColor:'rgba(30,58,138,0.1)' }] },
+    options: { responsive:true, maintainAspectRatio:false, plugins: { legend:{display:false}, title:{display:true, text:'Tren Peminat'} } }
+  });
+
+  cKeketatan = new Chart(document.getElementById('chKeketatan'), {
+    type: 'line',
+    data: { labels, datasets: [{ label:'Keketatan %', data: dataK, borderColor:'#dc2626', tension:0.3, fill:true, backgroundColor:'rgba(220,38,38,0.1)' }] },
+    options: { responsive:true, maintainAspectRatio:false, plugins: { legend:{display:false}, title:{display:true, text:'Tren Keketatan %'} } }
   });
 }
 
