@@ -747,6 +747,7 @@ select,input{
   <button onclick="showMenu('saran')">Saran Prodi</button>
   <button onclick="showMenu('perbandingan')">Perbandingan Prodi</button>
   <button onclick="showMenu('target')">Target Belajar</button>
+  <button onclick="showMenu('statistik')">Statistik Prodi</button>
   <button onclick="cekAksesTryout()" style="background: #fff1f2; color: #e11d48; border: 1px solid #fda4af; font-weight: bold;">✍ Tryout UTBK</button>
 </div>
 
@@ -813,6 +814,7 @@ function showMenu(menu){
   if(menu=="saran") loadSaran();
   if(menu=="perbandingan") loadPerbandingan();
   if(menu=="target") loadTarget();
+  if(menu=="statistik") loadStatistik();
 }
 
 // ================= RASIONALISASI ==================
@@ -1730,6 +1732,166 @@ function hitungTarget() {
     plugins: [ChartDataLabels]
   });
 }
+
+
+// ================= STATISTIK PRODI ==================
+function loadStatistik() {
+  // Ambil list PTN unik dari database (snbt)
+  const ptnList = [...new Set(snbt.slice(1).map(row => row[1]))].sort();
+  
+  document.getElementById("content").innerHTML = `
+  <div class="card">
+    <div style="background:linear-gradient(90deg,#1e5eff,#4fa3ff); color:white; padding:20px; text-align:center; border-radius:15px; margin-bottom:20px;">
+        <h3 style="margin:0;">📊 Statistik Prodi SNBT</h3>
+        <span class="watermark-lisensi" id="wm-prodi"></span>
+    </div>
+
+    <div class="card" style="margin-bottom:20px; border:1px solid #e3ecff;">
+        <div style="display:grid; gap:12px;">
+            <div class="selector-box">
+                <label style="font-size:12px; color:var(--muted);">1. Pilih Perguruan Tinggi (PTN)</label>
+                <select id="selPtn" onchange="updateProdiDropdown()" style="width:100%; padding:12px; border-radius:8px; border:1px solid #ccc;">
+                    <option value="">-- Pilih PTN --</option>
+                    ${ptnList.map(ptn => `<option value="${ptn}">${ptn}</option>`).join("")}
+                </select>
+            </div>
+            <div class="selector-box">
+                <label style="font-size:12px; color:var(--muted);">2. Pilih Program Studi</label>
+                <select id="selProdi" onchange="renderKontenStatistik()" style="width:100%; padding:12px; border-radius:8px; border:1px solid #ccc;">
+                    <option value="">-- Pilih Prodi --</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div id="hasilStatistik">
+        <div style="text-align:center; padding:40px; color:var(--muted);">
+            <img src="https://cdn-icons-png.flaticon.com/512/404/404621.png" style="width:80px; opacity:0.3; margin-bottom:15px;"><br>
+            Silakan pilih PTN dan Prodi untuk melihat data statistik.
+        </div>
+    </div>
+  </div>`;
+  
+  tampilkanInfoAkun();
+}
+
+function updateProdiDropdown() {
+  const ptnSelected = document.getElementById("selPtn").value;
+  const prodiSelect = document.getElementById("selProdi");
+  
+  if (!ptnSelected) {
+    prodiSelect.innerHTML = `<option value="">-- Pilih Prodi --</option>`;
+    return;
+  }
+
+  const prodiList = snbt.slice(1).filter(row => row[1] === ptnSelected);
+  prodiSelect.innerHTML = `<option value="">-- Pilih Prodi --</option>` + 
+    prodiList.map(row => `<option value="${row[2]}">${row[2]}</option>`).join("");
+}
+
+function renderKontenStatistik() {
+  const ptn = document.getElementById("selPtn").value;
+  const prodi = document.getElementById("selProdi").value;
+  const row = snbt.find(r => r[1] === ptn && r[2] === prodi);
+
+  if (!row) return;
+
+  // Pemetaan kolom berdasarkan struktur DB Anda
+  const d = {
+    namaPtn: row[1],
+    namaProdi: row[2],
+    kuota26: row[22],
+    peminat25: row[21],
+    keketatan: row[6],
+    kategori: row[7],
+    skorAman: row[8],
+    m1: row[9],
+    m2: row[10],
+    prediksi26: row[23],
+    // Data Tren Peminat
+    tren: [row[13], row[15], row[17], row[19], row[21], row[23]]
+  };
+
+  document.getElementById("hasilStatistik").innerHTML = `
+    <div class="prodi-title" style="text-align:center; margin-bottom:25px;">
+        <h2 style="margin:0; color:#1e5eff; font-size:24px;">${d.namaProdi}</h2>
+        <p style="margin:5px; color:#666; font-weight:500;">${d.namaPtn}</p>
+    </div>
+
+    <div class="prediction-box" style="background:#f0f7ff; border:2px dashed #1e5eff; border-radius:14px; padding:20px; text-align:center; margin-bottom:25px;">
+        <h4 style="margin:0; font-size:14px; color:#1e5eff;">Prediksi Peminat 2026</h4>
+        <div style="font-size:42px; font-weight:bold; color:#1e3a8a; margin:5px 0;">${d.prediksi26}</div>
+        <p style="margin:0; color:#666; font-size:13px;">Tersedia kuota <b>${d.kuota26}</b> kursi</p>
+    </div>
+
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap:12px; margin-bottom:25px;">
+        <div class="stat-card" style="background:white; padding:15px; border-radius:10px; border:1px solid #eee; text-align:center; box-shadow:0 4px 6px rgba(0,0,0,0.02);">
+            <div style="font-size:11px; color:#666;">Peminat 2025</div>
+            <div style="font-size:18px; font-weight:bold; color:#1e5eff;">${d.peminat25}</div>
+        </div>
+        <div class="stat-card" style="background:white; padding:15px; border-radius:10px; border:1px solid #eee; text-align:center; box-shadow:0 4px 6px rgba(0,0,0,0.02);">
+            <div style="font-size:11px; color:#666;">Keketatan</div>
+            <div style="font-size:18px; font-weight:bold; color:#1e5eff;">${d.keketatan}</div>
+        </div>
+        <div class="stat-card" style="background:white; padding:15px; border-radius:10px; border:1px solid #eee; text-align:center; box-shadow:0 4px 6px rgba(0,0,0,0.02);">
+            <div style="font-size:11px; color:#666;">Persaingan</div>
+            <div style="font-size:13px; font-weight:bold; color:#e11d48; margin-top:4px;">${d.kategori}</div>
+        </div>
+    </div>
+
+    <div class="chart-card" style="background:white; padding:15px; border-radius:12px; border:1px solid #e3ecff; margin-bottom:25px;">
+        <h4 style="margin:0 0 15px; font-size:14px; color:var(--muted);">📈 Tren Peminat (2021 - 2026P)</h4>
+        <canvas id="chartPeminatStats" style="max-height:250px;"></canvas>
+    </div>
+
+    <div style="background:#fff8e1; padding:15px; border-left:5px solid #ffc107; border-radius:8px; font-size:13px; color:#856404;">
+        <b>💡 Insight Analisis:</b><br>
+        Prodi ini sangat mempertimbangkan subtes <b>${d.m1}</b> dan <b>${d.m2}</b>. 
+        Pastikan skor rata-rata Anda berada di atas <b>${d.skorAman}</b> untuk peluang lebih aman.
+    </div>
+  `;
+
+  // Inisialisasi Chart setelah elemen Canvas muncul di innerHTML
+  initChartStatistik(d.tren);
+}
+
+let chartInstanceStats = null;
+function initChartStatistik(dataTren) {
+  const ctx = document.getElementById('chartPeminatStats').getContext('2d');
+  
+  if (chartInstanceStats) {
+    chartInstanceStats.destroy();
+  }
+
+  chartInstanceStats = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: ['2021', '2022', '2023', '2024', '2025', '2026P'],
+      datasets: [{
+        label: 'Peminat',
+        data: dataTren,
+        borderColor: '#1e5eff',
+        backgroundColor: 'rgba(30,94,255,0.1)',
+        tension: 0.4,
+        fill: true,
+        pointBackgroundColor: '#1e5eff',
+        pointRadius: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: false, grid: { color: '#f0f0f0' } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+}
+
+
+
 </script>
 
 <script>
