@@ -724,6 +724,23 @@ select,input{
 .table-stats td, .table-stats th {
     border-bottom: 1px solid #f1f5f9;
 }
+
+.badge-status {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    display: inline-block;
+}
+.aman { background: #dcfce7; color: #166534; }
+.setara { background: #dbeafe; color: #1e40af; }
+.idealis { background: #fee2e2; color: #991b1b; }
+
+.row-rekom { transition: background 0.2s; border-bottom: 1px solid #f1f5f9; }
+.row-rekom:hover { background: #f0f7ff; }
+.row-rekom:last-child { border-bottom: none; }    
+
     
 </style>
 </head>
@@ -1852,8 +1869,17 @@ function renderAnalisisStatistik() {
     trenText = `Tren peminat sangat labil, rata-rata peminat selama 5 tahun terakhir adalah ${avg} siswa.`;
   }
 
-  // Cari Prodi Sejenis
-  const sejenis = snbt.filter(x => x[2] === prodi && x[1] !== ptn);
+// -- LOGIKA PENCARIAN PRODI SEJENIS (FLEKSIBEL) --
+  // Ambil kata kunci utama (misal: "Kedokteran" dari "Kedokteran (S1)")
+  const prodiClean = prodi.toLowerCase().split(' (')[0].replace('ilmu ', '').trim();
+  
+  const sejenis = snbt.filter(x => {
+    const namaProdiLuar = x[2].toLowerCase();
+    // Cari yang mengandung kata kunci utama tapi beda PTN
+    return namaProdiLuar.includes(prodiClean) && x[1] !== ptn;
+  });
+
+  // Urutkan berdasarkan keketatan untuk kategori
   const fAman = sejenis.find(x => parseFloat(x[24]) > (d.k26 + 0.01)) || {1:'-', 2:'-', 24:0};
   const fSetara = sejenis.find(x => Math.abs(parseFloat(x[24]) - d.k26) <= 0.005) || {1:'-', 2:'-', 24:0};
   const fIdealis = sejenis.find(x => parseFloat(x[24]) < d.k26) || {1:'-', 2:'-', 24:0};
@@ -1882,15 +1908,15 @@ function renderAnalisisStatistik() {
           </div>
         </div>
 
-        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; margin-bottom:20px;">
+        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:5px; margin-bottom:10px;">
           <div class="mini-card"><b>Kuota 2026</b><br>${d.kuota26}</div>
           <div class="mini-card" style="grid-row: span 2; background:#1e3a8a; color:white; display:flex; align-items:center; justify-content:center; flex-direction:column;">
-            <b>Skor Aman</b><br><span style="font-size:18px;">${d.skor}</span>
+            <b>Perkiraan Skor Aman</b><br><span style="font-size:25px;">${d.skor}</span>
           </div>
           <div class="mini-card"><b>Keketatan 2025</b><br>${toPersen(d.k25)}%</div>
           <div class="mini-card"><b>Peminat 2025</b><br>${d.p25}</div>
-          <div class="mini-card"><b>Ranking</b><br>#${d.rank}</div>
-          <div class="mini-card" style="grid-column: span 3; background:#f8fafc;"><b>Kategori:</b> ${d.kat}</div>
+          <div class="mini-card"><b>Kategori:</b><br> ${d.kat}</div>
+          <div class="mini-card" style="grid-column: span 3; background:#f8fafc;"><b>Ranking keketatan nasional peringkat #${d.rank} dari 5133 Prodi SNBT </b></div>
         </div>
 
         <div class="grid-grafik">
@@ -1911,13 +1937,38 @@ function renderAnalisisStatistik() {
           </p>
         </div>
 
-        <h4>Prodi Sejenis</h4>
-        <table class="table-stats" style="width:100%; font-size:12px; border-collapse:collapse; background:white;">
-          <tr style="background:#f1f5f9;"><th>Rekomendasi</th><th>PTN-Prodi</th><th>Keketatan</th></tr>
-          <tr><td style="color:green; font-weight:bold;">Aman</td><td>${fAman[1]} - ${fAman[2]}</td><td>${toPersen(fAman[24])}%</td></tr>
-          <tr><td style="color:blue; font-weight:bold;">Setara</td><td>${fSetara[1]} - ${fSetara[2]}</td><td>${toPersen(fSetara[24])}%</td></tr>
-          <tr><td style="color:red; font-weight:bold;">Idealis</td><td>${fIdealis[1]} - ${fIdealis[2]}</td><td>${toPersen(fIdealis[24])}%</td></tr>
-        </table>
+<h4 style="margin: 25px 0 10px 0; color: #1e3a8a; display: flex; align-items: center; gap: 8px;">
+       <span style="background: #1e3a8a; width: 4px; height: 18px; display: inline-block; border-radius: 2px;"></span>
+       Rekomendasi Prodi Sejenis
+    </h4>
+    <div style="overflow-x: auto; border-radius: 12px; border: 1px solid #e0e7ff; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+      <table style="width:100%; font-size:12px; border-collapse:collapse; background:white;">
+        <thead>
+          <tr style="background: #f8faff; color: #1e40af; border-bottom: 2px solid #e0e7ff;">
+            <th style="padding:15px 10px; text-align:left; font-weight: 700;">STATUS</th>
+            <th style="padding:15px 10px; text-align:left; font-weight: 700;">PTN - PROGRAM STUDI</th>
+            <th style="padding:15px 10px; text-align:center; font-weight: 700;">KEKETATAN</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="row-rekom">
+            <td style="padding:12px 10px;"><span class="badge-status aman">Aman</span></td>
+            <td style="padding:12px 10px; color: #374151; font-weight: 500;">${fAman[1]} - ${fAman[2]}</td>
+            <td style="padding:12px 10px; text-align:center; font-weight: 700; color: #059669;">${toPersen(fAman[24])}%</td>
+          </tr>
+          <tr class="row-rekom">
+            <td style="padding:12px 10px;"><span class="badge-status setara">Setara</span></td>
+            <td style="padding:12px 10px; color: #374151; font-weight: 500;">${fSetara[1]} - ${fSetara[2]}</td>
+            <td style="padding:12px 10px; text-align:center; font-weight: 700; color: #2563eb;">${toPersen(fSetara[24])}%</td>
+          </tr>
+          <tr class="row-rekom">
+            <td style="padding:12px 10px;"><span class="badge-status idealis">Idealis</span></td>
+            <td style="padding:12px 10px; color: #374151; font-weight: 500;">${fIdealis[1]} - ${fIdealis[2]}</td>
+            <td style="padding:12px 10px; text-align:center; font-weight: 700; color: #dc2626;">${toPersen(fIdealis[24])}%</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
     </div>
   `;
 
