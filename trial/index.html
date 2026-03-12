@@ -741,6 +741,26 @@ select,input{
 .row-rekom:hover { background: #f0f7ff; }
 .row-rekom:last-child { border-bottom: none; }    
 
+<style>
+.mini-card-modern {
+    padding: 12px 8px;
+    border-radius: 12px;
+    text-align: center;
+    transition: transform 0.2s ease;
+}
+
+.mini-card-modern:hover {
+    transform: translateY(-2px);
+}
+
+/* Memastikan teks kecil tidak terlalu tipis */
+.mini-card-modern small {
+    display: inline-block;
+    margin-bottom: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+</style>
     
 </style>
 </head>
@@ -1798,14 +1818,12 @@ function loadStatistik() {
     <span class="watermark-lisensi" id="wm-prodi"></span>
     
     <div style="margin-bottom:20px; margin-top:15px;">
-        <label style="font-size:12px; color:#666;">1. Pilih Perguruan Tinggi (PTN)</label>
-        <input list="ptnStatsList" id="filterPtnStats" placeholder="Ketik/Pilih PTN..." oninput="updateProdiStats()" style="width:100%; padding:12px; border-radius:12px; border:1px solid #ddd; margin-bottom:10px;">
+        <input list="ptnStatsList" id="filterPtnStats" placeholder="Pilih PTN..." oninput="updateProdiStats()" style="width:100%; padding:12px; border-radius:12px; border:1px solid #ddd; margin-bottom:10px;">
         <datalist id="ptnStatsList">
             ${ptnList.map(p => `<option value="${p}">`).join("")}
         </datalist>
 
-        <label style="font-size:12px; color:#666;">2. Pilih Program Studi</label>
-        <input list="prodiStatsList" id="filterProdiStats" placeholder="Ketik/Pilih Prodi..." oninput="renderAnalisisStatistik()" style="width:100%; padding:12px; border-radius:12px; border:1px solid #ddd;">
+          <input list="prodiStatsList" id="filterProdiStats" placeholder="Pilih Prodi..." oninput="renderAnalisisStatistik()" style="width:100%; padding:12px; border-radius:12px; border:1px solid #ddd;">
         <datalist id="prodiStatsList"></datalist>
     </div>
 
@@ -1908,16 +1926,37 @@ function renderAnalisisStatistik() {
           </div>
         </div>
 
-        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:5px; margin-bottom:10px;">
-          <div class="mini-card"><b>Kuota 2026</b><br>${d.kuota26}</div>
-          <div class="mini-card" style="grid-row: span 2; background:#1e3a8a; color:white; display:flex; align-items:center; justify-content:center; flex-direction:column;">
-            <b>Perkiraan Skor Aman</b><br><span style="font-size:25px;">${d.skor}</span>
-          </div>
-          <div class="mini-card"><b>Keketatan 2025</b><br>${toPersen(d.k25)}%</div>
-          <div class="mini-card"><b>Peminat 2025</b><br>${d.p25}</div>
-          <div class="mini-card"><b>Kategori:</b><br> ${d.kat}</div>
-          <div class="mini-card" style="grid-column: span 3; background:#f8fafc;"><b>Ranking keketatan nasional peringkat #${d.rank} dari 5133 Prodi SNBT </b></div>
-        </div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px; margin-bottom:15px; font-family: sans-serif;">
+  <div class="mini-card-modern" style="background: #f0f7ff; border: 1px solid #e0e7ff;">
+    <small style="color: #64748b; font-size: 11px; font-weight: 600;">Kuota 2026</small><br>
+    <span style="font-size: 20px; font-weight: 800; color: #1e40af;">${d.kuota26}</span>
+  </div>
+
+  <div class="mini-card-modern" style="grid-row: span 2; background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); color: white; border: none; display: flex; align-items: center; justify-content: center; flex-direction: column; box-shadow: 0 4px 12px rgba(30, 58, 138, 0.2);">
+    <small style="opacity: 0.9; font-size: 11px; font-weight: 600; text-align: center;">Perkiraan Skor Aman</small>
+    <span style="font-size: 32px; font-weight: 900; margin-top: 5px; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">${d.skor}</span>
+  </div>
+
+  <div class="mini-card-modern" style="background: #fff1f2; border: 1px solid #ffe4e6;">
+    <small style="color: #9f1239; font-size: 11px; font-weight: 600;">Keketatan '25</small><br>
+    <span style="font-size: 20px; font-weight: 800; color: #881337;">${toPersen(d.k25)}%</span>
+  </div>
+
+  <div class="mini-card-modern" style="background: #f8fafc; border: 1px solid #e2e8f0;">
+    <small style="color: #64748b; font-size: 11px; font-weight: 600;">Peminat '25</small><br>
+    <span style="font-size: 20px; font-weight: 800; color: #334155;">${d.p25}</span>
+  </div>
+
+  <div class="mini-card-modern" style="background: #f0fdf4; border: 1px solid #dcfce7;">
+    <small style="color: #166534; font-size: 11px; font-weight: 600;">Kategori</small><br>
+    <span style="font-size: 16px; font-weight: 800; color: #14532d;">${d.kat}</span>
+  </div>
+
+  <div class="mini-card-modern" style="grid-column: span 3; background: #eff6ff; border: 1px solid #bfdbfe; display: flex; justify-content: center; align-items: center; gap: 10px; padding: 12px;">
+    <span style="background: #1e40af; color: white; padding: 4px 12px; border-radius: 20px; font-weight: 900; font-size: 16px;">Ranking #${d.rank}</span>
+    <span style="color: #1e40af; font-weight: 600; font-size: 13px;">dari 5133 Prodi SNBT</span>
+  </div>
+</div>
 
         <div class="grid-grafik">
           <div class="chart-box"><canvas id="canvasPeminat"></canvas></div>
