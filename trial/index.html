@@ -741,7 +741,6 @@ select,input{
 .row-rekom:hover { background: #f0f7ff; }
 .row-rekom:last-child { border-bottom: none; }    
 
-<style>
 .mini-card-modern {
     padding: 12px 8px;
     border-radius: 12px;
@@ -760,7 +759,6 @@ select,input{
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
-</style>
     
 </style>
 </head>
@@ -1902,6 +1900,23 @@ function renderAnalisisStatistik() {
   const fSetara = sejenis.find(x => Math.abs(parseFloat(x[24]) - d.k26) <= 0.005) || {1:'-', 2:'-', 24:0};
   const fIdealis = sejenis.find(x => parseFloat(x[24]) < d.k26) || {1:'-', 2:'-', 24:0};
 
+  // -- LOGIKA PEWARNAAN DINAMIS BERDASARKAN KEKETATAN --
+  let colorBg = "#f8fafc"; // Default abu-abu sangat muda
+  let colorBorder = "#e2e8f0";
+  let colorText = "#475569";
+  
+  const statusKet = d.kat.toLowerCase(); // Mengambil data dari r[7] / d.kat
+
+  if (statusKet.includes("sangat aman") || statusKet.includes("aman")) {
+    colorBg = "#f0fdf4"; colorBorder = "#bbf7d0"; colorText = "#166534"; // Hijau
+  } else if (statusKet.includes("sedang")) {
+    colorBg = "#fffbeb"; colorBorder = "#fef3c7"; colorText = "#92400e"; // Kuning
+  } else if (statusKet.includes("ketat") && !statusKet.includes("sangat")) {
+    colorBg = "#fff7ed"; colorBorder = "#ffedd5"; colorText = "#9a3412"; // Oranye
+  } else if (statusKet.includes("sangat ketat")) {
+    colorBg = "#fef2f2"; colorBorder = "#fee2e2"; colorText = "#991b1b"; // Merah
+  }
+    
   document.getElementById("hasilStatistikFull").innerHTML = `
     <div class="animate-in">
         <div style="text-align:center; margin-bottom:20px;">
@@ -1926,35 +1941,36 @@ function renderAnalisisStatistik() {
           </div>
         </div>
 
-        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px; margin-bottom:15px; font-family: sans-serif;">
-  <div class="mini-card-modern" style="background: #f0f7ff; border: 1px solid #e0e7ff;">
-    <small style="color: #64748b; font-size: 11px; font-weight: 600;">Kuota 2026</small><br>
-    <span style="font-size: 20px; font-weight: 800; color: #1e40af;">${d.kuota26}</span>
+<div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px; margin-bottom:15px; font-family: sans-serif; text-align: center;">
+  
+  <div class="mini-card-modern" style="background: #f0f7ff; border: 1px solid #e0e7ff; display: flex; flex-direction: column; justify-content: center;">
+    <small style="color: #64748b; font-size: 11px; font-weight: 600;">Kuota 2026</small>
+    <span style="font-size: 22px; font-weight: 800; color: #1e40af;">${d.kuota26}</span>
   </div>
 
-  <div class="mini-card-modern" style="grid-row: span 2; background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); color: white; border: none; display: flex; align-items: center; justify-content: center; flex-direction: column; box-shadow: 0 4px 12px rgba(30, 58, 138, 0.2);">
-    <small style="opacity: 0.9; font-size: 11px; font-weight: 600; text-align: center;">Perkiraan Skor Aman</small>
-    <span style="font-size: 32px; font-weight: 900; margin-top: 5px; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">${d.skor}</span>
+  <div class="mini-card-modern" style="grid-row: span 2; background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); color: white; border: none; display: flex; align-items: center; justify-content: center; flex-direction: column; box-shadow: 0 4px 12px rgba(30, 58, 138, 0.2); padding: 15px 5px;">
+    <small style="opacity: 0.9; font-size: 11px; font-weight: 600;">Perkiraan Skor Aman</small>
+    <span style="font-size: 35px; font-weight: 900; margin-top: 5px; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">${d.skor}</span>
   </div>
 
-  <div class="mini-card-modern" style="background: #fff1f2; border: 1px solid #ffe4e6;">
-    <small style="color: #9f1239; font-size: 11px; font-weight: 600;">Keketatan '25</small><br>
-    <span style="font-size: 20px; font-weight: 800; color: #881337;">${toPersen(d.k25)}%</span>
+  <div class="mini-card-modern" style="background: ${colorBg}; border: 1px solid ${colorBorder}; display: flex; flex-direction: column; justify-content: center;">
+    <small style="color: ${colorText}; font-size: 11px; font-weight: 600;">Keketatan 2025</small>
+    <span style="font-size: 22px; font-weight: 800; color: ${colorText};">${toPersen(d.k25)}%</span>
   </div>
 
-  <div class="mini-card-modern" style="background: #f8fafc; border: 1px solid #e2e8f0;">
-    <small style="color: #64748b; font-size: 11px; font-weight: 600;">Peminat '25</small><br>
-    <span style="font-size: 20px; font-weight: 800; color: #334155;">${d.p25}</span>
+  <div class="mini-card-modern" style="background: #f8fafc; border: 1px solid #e2e8f0; display: flex; flex-direction: column; justify-content: center;">
+    <small style="color: #64748b; font-size: 11px; font-weight: 600;">Peminat 2025</small>
+    <span style="font-size: 22px; font-weight: 800; color: #334155;">${d.p25}</span>
   </div>
 
-  <div class="mini-card-modern" style="background: #f0fdf4; border: 1px solid #dcfce7;">
-    <small style="color: #166534; font-size: 11px; font-weight: 600;">Kategori</small><br>
-    <span style="font-size: 16px; font-weight: 800; color: #14532d;">${d.kat}</span>
+  <div class="mini-card-modern" style="background: ${colorBg}; border: 1px solid ${colorBorder}; display: flex; flex-direction: column; justify-content: center;">
+    <small style="color: ${colorText}; font-size: 11px; font-weight: 600;">Kategori</small>
+    <span style="font-size: 16px; font-weight: 800; color: ${colorText}; text-transform: capitalize;">${d.kat}</span>
   </div>
 
-  <div class="mini-card-modern" style="grid-column: span 3; background: #eff6ff; border: 1px solid #bfdbfe; display: flex; justify-content: center; align-items: center; gap: 10px; padding: 12px;">
-    <span style="background: #1e40af; color: white; padding: 4px 12px; border-radius: 20px; font-weight: 900; font-size: 16px;">Ranking #${d.rank}</span>
-    <span style="color: #1e40af; font-weight: 600; font-size: 13px;">dari 5133 Prodi SNBT</span>
+  <div class="mini-card-modern" style="grid-column: span 3; background: #1e3a8a; border: none; display: flex; justify-content: center; align-items: center; gap: 12px; padding: 15px; color: white;">
+    <span style="background: rgba(255,255,255,0.2); color: white; padding: 6px 15px; border-radius: 25px; font-weight: 900; font-size: 18px; border: 1px solid rgba(255,255,255,0.3);">Ranking #${d.rank}</span>
+    <span style="font-weight: 600; font-size: 14px; opacity: 0.9;">Prodi Terketat Nasional</span>
   </div>
 </div>
 
@@ -2015,7 +2031,7 @@ function renderAnalisisStatistik() {
 }
 
 function renderDoubleCharts(r, histPeminat, p26, k26) {
-  const labels = ['21', '22', '23', '24', '25', '26P'];
+  const labels = ['2021', '2022', '2023', '2024', '2025', 'Prediksi'];
   const histKet = [
     ((r[12]/r[13])*100).toFixed(2), ((r[14]/r[15])*100).toFixed(2),
     ((r[16]/r[17])*100).toFixed(2), ((r[18]/r[19])*100).toFixed(2),
