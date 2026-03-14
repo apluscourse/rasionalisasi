@@ -2,7 +2,8 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Admin Panel</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Timer</title>
 
 <style>
 
@@ -15,16 +16,16 @@ body{
 
 margin:0;
 background:#eaf4ff;
-padding:40px;
+padding:20px;
 
 }
 
 .card{
 
 background:white;
-padding:30px;
+padding:25px;
 border-radius:14px;
-box-shadow:0 8px 30px rgba(0,0,0,0.08);
+box-shadow:0 8px 25px rgba(0,0,0,0.08);
 max-width:900px;
 margin:auto;
 
@@ -32,28 +33,31 @@ margin:auto;
 
 h1{
 
-color:#1e88ff;
 text-align:center;
+color:#1e88ff;
+margin-bottom:20px;
 
 }
 
 input{
 
-padding:10px;
+width:100%;
+padding:12px;
 border-radius:8px;
 border:1px solid #d5e6ff;
 margin-top:10px;
-width:200px;
 
 }
 
 button{
 
-padding:10px 16px;
+width:100%;
+padding:12px;
 border:none;
 border-radius:8px;
-cursor:pointer;
 margin-top:10px;
+font-size:16px;
+cursor:pointer;
 
 }
 
@@ -70,11 +74,18 @@ background:#0d6efd;
 
 }
 
+.table-wrap{
+
+overflow-x:auto;
+
+}
+
 table{
 
 width:100%;
 border-collapse:collapse;
 margin-top:20px;
+min-width:400px;
 
 }
 
@@ -106,9 +117,36 @@ font-weight:600;
 
 }
 
+/* ===== Tablet ===== */
+
+@media(min-width:600px){
+
+button{
+
+width:auto;
+padding:10px 16px;
+
+}
+
 .controls{
 
-margin-top:20px;
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+
+}
+
+}
+
+/* ===== Desktop ===== */
+
+@media(min-width:900px){
+
+.card{
+
+padding:35px;
+
+}
 
 }
 
@@ -126,13 +164,13 @@ margin-top:20px;
 
 <button class="btn" onclick="tampil()">Tampilkan</button>
 
+<div class="table-wrap">
 <div id="tabel"></div>
+</div>
 
 <div class="controls">
 
 <input id="kunci" placeholder="Kunci jawaban">
-
-<br>
 
 <button class="btn" onclick="proses()">Proses</button>
 
@@ -221,7 +259,7 @@ document.getElementById("tabel").innerHTML="";
 
 function lihatNilai(){
 
-alert("Fitur ini menghitung total skor dari database");
+alert("Fitur perhitungan nilai total");
 
 }
 
