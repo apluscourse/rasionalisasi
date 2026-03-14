@@ -151,9 +151,9 @@ document.getElementById("area").innerHTML=`
 <button class="btn-main" onclick="mulai()">Mulai<br>(+2 Menit)</button>
 </div>
 
-<input id="soalInput" placeholder="Nomor Soal">
+<input id="soalInput" placeholder="Nomor Soal" disabled>
 
-<input id="jawaban" placeholder="Masukkan jawaban">
+<input id="jawaban" placeholder="Masukkan jawaban" disabled>
 
 <button class="btn-main" onclick="kirim()">Input Jawaban</button>
 
@@ -168,15 +168,21 @@ sisaWaktu=0;
 
 updateDisplay(0);
 
+document.getElementById("soalInput").disabled=true;
+document.getElementById("jawaban").disabled=true;
+
 }
 
 function mulai(){
 
 timer+=120;
 
-/* kosongkan jawaban saat mulai */
-const jawabanInput = document.getElementById("jawaban");
-if(jawabanInput) jawabanInput.value="";
+/* aktifkan input setelah mulai */
+document.getElementById("soalInput").disabled=false;
+document.getElementById("jawaban").disabled=false;
+
+/* kosongkan jawaban */
+document.getElementById("jawaban").value="";
 
 startTime=Date.now();
 
