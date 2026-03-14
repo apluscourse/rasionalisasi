@@ -13,7 +13,6 @@ font-family:Segoe UI,Arial;
 }
 
 body{
-
 margin:0;
 background:#eaf4ff;
 display:flex;
@@ -21,11 +20,9 @@ justify-content:center;
 align-items:center;
 min-height:100vh;
 padding:20px;
-
 }
 
 .card{
-
 background:white;
 padding:30px;
 border-radius:14px;
@@ -33,47 +30,38 @@ box-shadow:0 8px 25px rgba(0,0,0,0.08);
 width:100%;
 max-width:420px;
 text-align:center;
-
 }
 
 h1{
-
 color:#1e88ff;
 margin-bottom:20px;
 font-size:24px;
-
 }
 
 .nama{
-
 font-size:22px;
 font-weight:600;
 margin-bottom:10px;
-
 }
 
 .timer{
-
-font-size:60px;
+font-size:56px;
 font-weight:700;
 color:#1e88ff;
 margin:20px 0;
-
+letter-spacing:2px;
 }
 
 input{
-
 width:100%;
 padding:12px;
 border-radius:8px;
 border:1px solid #d5e6ff;
 margin-top:10px;
 font-size:16px;
-
 }
 
 button{
-
 width:100%;
 padding:14px;
 border:none;
@@ -81,73 +69,34 @@ border-radius:8px;
 font-size:16px;
 cursor:pointer;
 margin-top:10px;
-
 }
 
 .btn-main{
-
 background:#1e88ff;
 color:white;
-
 }
 
 .btn-main:hover{
-
 background:#0d6efd;
-
 }
 
 .btn-reset{
-
 background:#e8f2ff;
-
 }
 
 .controls{
-
 display:flex;
 gap:10px;
-
 }
 
 .controls button{
-
 flex:1;
-
 }
-
-/* ===== Tablet ===== */
 
 @media(min-width:600px){
 
 .timer{
-
 font-size:70px;
-
-}
-
-h1{
-
-font-size:28px;
-
-}
-
-}
-
-/* ===== Desktop ===== */
-
-@media(min-width:900px){
-
-.card{
-
-max-width:500px;
-
-}
-
-.timer{
-
-font-size:80px;
-
 }
 
 }
@@ -165,6 +114,7 @@ font-size:80px;
 <div id="awal">
 
 <input id="namaInput" placeholder="Masukkan nama siswa">
+<input id="soalInput" placeholder="Nomor soal">
 
 <button class="btn-main" onclick="buat()">Mulai</button>
 
@@ -179,13 +129,17 @@ font-size:80px;
 const API="https://script.google.com/macros/s/AKfycbyGRR6WfeOVX_koRX3cOKTMTiPzuz_iIZyb2yAlxQJVrl6UlQP_CB0k3mBCB60qR062ig/exec";
 
 let nama="";
+let noSoal=0;
+
 let timer=0;
 let interval=null;
-let noSoal=1;
+
+let startTime=0;
 
 function buat(){
 
 nama=document.getElementById("namaInput").value;
+noSoal=document.getElementById("soalInput").value;
 
 document.getElementById("awal").style.display="none";
 
@@ -193,7 +147,7 @@ document.getElementById("area").innerHTML=`
 
 <div class="nama">${nama}</div>
 
-<div id="timer" class="timer">00:00</div>
+<div id="timer" class="timer">00:00.00</div>
 
 <div class="controls">
 <button class="btn-reset" onclick="resetTimer()">Reset</button>
@@ -211,7 +165,7 @@ document.getElementById("area").innerHTML=`
 function resetTimer(){
 
 timer=0;
-update();
+updateDisplay(0);
 
 }
 
@@ -219,37 +173,48 @@ function mulai(){
 
 timer+=120;
 
+startTime=Date.now();
+
 if(interval) clearInterval(interval);
 
-interval=setInterval(()=>{
+interval=setInterval(updateTimer,50);
 
-timer--;
+}
 
-update();
+function updateTimer(){
 
-if(timer<=0){
+let elapsed=(Date.now()-startTime)/1000;
+
+let sisa=timer-elapsed;
+
+if(sisa<=0){
 
 clearInterval(interval);
+updateDisplay(0);
 kirim();
+return;
 
 }
 
-},1000);
+updateDisplay(sisa);
 
 }
 
-function update(){
+function updateDisplay(waktu){
 
-document.getElementById("timer").innerText=format(timer);
+let detik=Math.floor(waktu);
 
-}
+let mili=Math.floor((waktu-detik)*100);
 
-function format(s){
+let m=Math.floor(detik/60);
+let d=detik%60;
 
-let m=Math.floor(s/60);
-let d=s%60;
-
-return String(m).padStart(2,'0')+":"+String(d).padStart(2,'0');
+document.getElementById("timer").innerText=
+String(m).padStart(2,'0')+
+":"+
+String(d).padStart(2,'0')+
+"."+
+String(mili).padStart(2,'0');
 
 }
 
@@ -259,6 +224,8 @@ clearInterval(interval);
 
 let jawaban=document.getElementById("jawaban").value;
 
+let waktuKirim=Math.floor(timer);
+
 fetch(API,{
 method:"POST",
 body:JSON.stringify({
@@ -267,7 +234,7 @@ action:"input",
 nama:nama,
 no:noSoal,
 jawaban:jawaban,
-waktu:timer
+waktu:waktuKirim
 
 })
 });
