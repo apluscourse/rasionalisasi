@@ -236,12 +236,20 @@ function kirim(){
 
 clearInterval(interval);
 
-let jawaban=document.getElementById("jawaban").value;
-let noSoal=document.getElementById("soalInput").value;
+let jawabanInput = document.getElementById("jawaban");
+let soalInput = document.getElementById("soalInput");
 
-/* ambil sisa waktu aktual */
-let waktuKirim=Math.floor(sisaWaktu);
+let jawaban = jawabanInput.value;
+let noSoal = soalInput.value;
 
+/* ambil sisa waktu */
+let waktuKirim = Math.floor(sisaWaktu);
+
+/* kunci kembali input */
+soalInput.disabled = true;
+jawabanInput.disabled = true;
+
+/* kirim ke database */
 fetch(API,{
 method:"POST",
 body:JSON.stringify({
@@ -254,6 +262,10 @@ waktu:waktuKirim
 
 })
 });
+
+/* kosongkan input */
+jawabanInput.value = "";
+soalInput.value = "";
 
 alert("Jawaban terkirim");
 
