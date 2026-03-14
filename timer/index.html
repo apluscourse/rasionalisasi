@@ -125,12 +125,14 @@ font-size:70px;
 
 <script>
 
-const API="https://script.google.com/macros/s/AKfycbyGRR6WfeOVX_koRX3cOKTMTiPzuz_iIZyb2yAlxQJVrl6UlQP_CB0k3mBCB60qR062ig/exec";
+const API="https://script.google.com/macros/s/AKfycbzAe3LX2rf7Q6B-OzGd5sFGmCfa-SFTMC50Wb5s_KSp3fXVL-XDpUsN1tluUy-ZanxPZA/exec";
 
 let nama="";
 let timer=0;
 let interval=null;
 let startTime=0;
+
+let sisaWaktu=0; // <-- simpan sisa waktu realtime
 
 function buat(){
 
@@ -162,6 +164,8 @@ document.getElementById("area").innerHTML=`
 function resetTimer(){
 
 timer=0;
+sisaWaktu=0;
+
 updateDisplay(0);
 
 }
@@ -186,12 +190,16 @@ let sisa=timer-elapsed;
 
 if(sisa<=0){
 
+sisaWaktu=0;
+
 clearInterval(interval);
 updateDisplay(0);
 kirim();
 return;
 
 }
+
+sisaWaktu=sisa; // <-- simpan waktu aktual
 
 updateDisplay(sisa);
 
@@ -221,7 +229,8 @@ clearInterval(interval);
 let jawaban=document.getElementById("jawaban").value;
 let noSoal=document.getElementById("soalInput").value;
 
-let waktuKirim=Math.floor(timer);
+/* ambil sisa waktu aktual */
+let waktuKirim=Math.floor(sisaWaktu);
 
 fetch(API,{
 method:"POST",
