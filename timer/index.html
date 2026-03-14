@@ -2,6 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Timer Jawaban</title>
 
 <style>
@@ -12,21 +13,25 @@ font-family:Segoe UI,Arial;
 }
 
 body{
+
 margin:0;
 background:#eaf4ff;
 display:flex;
 justify-content:center;
 align-items:center;
-height:100vh;
+min-height:100vh;
+padding:20px;
+
 }
 
 .card{
 
 background:white;
-padding:40px;
+padding:30px;
 border-radius:14px;
-box-shadow:0 8px 30px rgba(0,0,0,0.08);
-width:420px;
+box-shadow:0 8px 25px rgba(0,0,0,0.08);
+width:100%;
+max-width:420px;
 text-align:center;
 
 }
@@ -34,7 +39,25 @@ text-align:center;
 h1{
 
 color:#1e88ff;
-margin-bottom:30px;
+margin-bottom:20px;
+font-size:24px;
+
+}
+
+.nama{
+
+font-size:22px;
+font-weight:600;
+margin-bottom:10px;
+
+}
+
+.timer{
+
+font-size:60px;
+font-weight:700;
+color:#1e88ff;
+margin:20px 0;
 
 }
 
@@ -51,12 +74,13 @@ font-size:16px;
 
 button{
 
-margin-top:12px;
-padding:12px 20px;
+width:100%;
+padding:14px;
 border:none;
 border-radius:8px;
 font-size:16px;
 cursor:pointer;
+margin-top:10px;
 
 }
 
@@ -79,28 +103,52 @@ background:#e8f2ff;
 
 }
 
-.timer{
-
-font-size:64px;
-font-weight:700;
-color:#1e88ff;
-margin:20px 0;
-
-}
-
-.nama{
-
-font-size:24px;
-font-weight:600;
-margin-bottom:10px;
-
-}
-
 .controls{
 
 display:flex;
 gap:10px;
-justify-content:center;
+
+}
+
+.controls button{
+
+flex:1;
+
+}
+
+/* ===== Tablet ===== */
+
+@media(min-width:600px){
+
+.timer{
+
+font-size:70px;
+
+}
+
+h1{
+
+font-size:28px;
+
+}
+
+}
+
+/* ===== Desktop ===== */
+
+@media(min-width:900px){
+
+.card{
+
+max-width:500px;
+
+}
+
+.timer{
+
+font-size:80px;
+
+}
 
 }
 
@@ -145,7 +193,7 @@ document.getElementById("area").innerHTML=`
 
 <div class="nama">${nama}</div>
 
-<div id="timer" class="timer">0</div>
+<div id="timer" class="timer">00:00</div>
 
 <div class="controls">
 <button class="btn-reset" onclick="resetTimer()">Reset</button>
@@ -217,7 +265,7 @@ body:JSON.stringify({
 
 action:"input",
 nama:nama,
-no:noal,
+no:noSoal,
 jawaban:jawaban,
 waktu:timer
 
