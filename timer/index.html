@@ -114,7 +114,6 @@ font-size:70px;
 <div id="awal">
 
 <input id="namaInput" placeholder="Masukkan nama siswa">
-<input id="soalInput" placeholder="Nomor soal">
 
 <button class="btn-main" onclick="buat()">Mulai</button>
 
@@ -129,17 +128,13 @@ font-size:70px;
 const API="https://script.google.com/macros/s/AKfycbyGRR6WfeOVX_koRX3cOKTMTiPzuz_iIZyb2yAlxQJVrl6UlQP_CB0k3mBCB60qR062ig/exec";
 
 let nama="";
-let noSoal=0;
-
 let timer=0;
 let interval=null;
-
 let startTime=0;
 
 function buat(){
 
 nama=document.getElementById("namaInput").value;
-noSoal=document.getElementById("soalInput").value;
 
 document.getElementById("awal").style.display="none";
 
@@ -153,6 +148,8 @@ document.getElementById("area").innerHTML=`
 <button class="btn-reset" onclick="resetTimer()">Reset</button>
 <button class="btn-main" onclick="mulai()">+2 Menit</button>
 </div>
+
+<input id="soalInput" placeholder="Nomor Soal">
 
 <input id="jawaban" placeholder="Masukkan jawaban">
 
@@ -203,7 +200,6 @@ updateDisplay(sisa);
 function updateDisplay(waktu){
 
 let detik=Math.floor(waktu);
-
 let mili=Math.floor((waktu-detik)*100);
 
 let m=Math.floor(detik/60);
@@ -223,6 +219,7 @@ function kirim(){
 clearInterval(interval);
 
 let jawaban=document.getElementById("jawaban").value;
+let noSoal=document.getElementById("soalInput").value;
 
 let waktuKirim=Math.floor(timer);
 
