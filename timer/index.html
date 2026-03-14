@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Timer Jawaban</title>
+
+<style>
+
+*{
+box-sizing:border-box;
+font-family:Segoe UI,Arial;
+}
+
+body{
+margin:0;
+background:#eaf4ff;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+}
+
+.card{
+
+background:white;
+padding:40px;
+border-radius:14px;
+box-shadow:0 8px 30px rgba(0,0,0,0.08);
+width:420px;
+text-align:center;
+
+}
+
+h1{
+
+color:#1e88ff;
+margin-bottom:30px;
+
+}
+
+input{
+
+width:100%;
+padding:12px;
+border-radius:8px;
+border:1px solid #d5e6ff;
+margin-top:10px;
+font-size:16px;
+
+}
+
+button{
+
+margin-top:12px;
+padding:12px 20px;
+border:none;
+border-radius:8px;
+font-size:16px;
+cursor:pointer;
+
+}
+
+.btn-main{
+
+background:#1e88ff;
+color:white;
+
+}
+
+.btn-main:hover{
+
+background:#0d6efd;
+
+}
+
+.btn-reset{
+
+background:#e8f2ff;
+
+}
+
+.timer{
+
+font-size:64px;
+font-weight:700;
+color:#1e88ff;
+margin:20px 0;
+
+}
+
+.nama{
+
+font-size:24px;
+font-weight:600;
+margin-bottom:10px;
+
+}
+
+.controls{
+
+display:flex;
+gap:10px;
+justify-content:center;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="card">
+
+<h1>Timer Jawaban</h1>
+
+<div id="awal">
+
+<input id="namaInput" placeholder="Masukkan nama siswa">
+
+<button class="btn-main" onclick="buat()">Mulai</button>
+
+</div>
+
+<div id="area"></div>
+
+</div>
+
+<script>
+
+const API="https://script.google.com/macros/s/AKfycbyGRR6WfeOVX_koRX3cOKTMTiPzuz_iIZyb2yAlxQJVrl6UlQP_CB0k3mBCB60qR062ig/exec";
+
+let nama="";
+let timer=0;
+let interval=null;
+let noSoal=1;
+
+function buat(){
+
+nama=document.getElementById("namaInput").value;
+
+document.getElementById("awal").style.display="none";
+
+document.getElementById("area").innerHTML=`
+
+<div class="nama">${nama}</div>
+
+<div id="timer" class="timer">0</div>
+
+<div class="controls">
+<button class="btn-reset" onclick="resetTimer()">Reset</button>
+<button class="btn-main" onclick="mulai()">+2 Menit</button>
+</div>
+
+<input id="jawaban" placeholder="Masukkan jawaban">
+
+<button class="btn-main" onclick="kirim()">Input Jawaban</button>
+
+`;
+
+}
+
+function resetTimer(){
+
+timer=0;
+update();
+
+}
+
+function mulai(){
+
+timer+=120;
+
+if(interval) clearInterval(interval);
+
+interval=setInterval(()=>{
+
+timer--;
+
+update();
+
+if(timer<=0){
+
+clearInterval(interval);
+kirim();
+
+}
+
+},1000);
+
+}
+
+function update(){
+
+document.getElementById("timer").innerText=format(timer);
+
+}
+
+function format(s){
+
+let m=Math.floor(s/60);
+let d=s%60;
+
+return String(m).padStart(2,'0')+":"+String(d).padStart(2,'0');
+
+}
+
+function kirim(){
+
+clearInterval(interval);
+
+let jawaban=document.getElementById("jawaban").value;
+
+fetch(API,{
+method:"POST",
+body:JSON.stringify({
+
+action:"input",
+nama:nama,
+no:noal,
+jawaban:jawaban,
+waktu:timer
+
+})
+});
+
+alert("Jawaban terkirim");
+
+}
+
+</script>
+
+</body>
+</html>
