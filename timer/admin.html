@@ -13,44 +13,35 @@ font-family:Segoe UI,Arial;
 }
 
 body{
-
 margin:0;
 background:#eaf4ff;
 padding:20px;
-
 }
 
 .card{
-
 background:white;
 padding:25px;
 border-radius:14px;
 box-shadow:0 8px 25px rgba(0,0,0,0.08);
 max-width:900px;
 margin:auto;
-
 }
 
 h1{
-
 text-align:center;
 color:#1e88ff;
 margin-bottom:20px;
-
 }
 
 input{
-
 width:100%;
 padding:12px;
 border-radius:8px;
 border:1px solid #d5e6ff;
 margin-top:10px;
-
 }
 
 button{
-
 width:100%;
 padding:12px;
 border:none;
@@ -58,94 +49,59 @@ border-radius:8px;
 margin-top:10px;
 font-size:16px;
 cursor:pointer;
-
 }
 
 .btn{
-
 background:#1e88ff;
 color:white;
-
 }
 
 .btn:hover{
-
 background:#0d6efd;
-
 }
 
 .table-wrap{
-
 overflow-x:auto;
-
 }
 
 table{
-
 width:100%;
 border-collapse:collapse;
 margin-top:20px;
 min-width:400px;
-
 }
 
 th,td{
-
 padding:10px;
 border-bottom:1px solid #eee;
 text-align:center;
-
 }
 
 th{
-
 background:#f3f8ff;
-
 }
 
 .benar{
-
 color:green;
 font-weight:600;
-
 }
 
 .salah{
-
 color:red;
 font-weight:600;
-
 }
-
-/* ===== Tablet ===== */
 
 @media(min-width:600px){
 
 button{
-
 width:auto;
 padding:10px 16px;
-
 }
 
 .controls{
-
 display:flex;
 gap:10px;
 flex-wrap:wrap;
-
-}
-
-}
-
-/* ===== Desktop ===== */
-
-@media(min-width:900px){
-
-.card{
-
-padding:35px;
-
 }
 
 }
@@ -176,8 +132,6 @@ padding:35px;
 
 <button onclick="reset()">Reset</button>
 
-<button onclick="lihatNilai()">Lihat Nilai</button>
-
 </div>
 
 </div>
@@ -187,6 +141,23 @@ padding:35px;
 const API="https://script.google.com/macros/s/AKfycbyGRR6WfeOVX_koRX3cOKTMTiPzuz_iIZyb2yAlxQJVrl6UlQP_CB0k3mBCB60qR062ig/exec";
 
 let data=[];
+
+/* =========================
+FORMAT DETIK → MM:SS
+========================= */
+
+function formatWaktu(detik){
+
+let m=Math.floor(detik/60);
+let s=detik%60;
+
+return String(m).padStart(2,'0') + ":" + String(s).padStart(2,'0');
+
+}
+
+/* =========================
+TAMPILKAN DATA
+========================= */
 
 function tampil(){
 
@@ -205,16 +176,20 @@ no:no
 data=res;
 
 let html="<table>";
-
 html+="<tr><th>Nama</th><th>Jawaban</th><th>Sisa Waktu</th></tr>";
 
 res.forEach(r=>{
 
+let warna="";
+
+if(r[4]=="1") warna="benar";
+if(r[4]=="0") warna="salah";
+
 html+=`
-<tr>
+<tr class="${warna}">
 <td>${r[0]}</td>
 <td>${r[2]}</td>
-<td>${r[3]}</td>
+<td>${formatWaktu(Number(r[3]))}</td>
 </tr>
 `;
 
@@ -227,6 +202,10 @@ document.getElementById("tabel").innerHTML=html;
 });
 
 }
+
+/* =========================
+PROSES PENILAIAN
+========================= */
 
 function proses(){
 
@@ -245,21 +224,27 @@ no:no
 
 }).then(()=>{
 
-alert("Penilaian selesai");
+/* bersihkan tabel */
+document.getElementById("tabel").innerHTML="";
+
+/* panggil ulang data */
+setTimeout(()=>{
+
+tampil();
+
+},500);
 
 });
 
 }
 
+/* =========================
+RESET TAMPILAN
+========================= */
+
 function reset(){
 
 document.getElementById("tabel").innerHTML="";
-
-}
-
-function lihatNilai(){
-
-alert("Fitur perhitungan nilai total");
 
 }
 
