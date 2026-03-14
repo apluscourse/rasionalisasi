@@ -42,8 +42,7 @@ margin-top:10px;
 }
 
 button{
-width:100%;
-padding:12px;
+padding:10px 16px;
 border:none;
 border-radius:8px;
 margin-top:10px;
@@ -60,6 +59,13 @@ color:white;
 background:#0d6efd;
 }
 
+.controls{
+margin-top:15px;
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+}
+
 .table-wrap{
 overflow-x:auto;
 }
@@ -68,7 +74,6 @@ table{
 width:100%;
 border-collapse:collapse;
 margin-top:20px;
-min-width:400px;
 }
 
 th,td{
@@ -91,23 +96,7 @@ color:red;
 font-weight:600;
 }
 
-@media(min-width:600px){
-
-button{
-width:auto;
-padding:10px 16px;
-}
-
-.controls{
-display:flex;
-gap:10px;
-flex-wrap:wrap;
-}
-
-}
-
 </style>
-
 </head>
 
 <body>
@@ -132,32 +121,32 @@ flex-wrap:wrap;
 
 <button onclick="reset()">Reset</button>
 
+<button onclick="lihatNilai()">Lihat Nilai</button>
+
 </div>
 
 </div>
 
 <script>
 
-const API="https://script.google.com/macros/s/AKfycbyGRR6WfeOVX_koRX3cOKTMTiPzuz_iIZyb2yAlxQJVrl6UlQP_CB0k3mBCB60qR062ig/exec";
+const API="https://script.google.com/macros/s/AKfycbzAe3LX2rf7Q6B-OzGd5sFGmCfa-SFTMC50Wb5s_KSp3fXVL-XDpUsN1tluUy-ZanxPZA/exec";
 
-let data=[];
-
-/* =========================
+/* =======================
 FORMAT DETIK → MM:SS
-========================= */
+======================= */
 
-function formatWaktu(detik){
+function formatWaktu(d){
 
-let m=Math.floor(detik/60);
-let s=detik%60;
+let m=Math.floor(d/60);
+let s=d%60;
 
-return String(m).padStart(2,'0') + ":" + String(s).padStart(2,'0');
+return String(m).padStart(2,'0')+":"+String(s).padStart(2,'0');
 
 }
 
-/* =========================
-TAMPILKAN DATA
-========================= */
+/* =======================
+TAMPIL DATA SOAL
+======================= */
 
 function tampil(){
 
@@ -172,8 +161,6 @@ no:no
 })
 .then(res=>res.json())
 .then(res=>{
-
-data=res;
 
 let html="<table>";
 html+="<tr><th>Nama</th><th>Jawaban</th><th>Sisa Waktu</th></tr>";
@@ -203,9 +190,9 @@ document.getElementById("tabel").innerHTML=html;
 
 }
 
-/* =========================
+/* =======================
 PROSES PENILAIAN
-========================= */
+======================= */
 
 function proses(){
 
@@ -224,10 +211,8 @@ no:no
 
 }).then(()=>{
 
-/* bersihkan tabel */
 document.getElementById("tabel").innerHTML="";
 
-/* panggil ulang data */
 setTimeout(()=>{
 
 tampil();
@@ -238,13 +223,80 @@ tampil();
 
 }
 
-/* =========================
-RESET TAMPILAN
-========================= */
+/* =======================
+RESET TABEL
+======================= */
 
 function reset(){
 
 document.getElementById("tabel").innerHTML="";
+
+}
+
+/* =======================
+LIHAT NILAI
+======================= */
+
+function lihatNilai(){
+
+document.getElementById("tabel").innerHTML="";
+
+fetch(API,{
+method:"POST",
+body:JSON.stringify({
+action:"getall"
+})
+})
+.then(res=>res.json())
+.then(res=>{
+
+let siswa={};
+
+res.forEach(r=>{
+
+let nama=r[0];
+let soal=r[1];
+let skor=r[4];
+
+if(!siswa[nama]){
+
+siswa[nama]={benar:[],salah:[]};
+
+}
+
+if(skor=="1") siswa[nama].benar.push(soal);
+if(skor=="0") siswa[nama].salah.push(soal);
+
+});
+
+let html="<table>";
+html+="<tr><th>Nama</th><th>Benar</th><th>Salah</th><th>Nilai</th></tr>";
+
+for(let nama in siswa){
+
+let benar=siswa[nama].benar;
+let salah=siswa[nama].salah;
+
+let total=benar.length+salah.length;
+
+let nilai=Math.round((benar.length/total)*100);
+
+html+=`
+<tr>
+<td>${nama}</td>
+<td class="benar">${benar.join(",")}</td>
+<td class="salah">${salah.join(",")}</td>
+<td>${nilai}</td>
+</tr>
+`;
+
+}
+
+html+="</table>";
+
+document.getElementById("tabel").innerHTML=html;
+
+});
 
 }
 
