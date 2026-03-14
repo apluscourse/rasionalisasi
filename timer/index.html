@@ -148,7 +148,7 @@ document.getElementById("area").innerHTML=`
 
 <div class="controls">
 <button class="btn-reset" onclick="resetTimer()">Reset</button>
-<button class="btn-main" onclick="mulai()">+2 Menit</button>
+<button class="btn-main" onclick="mulai()">Mulai (+2 Menit)</button>
 </div>
 
 <input id="soalInput" placeholder="Nomor Soal">
@@ -173,6 +173,10 @@ updateDisplay(0);
 function mulai(){
 
 timer+=120;
+
+/* kosongkan jawaban saat mulai */
+const jawabanInput = document.getElementById("jawaban");
+if(jawabanInput) jawabanInput.value="";
 
 startTime=Date.now();
 
