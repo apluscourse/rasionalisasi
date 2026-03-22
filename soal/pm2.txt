@@ -1,0 +1,7 @@
+Femi mulai berlatih untuk mengikuti lomba lari lintas alam sejauh 8 km dengan berlari setiap pekan selama 28 pekan. Femi mengawali latihan dengan berlari sejauh 2,3 km pada pekan pertama. Setiap pekan setelah itu dia berlari 250 m lebih jauh dari pekan sebelumnya sampai dia berlari melampaui jarak sesungguhnya untuk dapat menyelesaikan panjang lintasan lari lintas alam. Setiap pekan setelah itu dia menyelesaikan lintasan tanpa menambah jarak.
+Jika kalori yang terbakar pada tubuh Femi sebesar 60 kalori ketika dia berlari sejauh 1 km, jumlah kalori yang telah terbakar selama 28 pekan latihan yang telah dilakukan Femi adalah ... kalori.
+A.	7.452
+B.	8.901
+C.	9.261
+D.	9.384
+E.	9.534
