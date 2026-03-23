@@ -2084,10 +2084,17 @@ function loadKisiKisi() {
       display: flex; 
       overflow-x: auto; 
       white-space: nowrap; 
+      justify-content: center;
       gap: 8px; 
       margin-bottom: 20px;
       padding-bottom: 10px; /* Ruang untuk scroll */
       -webkit-overflow-scrolling: touch;
+    }
+
+    @media (max-width: 600px) {
+      .subtes-buttons {
+        justify-content: flex-start; 
+      }
     }
     
     /* Sembunyikan Scrollbar agar rapi */
@@ -2201,19 +2208,34 @@ function renderSoal(kode) {
     const soalBox = document.getElementById("soalBox");
     const pembBox = document.getElementById("pembahasanBox");
 
+    // Menambahkan style khusus gambar agar responsif
     soalBox.innerHTML = `
+        <style>
+          .img-materi {
+            width: 80%; /* Default Laptop */
+            max-width: 100%;
+            display: block;
+            margin: 0 auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+          }
+          @media (max-width: 768px) {
+            .img-materi { width: 100%; } /* Full di HP */
+          }
+        </style>
+
         <div style="border-bottom: 2px solid #f1f5f9; padding-bottom: 8px; margin-bottom: 15px;">
             <b style="color:var(--blue)">MATERI:</b> ${item.materi}
         </div>
         <b style="color:#64748b; font-size:12px;">CONTOH SOAL:</b><br><br>
-        <img src="${item.soal}" style="width:100%; border-radius:10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+        <img src="${item.soal}" class="img-materi">
     `;
 
     pembBox.innerHTML = `
         <div class="btn-pembahasan" onclick="renderPembahasan('${kode}')">
             💡 Lihat Pembahasan & Kunci Jawaban
         </div>
-    `;
+        <div style="height:50px;"></div> `;
     pembBox.style.display = "block";
     pembBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
@@ -2223,12 +2245,14 @@ function renderPembahasan(kode) {
     const pembBox = document.getElementById("pembahasanBox");
 
     pembBox.innerHTML = `
-        <div class="box-display" style="border: 1px solid #bbf7d0; background: #f0fdf4; animation: fadeIn 0.4s;">
-            <b style="color:#166534;">PEMBAHASAN:</b><br><br>
-            <img src="${item.pembahasan}" style="width:100%; border-radius:10px;">
+        <div class="box-display" style="border: 1px solid #bbf7d0; background: #f0fdf4; animation: fadeIn 0.4s; text-align: center;">
+            <b style="color:#166534; display: block; text-align: left;">PEMBAHASAN:</b><br>
+            <img src="${item.pembahasan}" class="img-materi">
         </div>
-        <div style="height:40px;"></div>
-    `;
+        <div style="height:60px;"></div> `;
+    
+    // Scroll otomatis ke box pembahasan agar user langsung melihat jawabannya
+    pembBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
     
 </script>
