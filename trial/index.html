@@ -2126,7 +2126,21 @@ function loadKisiKisi() {
       text-align: center; font-weight: bold; cursor: pointer; border: 1px dashed #166534;
     }
 
+    /* Efek Animasi Berdenyut untuk Loading */
+    @keyframes pulse-loading {
+      0% { opacity: 1; }
+      50% { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
+    .loading-text {
+      animation: pulse-loading 1.5s infinite;
+      color: var(--blue);
+      font-weight: bold;
+      text-align: center;
+    }
+
     .spacer-footer { height: 50px; width: 100%; } /* Elemen transparan pengganjal footer */
+    
   </style>
 
   <div class="kisi-container">
@@ -2154,8 +2168,10 @@ function loadKisiKisi() {
         <tbody id="materiBody"></tbody>
     </table>
 
-    <div id="soalBox" class="box-display">
-        <div class="placeholder-text">Pilih subtes di atas, lalu klik materi untuk melihat soal.</div>
+<div id="soalBox" class="box-display">
+        <div class="placeholder-text">
+           <div class="loading-text">⏳ Sedang menyiapkan data, mohon ditunggu...</div>
+        </div>
     </div>
 
     <div id="pembahasanBox" style="display:none;"></div>
@@ -2166,6 +2182,11 @@ function loadKisiKisi() {
   if (typeof allData === 'undefined' || allData.length === 0) {
       fetchMateriData();
   }
+    else {
+      // Jika data sudah ada (sudah pernah fetch), langsung ubah teks placeholder-nya
+      const ph = document.querySelector(".placeholder-text");
+      if(ph) ph.innerText = "Pilih subtes di atas, lalu klik materi untuk melihat soal.";
+  }
 }
 
 const API_MATERI = "https://script.google.com/macros/s/AKfycbwTpCNOK1OrcmHiE28MebrcRxtiYvPSNZ6VEwhHQnTQz2gQDFvboCLcWDOlcAzItyY/exec";
@@ -2175,13 +2196,20 @@ async function fetchMateriData() {
     try {
         const res = await fetch(API_MATERI);
         allData = await res.json();
-    } catch (e) { console.log("Gagal ambil data materi"); }
+        
+        // Kembalikan ke teks instruksi setelah loading selesai
+        const ph = document.querySelector(".placeholder-text");
+        if(ph) ph.innerText = "Data berhasil dimuat. Pilih subtes di atas.";
+    } catch (e) { 
+        const ph = document.querySelector(".placeholder-text");
+        if(ph) ph.innerText = "Gagal memuat data. Periksa koneksi internet Anda.";
+    }
 }
 
 function loadMateriList(subtes) {
     const table = document.getElementById("materiTable");
     const tbody = document.getElementById("materiBody");
-    const judul = { pu:"Penalaran Umum", ppu:"P. Pemahaman Umum", pbm:"PBM", pk:"Pengetahuan Kuantitatif", lbi:"Literasi B.Indo", lbe:"Literasi B.Inggris", pm:"Penalaran Matematika" };
+    const judul = { pu:"Penalaran Umum", ppu:"Pengetahuan dan Pemahaman Umum", pbm:"Pemahaman Bacaan dan Menulis", pk:"Pengetahuan Kuantitatif", lbi:"Literasi dalam Bahasa Indonesia", lbe:"Literasi dalam Bahasa Inggris", pm:"Penalaran Matematika" };
 
     // Highlight tombol aktif
     document.querySelectorAll('.btn-subtes').forEach(b => b.classList.remove('btn-active'));
