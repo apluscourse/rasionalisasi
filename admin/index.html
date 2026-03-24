@@ -648,6 +648,7 @@ select,input{
   <button onclick="showMenu('perbandingan')">Perbandingan Prodi</button>
   <button onclick="showMenu('target')">Target Belajar</button>
   <button onclick="showMenu('statistik')">Statistik Prodi</button>
+  <button onclick="showMenu('kisi-kisi')">Kisi-Kisi</button>
 <!--  <a href="https://apluscourse.myexams.web.id/exam/login" target="_blank">
   <button onclick="cekAksesTryout()" style="background: #fff1f2; color: #e11d48; border: 1px solid #fda4af; font-weight: bold;">✍ Tryout UTBK</button>
   </a> -->
@@ -717,6 +718,7 @@ function showMenu(menu){
   if(menu=="perbandingan") loadPerbandingan();
   if(menu=="target") loadTarget();
   if(menu=="statistik") loadStatistik();
+  if(menu=="kisi-kisi") loadKisiKisi();
 }
 
 // ================= RASIONALISASI ==================
@@ -1928,6 +1930,221 @@ function renderDoubleCharts(r, histPeminat, p26, k26) {
   });
 }
 
+// ================= MENU KISI-KISI MATERI ==================
+function loadKisiKisi() {
+  document.getElementById("content").innerHTML = `
+  <style>
+    .kisi-container { 
+      animation: fadeIn 0.5s ease-out; 
+      padding: 5px; 
+      margin-bottom: 60px; /* Jarak agar tidak tertutup footer 40px */
+    }
+    
+    /* Tombol Subtes Satu Baris dengan Horizontal Scroll */
+    .subtes-buttons { 
+      display: flex; 
+      overflow-x: auto; 
+      white-space: nowrap; 
+      justify-content: center;
+      gap: 8px; 
+      margin-bottom: 20px;
+      padding-bottom: 10px; /* Ruang untuk scroll */
+      -webkit-overflow-scrolling: touch;
+    }
+
+    @media (max-width: 600px) {
+      .subtes-buttons {
+        justify-content: flex-start; 
+      }
+    }
+    
+    /* Sembunyikan Scrollbar agar rapi */
+    .subtes-buttons::-webkit-scrollbar { display: none; }
+    .subtes-buttons { -ms-overflow-style: none; scrollbar-width: none; }
+
+    .btn-subtes { 
+      flex: 0 0 auto; /* Mencegah tombol mengecil */
+      background: #f0f7ff; border: 1px solid #e0e7ff; color: var(--blue); 
+      padding: 10px 15px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 12px;
+      transition: all 0.2s;
+    }
+    
+    .btn-subtes:hover { background: var(--blue); color: white; }
+    .btn-active { background: linear-gradient(135deg, var(--blue), var(--blue2)) !important; color: white !important; border: none; box-shadow: 0 4px 10px rgba(30,94,255,0.2); }
+
+    .table-materi { width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-top: 15px; }
+    .table-materi th { background: #f8faff; color: #1e40af; padding: 12px; text-align: left; font-size: 13px; border-bottom: 2px solid #e0e7ff; }
+    .table-materi td { padding: 12px; border-bottom: 1px solid #f1f5f9; font-size: 13px; color: #374151; }
+    .table-materi tr:hover { background: #f0f7ff; cursor: pointer; }
+
+    .box-display { margin-top: 15px; padding: 15px; background: white; border-radius: 12px; border: 1px solid #e0e7ff; min-height: 100px; }
+    .placeholder-text { text-align: center; color: #94a3b8; font-style: italic; padding: 20px; }
+    
+    .btn-pembahasan { 
+      margin-top: 15px; 
+      margin-bottom: 20px; /* Jarak tambahan */
+      background: #f0fdf4; color: #166534; padding: 12px; border-radius: 10px; 
+      text-align: center; font-weight: bold; cursor: pointer; border: 1px dashed #166534;
+    }
+
+    /* Efek Animasi Berdenyut untuk Loading */
+    @keyframes pulse-loading {
+      0% { opacity: 1; }
+      50% { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
+    .loading-text {
+      animation: pulse-loading 1.5s infinite;
+      color: var(--blue);
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .spacer-footer { height: 50px; width: 100%; } /* Elemen transparan pengganjal footer */
+    
+  </style>
+
+  <div class="kisi-container">
+    <h3 style="text-align:center; color: var(--blue); margin-bottom:15px;">Kisi-Kisi & Contoh Soal UTBK</h3>
+    <span class="watermark-lisensi" id="wm-prodi"></span>
+    
+    <div class="subtes-buttons">
+        <button class="btn-subtes" id="btn-pu" onclick="loadMateriList('pu')">PU</button>
+        <button class="btn-subtes" id="btn-ppu" onclick="loadMateriList('ppu')">PPU</button>
+        <button class="btn-subtes" id="btn-pbm" onclick="loadMateriList('pbm')">PBM</button>
+        <button class="btn-subtes" id="btn-pk" onclick="loadMateriList('pk')">PK</button>
+        <button class="btn-subtes" id="btn-lbi" onclick="loadMateriList('lbi')">LBI</button>
+        <button class="btn-subtes" id="btn-lbe" onclick="loadMateriList('lbe')">LBE</button>
+        <button class="btn-subtes" id="btn-pm" onclick="loadMateriList('pm')">PM</button>
+    </div>
+
+    <h4 id="judulSubtes" style="color: #1e3a8a; margin: 10px 0;"></h4>
+
+    <table id="materiTable" class="table-materi" style="display:none;">
+        <thead>
+            <tr>
+                <th style="width:40px; text-align:center;">No</th>
+                <th>Materi Pokok</th>
+            </tr>
+        </thead>
+        <tbody id="materiBody"></tbody>
+    </table>
+
+<div id="soalBox" class="box-display">
+        <div class="placeholder-text">
+           <div class="loading-text">⏳ Sedang menyiapkan data, mohon ditunggu...</div>
+        </div>
+    </div>
+
+    <div id="pembahasanBox" style="display:none;"></div>
+    
+    <div class="spacer-footer"></div>
+  </div>`;
+    
+  if (typeof allData === 'undefined' || allData.length === 0) {
+      fetchMateriData();
+  }
+    else {
+      // Jika data sudah ada (sudah pernah fetch), langsung ubah teks placeholder-nya
+      const ph = document.querySelector(".placeholder-text");
+      if(ph) ph.innerText = "Pilih subtes di atas, lalu klik materi untuk melihat soal.";
+  }
+}
+
+const API_MATERI = "https://script.google.com/macros/s/AKfycbwTpCNOK1OrcmHiE28MebrcRxtiYvPSNZ6VEwhHQnTQz2gQDFvboCLcWDOlcAzItyY/exec";
+let allData = [];
+
+async function fetchMateriData() {
+    try {
+        const res = await fetch(API_MATERI);
+        allData = await res.json();
+        
+        // Kembalikan ke teks instruksi setelah loading selesai
+        const ph = document.querySelector(".placeholder-text");
+        if(ph) ph.innerText = "Data berhasil dimuat. Pilih subtes di atas.";
+    } catch (e) { 
+        const ph = document.querySelector(".placeholder-text");
+        if(ph) ph.innerText = "Gagal memuat data. Periksa koneksi internet Anda.";
+    }
+}
+
+function loadMateriList(subtes) {
+    const table = document.getElementById("materiTable");
+    const tbody = document.getElementById("materiBody");
+    const judul = { pu:"Penalaran Umum", ppu:"Pengetahuan dan Pemahaman Umum", pbm:"Pemahaman Bacaan dan Menulis", pk:"Pengetahuan Kuantitatif", lbi:"Literasi dalam Bahasa Indonesia", lbe:"Literasi dalam Bahasa Inggris", pm:"Penalaran Matematika" };
+
+    // Highlight tombol aktif
+    document.querySelectorAll('.btn-subtes').forEach(b => b.classList.remove('btn-active'));
+    document.getElementById('btn-' + subtes).classList.add('btn-active');
+
+    document.getElementById("judulSubtes").innerText = "📌 " + judul[subtes];
+    tbody.innerHTML = "";
+
+    let filtered = allData.filter(item => item.subtes === subtes);
+    filtered.forEach((item, index) => {
+        tbody.innerHTML += `<tr onclick="renderSoal('${item.kode}')">
+            <td style="text-align:center; font-weight:bold; color:var(--blue);">${index + 1}</td>
+            <td>${item.materi}</td>
+        </tr>`;
+    });
+
+    table.style.display = "table";
+    document.getElementById("soalBox").innerHTML = `<div class="placeholder-text">Klik salah satu materi di atas...</div>`;
+    document.getElementById("pembahasanBox").style.display = "none";
+}
+
+function renderSoal(kode) {
+    const item = allData.find(x => x.kode === kode);
+    const soalBox = document.getElementById("soalBox");
+    const pembBox = document.getElementById("pembahasanBox");
+
+    // Menambahkan style khusus gambar agar responsif
+    soalBox.innerHTML = `
+        <style>
+          .img-materi {
+            width: 60%; /* Default Laptop */
+            max-width: 100%;
+            display: block;
+            margin: 0 auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+          }
+          @media (max-width: 768px) {
+            .img-materi { width: 100%; } /* Full di HP */
+          }
+        </style>
+
+        <div style="border-bottom: 2px solid #f1f5f9; padding-bottom: 8px; margin-bottom: 15px;">
+            <b style="color:var(--blue)">MATERI:</b> ${item.materi}
+        </div>
+        <b style="color:#64748b; font-size:12px;">CONTOH SOAL:</b><br><br>
+        <img src="${item.soal}" class="img-materi">
+    `;
+
+    pembBox.innerHTML = `
+        <div class="btn-pembahasan" onclick="renderPembahasan('${kode}')">
+            💡 Lihat Pembahasan & Kunci Jawaban
+        </div>
+        <div style="height:50px;"></div> `;
+    pembBox.style.display = "block";
+    pembBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function renderPembahasan(kode) {
+    const item = allData.find(x => x.kode === kode);
+    const pembBox = document.getElementById("pembahasanBox");
+
+    pembBox.innerHTML = `
+        <div class="box-display" style="border: 1px solid #bbf7d0; background: #f0fdf4; animation: fadeIn 0.4s; text-align: center;">
+            <b style="color:#166534; display: block; text-align: left;">PEMBAHASAN:</b><br>
+            <img src="${item.pembahasan}" class="img-materi">
+        </div>
+        <div style="height:60px;"></div> `;
+    
+    // Scroll otomatis ke box pembahasan agar user langsung melihat jawabannya
+    pembBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+  
 </script>
 
 <script>
