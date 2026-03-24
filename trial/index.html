@@ -2145,6 +2145,7 @@ function loadKisiKisi() {
 
   <div class="kisi-container">
     <h3 style="text-align:center; color: var(--blue); margin-bottom:15px;">Kisi-Kisi & Contoh Soal UTBK</h3>
+    <span class="watermark-lisensi" id="wm-prodi"></span>
     
     <div class="subtes-buttons">
         <button class="btn-subtes" id="btn-pu" onclick="loadMateriList('pu')">PU</button>
@@ -2178,7 +2179,8 @@ function loadKisiKisi() {
     
     <div class="spacer-footer"></div>
   </div>`;
-
+  tampilkanInfoAkun();
+    
   if (typeof allData === 'undefined' || allData.length === 0) {
       fetchMateriData();
   }
