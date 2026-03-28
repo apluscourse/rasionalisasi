@@ -2381,7 +2381,7 @@ function loadCariProdi() {
   </style>
 
   <div class="cp-wrapper">
-    <h3 id="cp-title" style="text-align:center; color: var(--blue); margin-bottom:20px;">🔍 Cari Program Studi</h3>
+    <h3 id="cp-title" style="text-align:center; color: var(--blue); margin-bottom:20px;">Cari Program Studi</h3>
     
     <div class="cp-nav">
       <button id="cp-btn-skor" class="cp-btn-nav active" onclick="cp_switch('skor')">
@@ -2393,7 +2393,7 @@ function loadCariProdi() {
         BERDASARKAN PERSAINGAN
       </button>
     </div>
-
+    <span class="watermark-lisensi" id="wm-prodi"></span>
     <div class="cp-box" id="cp-input-area"></div>
 
     <div class="cp-table-wrap">
@@ -2410,7 +2410,7 @@ function loadCariProdi() {
        <button class="cp-btn-pg" id="cp-next" onclick="cp_changePage(1)">Next</button>
     </div>
   </div>`;
-
+  tampilkanInfoAkun();
   cp_switch('skor');
 }
 
