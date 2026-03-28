@@ -7,7 +7,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 <script>
-const VERSION_NOTIF = "3.0"; 
+const VERSION_NOTIF = "4.0"; 
 function toggleUpdateBallon() {
     const balloon = document.getElementById("updateBalloon");
     const dot = document.getElementById("dotNotif"); 
@@ -764,8 +764,8 @@ select,input{
     </div>
     <div id="updateBalloon" class="update-balloon">
         <button class="close-balloon" onclick="toggleUpdateBallon()" style="position:absolute; top:5px; right:8px; background:none; border:none; cursor:pointer; font-size:18px; color:var(--muted);">×</button>
-        <strong style="display:block; color:var(--blue); margin-bottom:5px;">UPDATE V3.0</strong>
-        <p style="margin:0;">Kami telah menambahkan fitur <b>Kisi - Kisi</b><br> Dengan isi konten: <br>- Materi yang keluar di UTBK semua subtes <br>- Contoh soal asli sesuai materi <br>- Pembahasan contoh soal <br><br> Ayo belajar dan mulai berlatih soal UTBK dengan terstruktur dan efektif sesuai kisi-kisi</p>
+        <strong style="display:block; color:var(--blue); margin-bottom:5px;">UPDATE V4.0</strong>
+        <p style="margin:0;">Kami telah menambahkan fitur <b>CARI PRODI</b><br> Dengan fungsi fitur: <br>- Mencari Prodi dengan Skor yang diinginkan <br>- Mencari prodi dengan keketatan 1 kursi bersaingan dengan berapa siswa. <br><br> Ayo pastikan prodi pilihanmu tepat</p>
     </div>
 </div>
 
@@ -795,6 +795,7 @@ select,input{
   <button onclick="showMenu('perbandingan')">Perbandingan Prodi</button>
   <button onclick="showMenu('target')">Target Belajar</button>
   <button onclick="showMenu('statistik')">Statistik Prodi</button>
+  <button onclick="showMenu('cari-prodi')">Cari Prodi</button>
   <button onclick="showMenu('kisi-kisi')">Kisi-Kisi</button>
   <button onclick="cekAksesTryout()" style="background: #fff1f2; color: #e11d48; border: 1px solid #fda4af; font-weight: bold;">Tryout UTBK</button>
 </div>
@@ -863,6 +864,7 @@ function showMenu(menu){
   if(menu=="perbandingan") loadPerbandingan();
   if(menu=="target") loadTarget();
   if(menu=="statistik") loadStatistik();
+  if(menu=="cari-prodi") loadCariProdi();
   if(menu=="kisi-kisi") loadKisiKisi();
 }
 
@@ -2275,6 +2277,242 @@ function renderPembahasan(kode) {
     
     // Scroll otomatis ke box pembahasan agar user langsung melihat jawabannya
     pembBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ================= PAKET MENU CARI PRODI ==================
+let cp_currentPage = 1;
+const cp_rowsPerPage = 10;
+let cp_filteredData = [];
+let cp_mode = 'skor'; 
+
+function loadCariProdi() {
+  document.getElementById("content").innerHTML = `
+  <style>
+    /* Kontrol Lebar Maksimal agar tidak terlalu lebar di PC */
+    .cp-wrapper { 
+      max-width: 600px; 
+      margin: 0 auto; 
+      animation: fadeIn 0.4s ease; 
+      padding: 10px;
+      margin-bottom: 80px;
+    }
+    
+    /* Tombol Navigasi Besar & Dominan */
+    .cp-nav { display: flex; gap: 12px; margin-bottom: 25px; }
+    .cp-btn-nav { 
+      flex: 1; padding: 18px 10px; border-radius: 16px; border: 2px solid #e0e7ff; 
+      background: #f0f7ff; color: var(--blue); font-weight: 800; cursor: pointer; 
+      font-size: 14px; text-transform: uppercase; transition: all 0.3s;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+    .cp-btn-nav.active { 
+      background: linear-gradient(135deg, var(--blue), var(--blue2)); 
+      color: white; border: none; transform: translateY(-3px);
+      box-shadow: 0 8px 15px rgba(30,94,255,0.3);
+    }
+    
+    /* Box Input & Judul Tengah */
+    .cp-box { background: white; padding: 20px; border-radius: 20px; border: 1px solid #e0e7ff; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
+    .cp-box label { font-size: 12px; color: #64748b; font-weight: 800; display: block; margin-bottom: 12px; text-align: center; text-transform: uppercase; letter-spacing: 1px; }
+    .cp-box input { 
+      width: 100%; padding: 14px; border-radius: 12px; border: 2px solid #f1f5f9; 
+      margin-bottom: 15px; font-size: 16px; box-sizing: border-box; outline: none; text-align: center;
+      transition: all 0.2s; background: #f8faff;
+    }
+    .cp-box input:focus { border-color: var(--blue); background: white; }
+
+    /* Desain Input Persaingan Menarik */
+    .input-ket-container {
+      display: flex; align-items: center; justify-content: center; 
+      background: #eff6ff; padding: 10px; border-radius: 15px; border: 2px dashed var(--blue);
+      margin-bottom: 15px;
+    }
+    .input-ket-container span { font-weight: 900; color: var(--blue); font-size: 18px; padding: 0 10px; }
+    .input-ket-container input { margin-bottom: 0 !important; width: 80px !important; font-size: 20px !important; font-weight: bold; color: var(--blue); }
+
+/* Tabel & Pagination */
+    .cp-table-wrap { 
+      width: 100%; 
+      overflow-x: auto; 
+      background: white; 
+      border-radius: 15px; 
+      border: 1px solid #e0e7ff; 
+      -webkit-overflow-scrolling: touch;
+    }
+    .cp-table { 
+      width: 100%; 
+      border-collapse: collapse; 
+      /* Hapus min-width 500px agar bisa mengecil */
+      table-layout: auto; 
+    }
+    .cp-table th { 
+      background: #f8faff; 
+      color: #1e40af; 
+      padding: 12px 8px; 
+      font-size: 13px; /* Font diperbesar */
+      border-bottom: 2px solid #e0e7ff; 
+      text-align: center;
+      white-space: nowrap;
+    }
+    .cp-table td { 
+      padding: 12px 8px; 
+      border-bottom: 1px solid #f1f5f9; 
+      font-size: 13px; /* Font diperbesar dari 11px/12px ke 13px */
+      color: #334155; 
+      vertical-align: middle;
+    }
+    
+    /* Ukuran font khusus untuk Nama Kampus agar tetap terbaca */
+    .cp-table td b { font-size: 13px; display: block; line-height: 1.2; }
+    .cp-table td small { font-size: 11px; color: var(--blue); }
+    
+    .cp-pagin { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; }
+    .cp-btn-pg { background: var(--blue); color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-size: 12px; font-weight: bold; }
+    .cp-btn-pg:disabled { background: #cbd5e1; }
+  </style>
+
+  <div class="cp-wrapper">
+    <h3 id="cp-title" style="text-align:center; color: var(--blue); margin-bottom:20px;">Cari Program Studi</h3>
+    
+    <div class="cp-nav">
+      <button id="cp-btn-skor" class="cp-btn-nav active" onclick="cp_switch('skor')">
+        <span style="font-size:20px;">📊</span>
+        BERDASARKAN SKOR
+      </button>
+      <button id="cp-btn-ket" class="cp-btn-nav" onclick="cp_switch('keketatan')">
+        <span style="font-size:20px;">⚔️</span>
+        BERDASARKAN PERSAINGAN
+      </button>
+    </div>
+    <span class="watermark-lisensi" id="wm-prodi"></span>
+    <div class="cp-box" id="cp-input-area"></div>
+
+    <div class="cp-table-wrap">
+       <table id="cp-table-main" class="cp-table" style="display:none;">
+          <thead id="cp-thead"></thead>
+          <tbody id="cp-tbody"></tbody>
+       </table>
+       <div id="cp-msg" style="text-align:center; padding:50px; color:#94a3b8; font-style:italic;">Silahkan masukkan data...</div>
+    </div>
+
+    <div class="cp-pagin" id="cp-pagin-ctrl" style="display:none;">
+       <button class="cp-btn-pg" id="cp-prev" onclick="cp_changePage(-1)">Prev</button>
+       <span id="cp-page-info" style="font-size:12px; font-weight:bold; color:#64748b;"></span>
+       <button class="cp-btn-pg" id="cp-next" onclick="cp_changePage(1)">Next</button>
+    </div>
+  </div>`;
+  tampilkanInfoAkun();
+  cp_switch('skor');
+}
+
+function cp_switch(mode) {
+  cp_mode = mode;
+  cp_currentPage = 1;
+  document.getElementById('cp-btn-skor').classList.toggle('active', mode === 'skor');
+  document.getElementById('cp-btn-ket').classList.toggle('active', mode === 'keketatan');
+  
+  const area = document.getElementById('cp-input-area');
+  if (mode === 'skor') {
+    document.getElementById('cp-title').innerText = "Cari Berdasarkan Skor Aman";
+    area.innerHTML = `
+      <label>MASUKKAN TARGET SKOR ANDA</label>
+      <input type="number" id="cp-in-skor" placeholder="Contoh: 675">
+      <label>FILTER NAMA PTN ATAU PRODI</label>
+      <input type="text" id="cp-in-filter" placeholder="Ketik PTN/Prodi...">`;
+    document.getElementById('cp-msg').innerText = "Silahkan Masukkan Skor Untuk Mencari Prodi";
+    document.getElementById("cp-in-skor").oninput = cp_filter;
+    document.getElementById("cp-in-filter").oninput = cp_filter;
+  } else {
+    document.getElementById('cp-title').innerText = "Cari Berdasarkan Keketatan";
+    area.innerHTML = `
+      <label>RASIO PERSAINGAN YANG DICARI</label>
+      <div class="input-ket-container">
+        <span>1 Kursi :</span>
+        <input type="number" id="cp-in-ket" placeholder="00">
+        <span>Orang</span>
+      </div>
+      <label>FILTER NAMA PTN ATAU PRODI</label>
+      <input type="text" id="cp-in-filter" placeholder="Ketik PTN/Prodi...">`;
+    document.getElementById('cp-msg').innerText = "Silahkan Masukkan Angka Persaingan";
+    document.getElementById("cp-in-ket").oninput = cp_filter;
+    document.getElementById("cp-in-filter").oninput = cp_filter;
+  }
+  cp_filter();
+}
+
+function cp_filter() {
+  const fText = document.getElementById('cp-in-filter').value.toLowerCase();
+  const table = document.getElementById('cp-table-main');
+  const msg = document.getElementById('cp-msg');
+  const thead = document.getElementById('cp-thead');
+  const pagin = document.getElementById('cp-pagin-ctrl');
+
+  if (cp_mode === 'skor') {
+    const sVal = parseFloat(document.getElementById('cp-in-skor').value);
+    if (!sVal) { table.style.display="none"; pagin.style.display="none"; msg.style.display="block"; return; }
+    cp_filteredData = snbt.filter(r => parseFloat(r[8]) <= sVal && (r[1] + r[2]).toLowerCase().includes(fText));
+    thead.innerHTML = `<tr><th>NO</th><th>PTN - PRODI</th><th>KUOTA</th><th>PEMINAT</th><th>SKOR AMAN</th></tr>`;
+  } else {
+    const kVal = parseInt(document.getElementById('cp-in-ket').value);
+    if (!kVal) { table.style.display="none"; pagin.style.display="none"; msg.style.display="block"; return; }
+    cp_filteredData = snbt.filter(r => Math.ceil(r[5] / r[4]) === kVal && (r[1] + r[2]).toLowerCase().includes(fText));
+    thead.innerHTML = `<tr><th>NO</th><th>PTN - PRODI</th><th>PERSAINGAN</th><th>SKOR AMAN</th></tr>`;
+  }
+
+  cp_filteredData.sort((a, b) => b[8] - a[8]);
+
+  if (cp_filteredData.length === 0) {
+    table.style.display="none"; pagin.style.display="none"; msg.style.display="block";
+    msg.innerText = "Data tidak ditemukan...";
+  } else {
+    table.style.display="table"; pagin.style.display="flex"; msg.style.display="none";
+    cp_render();
+  }
+}
+
+function cp_render() {
+  const tbody = document.getElementById('cp-tbody');
+  tbody.innerHTML = "";
+  const start = (cp_currentPage - 1) * cp_rowsPerPage;
+  const items = cp_filteredData.slice(start, start + cp_rowsPerPage);
+
+  items.forEach((r, i) => {
+    let row = "";
+    if (cp_mode === 'skor') {
+      row = `<tr>
+        <td style="text-align:center; color:#94a3b8; width:30px;">${start + i + 1}</td>
+        <td><b style="color:#1e3a8a">${r[1]}</b><small>${r[2]}</small></td>
+        <td style="text-align:center">${r[4]}</td>
+        <td style="text-align:center">${r[5]}</td>
+        <td style="text-align:center">
+          <span style="background:#eff6ff; color:var(--blue); padding:5px 10px; border-radius:8px; font-weight:800; display:inline-block;">${r[8]}</span>
+        </td>
+      </tr>`;
+    } else {
+      const rasio = Math.ceil(parseInt(r[5]) / parseInt(r[4]));
+      row = `<tr>
+        <td style="text-align:center; color:#94a3b8; width:30px;">${start + i + 1}</td>
+        <td><b style="color:#1e3a8a">${r[1]}</b><small>${r[2]}</small></td>
+        <td style="text-align:center; color:#d97706; font-weight:bold; white-space:nowrap;">1 : ${rasio} orang</td>
+        <td style="text-align:center">
+          <span style="background:#eff6ff; color:var(--blue); padding:5px 10px; border-radius:8px; font-weight:800; display:inline-block;">${r[8]}</span>
+        </td>
+      </tr>`;
+    }
+    tbody.innerHTML += row;
+  });
+
+  const totalPage = Math.ceil(cp_filteredData.length / cp_rowsPerPage);
+  document.getElementById('cp-page-info').innerText = "Hal " + cp_currentPage + " dari " + totalPage;
+  document.getElementById('cp-prev').disabled = cp_currentPage === 1;
+  document.getElementById('cp-next').disabled = cp_currentPage >= totalPage;
+}
+
+function cp_changePage(dir) {
+  cp_currentPage += dir;
+  cp_render();
+  document.querySelector('.cp-table-wrap').scrollTop = 0;
 }
     
 </script>
