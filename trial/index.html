@@ -802,6 +802,7 @@ select,input{
   <button onclick="showMenu('perbandingan')">Perbandingan Prodi</button>
   <button onclick="showMenu('target')">Target Belajar</button>
   <button onclick="showMenu('statistik')">Statistik Prodi</button>
+  <button onclick="showMenu('cari-prodi')">Cari Prodi</button>
   <button onclick="showMenu('kisi-kisi')">Kisi-Kisi</button>
   <button onclick="cekAksesTryout()" style="background: #fff1f2; color: #e11d48; border: 1px solid #fda4af; font-weight: bold;">Tryout UTBK</button>
 </div>
@@ -870,6 +871,7 @@ function showMenu(menu){
   if(menu=="perbandingan") loadPerbandingan();
   if(menu=="target") loadTarget();
   if(menu=="statistik") loadStatistik();
+  if(menu=="cari-prodi") loadCariProdi();
   if(menu=="kisi-kisi") loadKisiKisi();
 }
 
@@ -2283,6 +2285,216 @@ function renderPembahasan(kode) {
     
     // Scroll otomatis ke box pembahasan agar user langsung melihat jawabannya
     pembBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ================= MENU CARI PRODI ==================
+let dataCari = []; // Untuk menampung database ptn prodi
+let currentPage = 1;
+const rowsPerPage = 10;
+let filteredData = [];
+
+async function loadCariProdi() {
+  const content = document.getElementById("content");
+  content.innerHTML = `
+  <style>
+    .cari-container { animation: fadeIn 0.5s ease; padding: 5px; margin-bottom: 80px; text-align: center; }
+    .nav-cari { display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; }
+    .btn-nav { 
+      flex: 1; padding: 12px 5px; border-radius: 12px; border: 1px solid #e0e7ff; 
+      background: #f0f7ff; color: var(--blue); font-weight: bold; cursor: pointer; font-size: 13px;
+    }
+    .btn-nav.active { background: linear-gradient(135deg, var(--blue), var(--blue2)); color: white; border: none; }
+    
+    .search-box { background: white; padding: 15px; border-radius: 15px; border: 1px solid #e0e7ff; margin-bottom: 15px; text-align: left; }
+    .search-box label { font-size: 12px; color: #64748b; font-weight: 600; margin-bottom: 5px; display: block; }
+    .search-box input { 
+      width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; 
+      margin-bottom: 12px; outline: none; font-size: 14px; box-sizing: border-box;
+    }
+    .search-box input:focus { border-color: var(--blue); box-shadow: 0 0 0 2px rgba(30,94,255,0.1); }
+
+    .table-wrapper { 
+      width: 100%; overflow-x: auto; background: white; border-radius: 12px; 
+      border: 1px solid #e0e7ff; min-height: 300px; position: relative;
+    }
+    table { width: 100%; border-collapse: collapse; min-width: 500px; }
+    th { background: #f8faff; color: #1e40af; padding: 12px; font-size: 12px; border-bottom: 2px solid #e0e7ff; text-align: left; }
+    td { padding: 10px; border-bottom: 1px solid #f1f5f9; font-size: 12px; color: #334155; text-align: left; }
+    
+    .empty-state { padding: 50px 20px; color: #94a3b8; font-style: italic; text-align: center; }
+    
+    .pagination { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding: 0 5px; }
+    .btn-page { background: var(--blue); color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: bold; }
+    .btn-page:disabled { background: #cbd5e1; cursor: not-allowed; }
+    .page-info { font-size: 12px; color: #64748b; font-weight: bold; }
+  </style>
+
+  <div class="cari-container">
+    <h3 id="mainTitle" style="color: var(--blue); margin-bottom:15px;">🔍 Cari Program Studi</h3>
+    
+    <div class="nav-cari">
+      <button id="btnSkor" class="btn-nav active" onclick="switchCari('skor')">Berdasarkan Skor</button>
+      <button id="btnKeketatan" class="btn-nav" onclick="switchCari('keketatan')">Berdasarkan Persaingan</button>
+    </div>
+
+    <div class="search-box" id="inputContainer">
+       </div>
+
+    <div class="table-wrapper">
+       <table id="resultTable" style="display:none;">
+          <thead id="tableHead"></thead>
+          <tbody id="tableBody"></tbody>
+       </table>
+       <div id="emptyBox" class="empty-state">Silahkan Masukkan Skor Untuk Mencari Prodi</div>
+    </div>
+
+    <div class="pagination" id="paginationCtrl" style="display:none;">
+       <button class="btn-page" id="prevBtn" onclick="changePage(-1)">Prev</button>
+       <span class="page-info" id="pageNumber">Halaman 1</span>
+       <button class="btn-page" id="nextBtn" onclick="changePage(1)">Next</button>
+    </div>
+  </div>
+  `;
+
+  // Inisialisasi Mode Awal
+  switchCari('skor');
+  
+  // Ambil data jika belum ada (menggunakan variabel dataFull/prodi dari menu sebelumnya jika ada)
+  if (typeof dataFull === 'undefined' || dataFull.length === 0) {
+      // Jika dataFull tidak ada, anda bisa memanggil fungsi fetch data anda disini
+      // dataCari = dataFull; 
+  } else {
+      dataCari = dataFull;
+  }
+}
+
+let modeCari = 'skor';
+
+function switchCari(mode) {
+  modeCari = mode;
+  currentPage = 1;
+  document.getElementById('btnSkor').classList.toggle('active', mode === 'skor');
+  document.getElementById('btnKeketatan').classList.toggle('active', mode === 'keketatan');
+  
+  const container = document.getElementById('inputContainer');
+  if (mode === 'skor') {
+    document.getElementById('mainTitle').innerText = "🔍 Cari Prodi Berdasarkan Skor Aman";
+    container.innerHTML = `
+      <label>Masukkan Skor</label>
+      <input type="number" id="inputSkor" placeholder="Input Skor (Contoh: 650)" oninput="eksekusiCari()">
+      <label>Pencarian PTN/Prodi</label>
+      <input type="text" id="filterText" placeholder="Ketik PTN atau Prodi" oninput="eksekusiCari()">
+    `;
+    document.getElementById('emptyBox').innerText = "Silahkan Masukkan Skor Untuk Mencari Prodi";
+  } else {
+    document.getElementById('mainTitle').innerText = "🔍 Cari Prodi Berdasarkan Keketatan";
+    container.innerHTML = `
+      <label>1 kursi diperebutkan berapa orang!</label>
+      <div style="display:flex; align-items:center; gap:10px;">
+        <span style="font-size:14px; font-weight:bold;">1 Kursi :</span>
+        <input type="number" id="inputKet" placeholder="Masukkan Angka" oninput="eksekusiCari()" style="margin-bottom:0;">
+        <span style="font-size:14px; font-weight:bold;">Orang</span>
+      </div>
+      <br>
+      <label>Pencarian PTN/Prodi</label>
+      <input type="text" id="filterText" placeholder="Ketik PTN atau Prodi" oninput="eksekusiCari()">
+    `;
+    document.getElementById('emptyBox').innerText = "Silahkan Masukkan Angka Persaingan";
+  }
+  eksekusiCari();
+}
+
+function eksekusiCari() {
+  const filterTxt = document.getElementById('filterText').value.toLowerCase();
+  const table = document.getElementById('resultTable');
+  const empty = document.getElementById('emptyBox');
+  const head = document.getElementById('tableHead');
+  const pagin = document.getElementById('paginationCtrl');
+
+  if (modeCari === 'skor') {
+    const valSkor = parseFloat(document.getElementById('inputSkor').value);
+    if (!valSkor) {
+      table.style.display = "none"; pagin.style.display="none"; empty.style.display = "block";
+      return;
+    }
+    // Filter: Skor Prodi (index 8) <= Input User
+    filteredData = dataFull.filter(r => {
+      const matchSkor = parseFloat(r[8]) <= valSkor;
+      const matchText = (r[1] + " " + r[2]).toLowerCase().includes(filterTxt);
+      return matchSkor && matchText;
+    });
+    // Urutkan skor terbesar ke terkecil
+    filteredData.sort((a, b) => b[8] - a[8]);
+    
+    head.innerHTML = `<tr><th>No</th><th>PTN - Prodi</th><th>Kuota</th><th>Peminat</th><th>Skor Aman</th></tr>`;
+  } else {
+    const valKet = parseInt(document.getElementById('inputKet').value);
+    if (!valKet) {
+      table.style.display = "none"; pagin.style.display="none"; empty.style.display = "block";
+      return;
+    }
+    // Filter: Peminat(5) / Kuota(4) dibulatkan ke atas == Input User
+    filteredData = dataFull.filter(r => {
+      const rasio = Math.ceil(parseInt(r[5]) / parseInt(r[4]));
+      const matchKet = rasio === valKet;
+      const matchText = (r[1] + " " + r[2]).toLowerCase().includes(filterTxt);
+      return matchKet && matchText;
+    });
+    filteredData.sort((a, b) => b[8] - a[8]);
+    
+    head.innerHTML = `<tr><th>No</th><th>PTN - Prodi</th><th>Persaingan</th><th>Skor Aman</th></tr>`;
+  }
+
+  if (filteredData.length === 0) {
+    table.style.display = "none"; pagin.style.display="none"; empty.style.display = "block";
+    empty.innerText = "Data tidak ditemukan...";
+  } else {
+    table.style.display = "table"; pagin.style.display="flex"; empty.style.display = "none";
+    renderTableCari();
+  }
+}
+
+function renderTableCari() {
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = "";
+  
+  const start = (currentPage - 1) * rowsPerPage;
+  const end = start + rowsPerPage;
+  const paginatedItems = filteredData.slice(start, end);
+
+  paginatedItems.forEach((r, i) => {
+    let rowHTML = "";
+    if (modeCari === 'skor') {
+      rowHTML = `<tr>
+        <td>${start + i + 1}</td>
+        <td style="font-weight:600; font-size:11px;">${r[1]}<br><span style="color:var(--blue)">${r[2]}</span></td>
+        <td>${r[4]}</td>
+        <td>${r[5]}</td>
+        <td style="font-weight:bold; color:#1e40af;">${r[8]}</td>
+      </tr>`;
+    } else {
+      const rasio = Math.ceil(parseInt(r[5]) / parseInt(r[4]));
+      rowHTML = `<tr>
+        <td>${start + i + 1}</td>
+        <td style="font-weight:600; font-size:11px;">${r[1]}<br><span style="color:var(--blue)">${r[2]}</span></td>
+        <td style="color:#9a3412; font-weight:bold;">1 : ${rasio}</td>
+        <td style="font-weight:bold; color:#1e40af;">${r[8]}</td>
+      </tr>`;
+    }
+    tbody.innerHTML += rowHTML;
+  });
+
+  // Update Pagination UI
+  document.getElementById('pageNumber').innerText = `Hal ${currentPage} dari ${Math.ceil(filteredData.length / rowsPerPage)}`;
+  document.getElementById('prevBtn').disabled = currentPage === 1;
+  document.getElementById('nextBtn').disabled = currentPage === Math.ceil(filteredData.length / rowsPerPage);
+}
+
+function changePage(dir) {
+  currentPage += dir;
+  renderTableCari();
+  // Scroll table ke atas agar user tahu data berubah
+  document.querySelector('.table-wrapper').scrollTop = 0;
 }
     
 </script>
