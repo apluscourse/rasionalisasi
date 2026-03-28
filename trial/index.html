@@ -2339,11 +2339,41 @@ function loadCariProdi() {
     .input-ket-container span { font-weight: 900; color: var(--blue); font-size: 18px; padding: 0 10px; }
     .input-ket-container input { margin-bottom: 0 !important; width: 80px !important; font-size: 20px !important; font-weight: bold; color: var(--blue); }
 
-    /* Tabel & Pagination */
-    .cp-table-wrap { width: 100%; overflow-x: auto; background: white; border-radius: 15px; border: 1px solid #e0e7ff; }
-    .cp-table { width: 100%; border-collapse: collapse; min-width: 500px; }
-    .cp-table th { background: #f8faff; color: #1e40af; padding: 15px 10px; font-size: 11px; border-bottom: 2px solid #e0e7ff; text-align: center; }
-    .cp-table td { padding: 12px 10px; border-bottom: 1px solid #f1f5f9; font-size: 12px; color: #334155; }
+/* Tabel & Pagination */
+    .cp-table-wrap { 
+      width: 100%; 
+      overflow-x: auto; 
+      background: white; 
+      border-radius: 15px; 
+      border: 1px solid #e0e7ff; 
+      -webkit-overflow-scrolling: touch;
+    }
+    .cp-table { 
+      width: 100%; 
+      border-collapse: collapse; 
+      /* Hapus min-width 500px agar bisa mengecil */
+      table-layout: auto; 
+    }
+    .cp-table th { 
+      background: #f8faff; 
+      color: #1e40af; 
+      padding: 12px 8px; 
+      font-size: 13px; /* Font diperbesar */
+      border-bottom: 2px solid #e0e7ff; 
+      text-align: center;
+      white-space: nowrap;
+    }
+    .cp-table td { 
+      padding: 12px 8px; 
+      border-bottom: 1px solid #f1f5f9; 
+      font-size: 13px; /* Font diperbesar dari 11px/12px ke 13px */
+      color: #334155; 
+      vertical-align: middle;
+    }
+    
+    /* Ukuran font khusus untuk Nama Kampus agar tetap terbaca */
+    .cp-table td b { font-size: 13px; display: block; line-height: 1.2; }
+    .cp-table td small { font-size: 11px; color: var(--blue); }
     
     .cp-pagin { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; }
     .cp-btn-pg { background: var(--blue); color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-size: 12px; font-weight: bold; }
@@ -2459,19 +2489,23 @@ function cp_render() {
     let row = "";
     if (cp_mode === 'skor') {
       row = `<tr>
-        <td style="text-align:center; color:#94a3b8;">${start + i + 1}</td>
-        <td><b style="color:#1e3a8a">${r[1]}</b><br><small style="color:var(--blue)">${r[2]}</small></td>
+        <td style="text-align:center; color:#94a3b8; width:30px;">${start + i + 1}</td>
+        <td><b style="color:#1e3a8a">${r[1]}</b><small>${r[2]}</small></td>
         <td style="text-align:center">${r[4]}</td>
         <td style="text-align:center">${r[5]}</td>
-        <td style="text-align:center"><span style="background:#eff6ff; color:var(--blue); padding:4px 8px; border-radius:6px; font-weight:800;">${r[8]}</span></td>
+        <td style="text-align:center">
+          <span style="background:#eff6ff; color:var(--blue); padding:5px 10px; border-radius:8px; font-weight:800; display:inline-block;">${r[8]}</span>
+        </td>
       </tr>`;
     } else {
       const rasio = Math.ceil(parseInt(r[5]) / parseInt(r[4]));
       row = `<tr>
-        <td style="text-align:center; color:#94a3b8;">${start + i + 1}</td>
-        <td><b style="color:#1e3a8a">${r[1]}</b><br><small style="color:var(--blue)">${r[2]}</small></td>
-        <td style="text-align:center; color:#d97706; font-weight:bold;">1 : ${rasio} orang</td>
-        <td style="text-align:center"><span style="background:#eff6ff; color:var(--blue); padding:4px 8px; border-radius:6px; font-weight:800;">${r[8]}</span></td>
+        <td style="text-align:center; color:#94a3b8; width:30px;">${start + i + 1}</td>
+        <td><b style="color:#1e3a8a">${r[1]}</b><small>${r[2]}</small></td>
+        <td style="text-align:center; color:#d97706; font-weight:bold; white-space:nowrap;">1 : ${rasio} orang</td>
+        <td style="text-align:center">
+          <span style="background:#eff6ff; color:var(--blue); padding:5px 10px; border-radius:8px; font-weight:800; display:inline-block;">${r[8]}</span>
+        </td>
       </tr>`;
     }
     tbody.innerHTML += row;
