@@ -2287,180 +2287,196 @@ function renderPembahasan(kode) {
     pembBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-// ================= MENU CARI PRODI (TOTAL REWRITE) ==================
-var cariPage = 1;
-var cariLimit = 10;
-var cariFiltered = [];
-var cariMode = 'skor';
+// ================= PAKET MENU CARI PRODI ==================
+let cp_currentPage = 1;
+const cp_rowsPerPage = 10;
+let cp_filteredData = [];
+let cp_mode = 'skor'; 
 
 function loadCariProdi() {
-  // Pastikan dataFull tersedia dari database utama Anda
-  if (typeof dataFull === 'undefined' || dataFull.length === 0) {
-    document.getElementById("content").innerHTML = "<div style='padding:20px; text-align:center;'>Memuat database, mohon tunggu sebentar...</div>";
-    return;
-  }
-
   document.getElementById("content").innerHTML = `
   <style>
-    .cp-container { animation: fadeIn 0.4s ease; padding: 5px; margin-bottom: 70px; }
+    .cp-container { animation: fadeIn 0.4s ease; padding: 5px; margin-bottom: 20px; }
     .cp-nav { display: flex; gap: 8px; margin-bottom: 15px; }
     .cp-btn-nav { 
       flex: 1; padding: 12px 5px; border-radius: 12px; border: 1px solid #e0e7ff; 
-      background: #f8faff; color: #1e40af; font-weight: bold; cursor: pointer; font-size: 11px;
+      background: #f0f7ff; color: var(--blue); font-weight: bold; cursor: pointer; font-size: 11px;
     }
-    .cp-btn-nav.aktif { background: #1e40af; color: white; border: none; }
+    .cp-btn-nav.active { background: linear-gradient(135deg, var(--blue), var(--blue2)); color: white; border: none; }
     
-    .cp-card { background: white; padding: 15px; border-radius: 15px; border: 1px solid #e0e7ff; margin-bottom: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
-    .cp-card label { font-size: 11px; color: #64748b; font-weight: bold; display: block; margin-bottom: 5px; text-transform: uppercase; }
-    .cp-input { 
-      width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #cbd5e1; 
-      margin-bottom: 10px; outline: none; font-size: 14px; box-sizing: border-box;
+    .cp-box { background: white; padding: 15px; border-radius: 15px; border: 1px solid #e0e7ff; margin-bottom: 15px; text-align: left; }
+    .cp-box label { font-size: 11px; color: #64748b; font-weight: 700; display: block; margin-bottom: 5px; }
+    .cp-box input { 
+      width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; 
+      margin-bottom: 12px; font-size: 14px; box-sizing: border-box; outline: none;
     }
 
-    .cp-table-box { 
+    .cp-table-wrap { 
       width: 100%; overflow-x: auto; background: white; border-radius: 12px; 
-      border: 1px solid #e0e7ff; min-height: 250px;
+      border: 1px solid #e0e7ff; min-height: 300px;
     }
-    .cp-table { width: 100%; border-collapse: collapse; min-width: 500px; }
+    .cp-table { width: 100%; border-collapse: collapse; min-width: 550px; }
     .cp-table th { background: #f8faff; color: #1e40af; padding: 12px; font-size: 11px; border-bottom: 2px solid #e0e7ff; text-align: left; }
-    .cp-table td { padding: 12px; border-bottom: 1px solid #f1f5f9; font-size: 11px; color: #334155; }
+    .cp-table td { padding: 12px 10px; border-bottom: 1px solid #f1f5f9; font-size: 11px; color: #334155; }
     
-    .cp-pagination { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; }
-    .cp-btn-pg { background: #1e40af; color: white; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: bold; }
+    .cp-empty { padding: 50px 10px; color: #94a3b8; font-style: italic; text-align: center; font-size: 13px; }
+    
+    .cp-pagin { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; }
+    .cp-btn-pg { background: var(--blue); color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: bold; }
     .cp-btn-pg:disabled { background: #cbd5e1; cursor: not-allowed; }
   </style>
 
   <div class="cp-container">
-    <div class="cp-nav">
-      <button id="navSkor" class="cp-btn-nav aktif" onclick="ubahModeCari('skor')">Berdasarkan Skor</button>
-      <button id="navKet" class="cp-btn-nav" onclick="ubahModeCari('keketatan')">Berdasarkan Persaingan</button>
-    </div>
-
-    <div class="cp-card">
-       <div id="formInputan"></div>
-    </div>
-
-    <div class="cp-table-box">
-       <table class="cp-table" id="tabelHasilCari" style="display:none;">
-          <thead id="headCari"></thead>
-          <tbody id="bodyCari"></tbody>
-       </table>
-       <div id="pesanCari" style="text-align:center; padding:50px 20px; color:#94a3b8; font-style:italic; font-size:13px;">
-          Silahkan lengkapi inputan di atas.
-       </div>
-    </div>
-
-    <div class="cp-pagination" id="kontrolPaging" style="display:none;">
-       <button class="cp-btn-pg" id="btnPrevCari" onclick="geserHalamanCari(-1)">Sebelumnya</button>
-       <span id="infoHalaman" style="font-size:11px; font-weight:bold; color:#64748b;"></span>
-       <button class="cp-btn-pg" id="btnNextCari" onclick="geserHalamanCari(1)">Selanjutnya</button>
-    </div>
+    <h3 id="cp-title" style="text-align:center; color: var(--blue); margin-bottom:15px;">🔍 Cari Prodi</h3>
     
-    <div style="height:40px;"></div>
+    <div class="cp-nav">
+      <button id="cp-btn-skor" class="cp-btn-nav active" onclick="cp_switch('skor')">Berdasarkan Skor</button>
+      <button id="cp-btn-ket" class="cp-btn-nav" onclick="cp_switch('keketatan')">Berdasarkan Persaingan</button>
+    </div>
+
+    <div class="cp-box" id="cp-input-area"></div>
+
+    <div class="cp-table-wrap">
+       <table id="cp-table-main" class="cp-table" style="display:none;">
+          <thead id="cp-thead"></thead>
+          <tbody id="cp-tbody"></tbody>
+       </table>
+       <div id="cp-msg" class="cp-empty">Silahkan Masukkan Skor Untuk Mencari Prodi</div>
+    </div>
+
+    <div class="cp-pagin" id="cp-pagin-ctrl" style="display:none;">
+       <button class="cp-btn-pg" id="cp-prev" onclick="cp_changePage(-1)">Prev</button>
+       <span id="cp-page-info" style="font-size:11px; font-weight:bold; color:#64748b;"></span>
+       <button class="cp-btn-pg" id="cp-next" onclick="cp_changePage(1)">Next</button>
+    </div>
+    <div style="height:60px;"></div>
   </div>`;
 
-  ubahModeCari('skor');
+  cp_switch('skor');
 }
 
-function ubahModeCari(m) {
-  cariMode = m;
-  cariPage = 1;
-  document.getElementById('navSkor').classList.toggle('aktif', m === 'skor');
-  document.getElementById('navKet').classList.toggle('aktif', m === 'keketatan');
+function cp_switch(mode) {
+  cp_mode = mode;
+  cp_currentPage = 1;
+  document.getElementById('cp-btn-skor').classList.toggle('active', mode === 'skor');
+  document.getElementById('cp-btn-ket').classList.toggle('active', mode === 'keketatan');
   
-  const form = document.getElementById('formInputan');
-  if (m === 'skor') {
-    form.innerHTML = `
-      <label>Target Skor Aman Anda</label>
-      <input type="number" id="inSkor" class="cp-input" placeholder="Contoh: 600" oninput="prosesCariProdi()">
-      <label>Filter Nama PTN / Prodi</label>
-      <input type="text" id="inFilter" class="cp-input" placeholder="Ketik nama kampus atau prodi..." oninput="prosesCariProdi()">`;
+  const area = document.getElementById('cp-input-area');
+  if (mode === 'skor') {
+    document.getElementById('cp-title').innerText = "Cari Prodi Berdasarkan Skor Aman";
+    area.innerHTML = `
+      <label>MASUKKAN SKOR</label>
+      <input type="number" id="cp-in-skor" placeholder="Input Skor (Contoh: 650)">
+      <label>PENCARIAN PTN/PRODI</label>
+      <input type="text" id="cp-in-filter" placeholder="Ketik PTN atau Prodi">`;
+    document.getElementById('cp-msg').innerText = "Silahkan Masukkan Skor Untuk Mencari Prodi";
+    
+    // Pasang Event Listener
+    document.getElementById("cp-in-skor").oninput = cp_filter;
+    document.getElementById("cp-in-filter").oninput = cp_filter;
   } else {
-    form.innerHTML = `
-      <label>Angka Persaingan (1 Kursi : X Orang)</label>
-      <input type="number" id="inKet" class="cp-input" placeholder="Contoh: 15 (berarti 1:15)" oninput="prosesCariProdi()">
-      <label>Filter Nama PTN / Prodi</label>
-      <input type="text" id="inFilter" class="cp-input" placeholder="Ketik nama kampus atau prodi..." oninput="prosesCariProdi()">`;
+    document.getElementById('cp-title').innerText = "Cari Prodi Berdasarkan Keketatan";
+    area.innerHTML = `
+      <label>1 KURSI DIPEREBUTKAN BERAPA ORANG!</label>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span style="font-size:13px; font-weight:bold;">1 Kursi :</span>
+        <input type="number" id="cp-in-ket" placeholder="Masukkan Angka" style="margin-bottom:0;">
+        <span style="font-size:13px; font-weight:bold;">Orang</span>
+      </div><br>
+      <label>PENCARIAN PTN/PRODI</label>
+      <input type="text" id="cp-in-filter" placeholder="Ketik PTN atau Prodi">`;
+    document.getElementById('cp-msg').innerText = "Silahkan Masukkan Angka Persaingan";
+
+    // Pasang Event Listener
+    document.getElementById("cp-in-ket").oninput = cp_filter;
+    document.getElementById("cp-in-filter").oninput = cp_filter;
   }
-  prosesCariProdi();
+  cp_filter();
 }
 
-function prosesCariProdi() {
-  const fText = document.getElementById('inFilter').value.toLowerCase();
-  const tb = document.getElementById('tabelHasilCari');
-  const ps = document.getElementById('pesanCari');
-  const hd = document.getElementById('headCari');
-  const pg = document.getElementById('kontrolPaging');
+function cp_filter() {
+  const fText = document.getElementById('cp-in-filter').value.toLowerCase();
+  const table = document.getElementById('cp-table-main');
+  const msg = document.getElementById('cp-msg');
+  const thead = document.getElementById('cp-thead');
+  const pagin = document.getElementById('cp-pagin-ctrl');
 
-  if (cariMode === 'skor') {
-    const sVal = parseFloat(document.getElementById('inSkor').value);
-    if (!sVal) { 
-        tb.style.display="none"; pg.style.display="none"; ps.style.display="block"; 
-        ps.innerText="Silahkan Masukkan Skor Untuk Mencari Prodi"; return; 
-    }
-    // Filter data: skor (index 8) <= input
-    cariFiltered = dataFull.filter(r => parseFloat(r[8]) <= sVal && (r[1]+r[2]).toLowerCase().includes(fText));
-    hd.innerHTML = `<tr><th style="width:30px">No</th><th>PTN - Program Studi</th><th>Kuota</th><th>Peminat</th><th>Skor Aman</th></tr>`;
+  if (cp_mode === 'skor') {
+    const sVal = parseFloat(document.getElementById('cp-in-skor').value);
+    if (!sVal) { table.style.display="none"; pagin.style.display="none"; msg.style.display="block"; return; }
+    
+    // Filter database 'snbt' (Indeks 8 adalah Skor)
+    cp_filteredData = snbt.filter(r => {
+      const matchSkor = parseFloat(r[8]) <= sVal;
+      const matchText = (r[1] + " " + r[2]).toLowerCase().includes(fText);
+      return matchSkor && matchText;
+    });
+    thead.innerHTML = `<tr><th>No</th><th>PTN - Prodi</th><th>Kuota</th><th>Peminat</th><th>Skor Aman</th></tr>`;
   } else {
-    const kVal = parseInt(document.getElementById('inKet').value);
-    if (!kVal) { 
-        tb.style.display="none"; pg.style.display="none"; ps.style.display="block"; 
-        ps.innerText="Silahkan Masukkan Angka Persaingan"; return; 
-    }
-    // Filter data: pembulatan keatas(peminat index 5 / kuota index 4) == input
-    cariFiltered = dataFull.filter(r => Math.ceil(parseInt(r[5])/parseInt(r[4])) === kVal && (r[1]+r[2]).toLowerCase().includes(fText));
-    hd.innerHTML = `<tr><th style="width:30px">No</th><th>PTN - Program Studi</th><th>Persaingan</th><th>Skor Aman</th></tr>`;
+    const kVal = parseInt(document.getElementById('cp-in-ket').value);
+    if (!kVal) { table.style.display="none"; pagin.style.display="none"; msg.style.display="block"; return; }
+
+    // Filter database 'snbt' (Indeks 5 = Peminat, Indeks 4 = Kuota)
+    cp_filteredData = snbt.filter(r => {
+      const rasio = Math.ceil(parseInt(r[5]) / parseInt(r[4]));
+      const matchKet = rasio === kVal;
+      const matchText = (r[1] + " " + r[2]).toLowerCase().includes(fText);
+      return matchKet && matchText;
+    });
+    thead.innerHTML = `<tr><th>No</th><th>PTN - Prodi</th><th>Persaingan</th><th>Skor Aman</th></tr>`;
   }
 
-  // Urutkan skor tertinggi ke terendah
-  cariFiltered.sort((a,b) => parseFloat(b[8]) - parseFloat(a[8]));
+  // Sort Skor Terbesar ke Terkecil
+  cp_filteredData.sort((a, b) => b[8] - a[8]);
 
-  if (cariFiltered.length === 0) {
-    tb.style.display="none"; pg.style.display="none"; ps.style.display="block"; ps.innerText="Prodi tidak ditemukan.";
+  if (cp_filteredData.length === 0) {
+    table.style.display="none"; pagin.style.display="none"; msg.style.display="block";
+    msg.innerText = "Data tidak ditemukan...";
   } else {
-    tb.style.display="table"; pg.style.display="flex"; ps.style.display="none";
-    tampilkanTabelCari();
+    table.style.display="table"; pagin.style.display="flex"; msg.style.display="none";
+    cp_render();
   }
 }
 
-function tampilkanTabelCari() {
-  const b = document.getElementById('bodyCari');
-  b.innerHTML = "";
-  const mulai = (cariPage - 1) * cariLimit;
-  const dataHalaman = cariFiltered.slice(mulai, mulai + cariLimit);
+function cp_render() {
+  const tbody = document.getElementById('cp-tbody');
+  tbody.innerHTML = "";
+  const start = (cp_currentPage - 1) * cp_rowsPerPage;
+  const items = cp_filteredData.slice(start, start + cp_rowsPerPage);
 
-  dataHalaman.forEach((r, i) => {
-    let baris = "";
-    if (cariMode === 'skor') {
-      baris = `<tr>
-        <td style="text-align:center">${mulai + i + 1}</td>
-        <td><div style="font-weight:bold; color:#1e40af;">${r[1]}</div><div style="font-size:10px; color:#64748b;">${r[2]}</div></td>
+  items.forEach((r, i) => {
+    let row = "";
+    if (cp_mode === 'skor') {
+      row = `<tr>
+        <td style="text-align:center">${start + i + 1}</td>
+        <td><b>${r[1]}</b><br><small style="color:var(--blue)">${r[2]}</small></td>
         <td>${r[4]}</td>
         <td>${r[5]}</td>
-        <td style="font-weight:bold; color:#1e40af;">${r[8]}</td>
+        <td style="font-weight:bold; color:var(--blue)">${r[8]}</td>
       </tr>`;
     } else {
-      const rasio = Math.ceil(parseInt(r[5])/parseInt(r[4]));
-      baris = `<tr>
-        <td style="text-align:center">${mulai + i + 1}</td>
-        <td><div style="font-weight:bold; color:#1e40af;">${r[1]}</div><div style="font-size:10px; color:#64748b;">${r[2]}</div></td>
-        <td style="color:#b91c1c; font-weight:bold;">1 Kursi : ${rasio}</td>
-        <td style="font-weight:bold; color:#1e40af;">${r[8]}</td>
+      const rasio = Math.ceil(parseInt(r[5]) / parseInt(r[4]));
+      row = `<tr>
+        <td style="text-align:center">${start + i + 1}</td>
+        <td><b>${r[1]}</b><br><small style="color:var(--blue)">${r[2]}</small></td>
+        <td style="color:#d97706; font-weight:bold;">1 : ${rasio}</td>
+        <td style="font-weight:bold; color:var(--blue)">${r[8]}</td>
       </tr>`;
     }
-    b.innerHTML += baris;
+    tbody.innerHTML += row;
   });
 
-  const totalHal = Math.ceil(cariFiltered.length / cariLimit);
-  document.getElementById('infoHalaman').innerText = "Hal " + cariPage + " dari " + totalHal;
-  document.getElementById('btnPrevCari').disabled = cariPage === 1;
-  document.getElementById('btnNextCari').disabled = cariPage >= totalHal;
+  const totalPage = Math.ceil(cp_filteredData.length / cp_rowsPerPage);
+  document.getElementById('cp-page-info').innerText = "Hal " + cp_currentPage + " dari " + totalPage;
+  document.getElementById('cp-prev').disabled = cp_currentPage === 1;
+  document.getElementById('cp-next').disabled = cp_currentPage >= totalPage;
 }
 
-function geserHalamanCari(arah) {
-  cariPage += arah;
-  tampilkanTabelCari();
-  document.querySelector('.cp-table-box').scrollTop = 0;
+function cp_changePage(dir) {
+  cp_currentPage += dir;
+  cp_render();
+  // Reset scroll tabel ke atas saat ganti halaman
+  document.querySelector('.cp-table-wrap').scrollTop = 0;
 }
     
 </script>
