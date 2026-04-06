@@ -7,7 +7,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 <script>
-const VERSION_NOTIF = "4.0"; 
+const VERSION_NOTIF = "5.0"; 
 function toggleUpdateBallon() {
     const balloon = document.getElementById("updateBalloon");
     const dot = document.getElementById("dotNotif"); 
@@ -274,6 +274,35 @@ body{
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
+/* --- VARIAN TOMBOL MERAH (Kisi-Kisi, Drilling, Tryout) --- */
+
+/* Gaya Dasar Tombol Merah */
+.menu-bar button.btn-red {
+  color: #e11d48; /* Warna teks merah */
+  border: 1px solid #fda4af; /* Border merah muda */
+  background-color: #fff1f2; /* Background merah sangat muda */
+}
+
+/* Hover Tombol Merah */
+.menu-bar button.btn-red:hover {
+  background-color: #ffe4e6;
+  border-color: #fecdd3;
+  box-shadow: 0 4px 8px rgba(225, 29, 72, 0.1);
+}
+
+/* Tombol Merah Saat Aktif (Terpilih) */
+.menu-bar button.btn-red.active {
+  background-color: #e11d48; /* Merah solid */
+  color: white;
+  border: none;
+  box-shadow: 0 3px 10px rgba(225, 29, 72, 0.3);
+}
+
+/* Hover Tombol Merah Saat Aktif */
+.menu-bar button.btn-red.active:hover {
+  background-color: #be123c; /* Merah lebih gelap */
+}
+    
 /* CARD */
 .card{
   background:var(--card);
@@ -764,8 +793,8 @@ select,input{
     </div>
     <div id="updateBalloon" class="update-balloon">
         <button class="close-balloon" onclick="toggleUpdateBallon()" style="position:absolute; top:5px; right:8px; background:none; border:none; cursor:pointer; font-size:18px; color:var(--muted);">×</button>
-        <strong style="display:block; color:var(--blue); margin-bottom:5px;">UPDATE V4.0</strong>
-        <p style="margin:0;">Kami telah menambahkan fitur <b>CARI PRODI</b><br> Dengan fungsi fitur: <br>- Mencari Prodi dengan Skor yang diinginkan <br>- Mencari prodi dengan keketatan 1 kursi bersaingan dengan berapa siswa. <br><br> Ayo pastikan prodi pilihanmu tepat</p>
+        <strong style="display:block; color:var(--blue); margin-bottom:5px;">UPDATE V5.0</strong>
+        <p style="margin:0;">Kami telah menambahkan fitur <b>DRILLING SOAL</b><br> Dengan fungsi fitur: <br>- Tantangan mengerjakan soal UTBK yang berpacu dengan waktu <br>- Soal setiap hari akan bertambah <br><br> Ayo jadi top global Drilling Soal</p>
     </div>
 </div>
 
@@ -796,8 +825,9 @@ select,input{
   <button onclick="showMenu('target')">Target Belajar</button>
   <button onclick="showMenu('statistik')">Statistik Prodi</button>
   <button onclick="showMenu('cari-prodi')">Cari Prodi</button>
-  <button onclick="showMenu('kisi-kisi')">Kisi-Kisi</button>
-  <button onclick="cekAksesTryout()" style="background: #fff1f2; color: #e11d48; border: 1px solid #fda4af; font-weight: bold;">Tryout UTBK</button>
+  <button class="btn-red" onclick="showMenu('kisi-kisi')">Kisi-Kisi</button>
+  <button class="btn-red" onclick="showMenu('drilling')">Drilling Soal</button>
+  <button class="btn-red" onclick="cekAksesTryout()">Tryout UTBK</button>
 </div>
 
 <div id="content"></div>
@@ -866,6 +896,7 @@ function showMenu(menu){
   if(menu=="statistik") loadStatistik();
   if(menu=="cari-prodi") loadCariProdi();
   if(menu=="kisi-kisi") loadKisiKisi();
+  if(menu=="drilling") loadDrilling();
 }
 
 // ================= RASIONALISASI ==================
@@ -2514,6 +2545,419 @@ function cp_changePage(dir) {
   cp_render();
   document.querySelector('.cp-table-wrap').scrollTop = 0;
 }
+
+// ================= DRILLING SOAL GAME SYSTEM (VERSI REVISI) ==================
+let dr_soalRaw = [];
+let dr_currentSoal = [];
+let dr_index = 0;
+let dr_score = 0;
+let dr_timer;
+let dr_timeLeft = 0;
+let dr_selectedSubtes = [];
+let dr_isSimulasi = false;
+let dr_zoomLevel = 100;
+
+// API URL (Ganti dengan URL Web App Script Anda)
+const DR_API_URL = "https://script.google.com/macros/s/AKfycbxiG64e3m9yfmrgDvqsVss9L4s3ZN9l_4A00MQcYE4R4e_ZWgixfY8OkT8pKNRyTXEHWQ/exec"; 
+
+function loadDrilling() {
+  const content = document.getElementById("content");
+  content.innerHTML = `
+  <style>
+    .dr-wrapper { 
+      max-width: 700px; margin: 0 auto; animation: fadeIn 0.4s ease; padding: 10px;
+      padding-bottom: 70px; /* Jaga jarak agar tidak tertutup footer 50px */
+    }
+    .dr-header { text-align: center; margin-bottom: 15px; }
+    .dr-header h2 { color: var(--blue); margin: 0; }
+
+    /* Box Konten Fix & Scrollable */
+    .dr-main-box { 
+      background: white; border-radius: 20px; border: 2px solid #e0e7ff; 
+      height: 380px; /* Tinggi Fix diperkecil */
+      padding: 20px; position: relative; overflow-y: auto;
+      box-shadow: 0 10px 25px rgba(30,94,255,0.1);
+      display: flex; flex-direction: column;
+    }
+    
+    .dr-aturan-list { text-align: left; font-size: 13px; color: #334155; line-height: 1.5; }
+    .dr-aturan-list h4 { text-align: center; color: var(--blue); border-bottom: 2px dashed #e0e7ff; padding-bottom: 8px; margin-top:0; }
+
+    .dr-btn-group { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 15px; }
+    .dr-btn { 
+      padding: 12px 20px; border-radius: 12px; border: none; color: white; 
+      font-weight: bold; cursor: pointer; font-size: 13px; transition: 0.3s; 
+    }
+    .btn-simulasi { background: #22c55e; flex: 1; }
+    .btn-tantangan { background: #ef4444; flex: 1; }
+    .btn-ranking { background: #3b82f6; width: 100%; }
+
+    /* Soal & Timer */
+    .dr-img-container { width: 100%; flex: 1; overflow-y: auto; background: #f8fafc; border-radius: 10px; margin-bottom: 10px; }
+    .dr-img-container img { width: 100%; display: block; }
+    
+    .dr-controls-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .btn-reload { background: #64748b; color: white; border: none; padding: 5px 10px; border-radius: 6px; font-size: 11px; cursor: pointer; }
+    .dr-timer-box { 
+      background: #0f172a; color: #22c55e; padding: 5px 12px; border-radius: 8px;
+      font-family: monospace; font-weight: bold; font-size: 16px;
+    }
+
+    .dr-input-box { width: 100%; display: flex; gap: 8px; }
+    .dr-input-box input { flex: 1; padding: 10px; border-radius: 10px; border: 2px solid #cbd5e1; outline: none; text-align: center; font-weight: bold; }
+    
+    /* Hover Modal Subtes Baru */
+    .dr-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(15, 23, 42, 0.8); display: none; align-items: center; justify-content: center; z-index: 1000;
+    }
+    .dr-modal { background: white; padding: 25px; border-radius: 25px; width: 90%; max-width: 400px; text-align: center; }
+    .st-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 15px 0; }
+    .btn-st-opt { 
+      padding: 10px; border-radius: 10px; border: 2px solid #e2e8f0; background: white; 
+      color: #64748b; font-weight: bold; cursor: pointer; font-size: 12px;
+    }
+    .btn-st-opt.active { background: #22c55e; color: white; border-color: #16a34a; }
+    .btn-all-st { width: 100%; padding: 12px; border-radius: 10px; border: 2px solid #e2e8f0; font-weight: 800; cursor: pointer; margin-bottom: 10px; }
+    .btn-all-st.active { background: #16a34a; color: white; border-color: #15803d; }
+
+    .dr-btn-footer { 
+      background: #f1f5f9; color: #475569; padding: 8px 20px; border-radius: 20px; 
+      font-size: 11px; font-weight: bold; border: none; cursor: pointer; margin-top: auto; align-self: center;
+    }
+    .countdown-text { font-size: 60px; font-weight: 900; color: var(--blue); margin: auto; }
+    .btn-reload { 
+  background: #64748b; 
+  color: white; 
+  border: none; 
+  padding: 5px 12px; 
+  border-radius: 6px; 
+  font-size: 12px; 
+  cursor: pointer; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+  </style>
+
+  <div class="dr-wrapper">
+    <div class="dr-header">
+      <h2>🎯 DRILLING SOAL</h2>
+    </div>
+
+    <div id="dr-box" class="dr-main-box">
+       <div class="dr-aturan-list">
+          <h4>Aturan Tantangan Soal</h4>
+          <p>1. Kalian bisa memilih untuk melakukan tantangan, semua subtes beberapa subtes atau hanya subtes tertentu untuk soal yang akan dikerjakan.</p>
+          <p>2. Kalian akan diberikan waktu tertentu untuk mengerjakan tiap 1 soal subtes sesuai aturan SNPMB sebagai berikut.</p>
+          <p style="margin-left:10px; font-weight:bold; color:var(--blue)">
+            - PU(60s), PPU(45s), PBM(75s), PK(60s), LBI(85s), LBE(60s), PM(85s)
+          </p>
+          <p>3. Jawaban bisa diinput dikotak jawaban dibawah soal.</p>
+          <p>4. Apabila jawaban benar bisa melanjutkan ke soal berikutnya dan waktu tersisa akan bertambah komulatif sesuai durasi subtes 1 soal, apabila jawaban salah maka tantangan dianggap berakhir.</p>
+          <p>5. Apabila kehabisan waktu dianggap tantangan berakhir.</p>
+          <p>6. Setelah tantangan berakhir, anda dapat mensubmit hasil ke ranking global siswa yang pernah mengerjakan atau menghapusnya.</p>
+       </div>
+    </div>
+
+    <div id="dr-btn-area" class="dr-btn-group">
+      <button class="dr-btn btn-simulasi" onclick="startDrill(true)">SIMULASI</button>
+      <button class="dr-btn btn-tantangan" onclick="openSubtesModal()">MULAI TANTANGAN</button>
+      <button class="dr-btn btn-ranking" onclick="loadRanking()">PERINGKAT GLOBAL</button>
+    </div>
+  </div>
+
+  <div id="subtesModal" class="dr-overlay">
+    <div class="dr-modal">
+      <h4 style="margin-bottom:15px">Pilih Subtes</h4>
+      <button id="st-all" class="btn-all-st" onclick="toggleAllST()">PILIH SEMUA SUBTES</button>
+      <div class="st-grid" id="st-grid-container">
+        ${['PU','PPU','PBM','PK','LBI','LBE','PM'].map(st => `
+          <button class="btn-st-opt" onclick="toggleST(this)" value="${st}">${st}</button>
+        `).join('')}
+      </div>
+      <div style="display:flex; gap:10px; margin-top:15px;">
+        <button class="dr-btn" style="background:#ef4444; flex:1;" onclick="closeSubtesModal()">KEMBALI</button>
+        <button class="dr-btn" style="background:#22c55e; flex:1;" onclick="startDrill(false)">MULAI</button>
+      </div>
+    </div>
+  </div>
+  `;
+}
+
+// --- LOGIKA PERBAIKAN ---
+
+function openSubtesModal() { document.getElementById('subtesModal').style.display = 'flex'; }
+function closeSubtesModal() { document.getElementById('subtesModal').style.display = 'none'; }
+
+function toggleST(btn) {
+  btn.classList.toggle('active');
+  checkAllSTStatus();
+}
+
+function toggleAllST() {
+  const btnAll = document.getElementById('st-all');
+  const isNowActive = !btnAll.classList.contains('active');
+  btnAll.classList.toggle('active', isNowActive);
+  document.querySelectorAll('.btn-st-opt').forEach(b => b.classList.toggle('active', isNowActive));
+}
+
+function checkAllSTStatus() {
+  const allOpts = document.querySelectorAll('.btn-st-opt');
+  const activeOpts = document.querySelectorAll('.btn-st-opt.active');
+  document.getElementById('st-all').classList.toggle('active', allOpts.length === activeOpts.length);
+}
+
+async function startDrill(isSimulasi) {
+  dr_isSimulasi = isSimulasi;
+  if(!isSimulasi) {
+    dr_selectedSubtes = Array.from(document.querySelectorAll('.btn-st-opt.active')).map(b => b.value);
+    if(dr_selectedSubtes.length === 0) return alert("Pilih minimal 1 subtes!");
+  }
+  closeSubtesModal();
+
+  const box = document.getElementById('dr-box');
+  const btnArea = document.getElementById('dr-btn-area');
+  btnArea.style.display = 'none';
+  box.innerHTML = `<div class="countdown-text">...</div><p style="text-align:center">Memuat soal...</p>`;
+
+  try {
+    const res = await fetch(DR_API_URL + "?action=getSoal");
+    const data = await res.json();
+    dr_currentSoal = isSimulasi ? data.filter(s => s[1].toUpperCase() === 'SIMULASI') : data.filter(s => dr_selectedSubtes.includes(s[1].toUpperCase()));
+    
+    if(dr_currentSoal.length === 0) { alert("Soal tidak ditemukan!"); loadDrilling(); return; }
+
+    dr_currentSoal.sort(() => Math.random() - 0.5);
+    dr_index = 0; dr_score = 0; dr_timeLeft = 0;
+
+    for(let i=3; i>0; i--) {
+      box.innerHTML = `<div class="countdown-text">${i}</div>`;
+      await new Promise(r => setTimeout(r, 1000));
+    }
+    displaySoal();
+  } catch(e) { alert("Gagal!"); loadDrilling(); }
+}
+
+function displaySoal() {
+  const soal = dr_currentSoal[dr_index];
+  const box = document.getElementById("dr-box");
+  
+  dr_zoomLevel = 100; // Reset ke pas kanan-kiri (100%)
+  dr_timeLeft += parseInt(soal[4]) * 1000;
+
+  box.innerHTML = `
+    <div class="dr-controls-row">
+      <div style="display:flex; gap:5px;">
+        <button class="btn-reload" onclick="reloadImg()" title="Muat Ulang">🔄</button>
+        <button class="btn-reload" onclick="zoomSoal(10)" title="Perbesar"><b>+</b></button>
+        <button class="btn-reload" onclick="zoomSoal(-10)" title="Perkecil"><b>-</b></button>
+      </div>
+      <div class="dr-timer-box" id="dr-timer-display">00:00:00</div>
+    </div>
+    
+    <div class="dr-img-container" id="dr-scroll-pane" style="display: flex; align-items: flex-start; justify-content: center;">
+      <img id="soalImg" src="${soal[2]}?t=${new Date().getTime()}" 
+           style="width: 100%; transition: width 0.2s ease; display: block; flex-shrink: 0;" alt="Soal">
+    </div>
+
+    <div class="dr-input-box" style="margin-top:10px">
+      <input type="text" id="dr-answer" placeholder="Ketik Jawaban..." autocomplete="off">
+      <button class="dr-btn" style="background:var(--blue); flex:none" onclick="confirmAnswer()">SUBMIT</button>
+    </div>
+    ${dr_isSimulasi ? `<p style="font-size:9px; color:#94a3b8; text-align:center; margin-top:5px">HURUF KAPITAL / ANGKA / BBS</p>` : ''}
+  `;
+  startTimer();
+}
+
+// Fungsi Zoom Baru
+function zoomSoal(delta) {
+  const img = document.getElementById("soalImg");
+  // dr_zoomLevel sekarang kita kontrol antara 50 sampai 300
+  dr_zoomLevel = Math.max(50, Math.min(300, dr_zoomLevel + delta));
+  
+  // Menggunakan width untuk kontrol ukuran
+  img.style.width = dr_zoomLevel + "%";
+  
+  // Jika zoom dibawah 100, kita buat dia tetap di tengah (margin auto)
+  if (dr_zoomLevel < 100) {
+    img.style.margin = "0 auto";
+  } else {
+    img.style.margin = "0";
+  }
+}
+
+function reloadImg() {
+  const img = document.getElementById('soalImg');
+  const src = img.src.split('?')[0];
+  img.src = src + '?t=' + new Date().getTime();
+}
+
+function startTimer() {
+  clearInterval(dr_timer);
+  dr_timer = setInterval(() => {
+    dr_timeLeft -= 10;
+    if(dr_timeLeft <= 0) { clearInterval(dr_timer); finishGame("Waktu Habis!"); return; }
+    updateTimerDisplay();
+  }, 10);
+}
+
+function updateTimerDisplay() {
+  let ms = Math.floor((dr_timeLeft % 1000) / 10);
+  let sec = Math.floor((dr_timeLeft / 1000) % 60);
+  let min = Math.floor((dr_timeLeft / (1000 * 60)) % 60);
+  document.getElementById('dr-timer-display').innerText = `${min.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}:${ms.toString().padStart(2,'0')}`;
+}
+
+function confirmAnswer() { if(confirm("Yakin dengan jawaban ini?")) checkAnswer(); }
+
+function checkAnswer() {
+  const inputElement = document.getElementById('dr-answer');
+  const userAns = inputElement.value.trim().toUpperCase(); // Paksa ke besar
+  const correctAns = dr_currentSoal[dr_index][3].toString().trim().toUpperCase(); // Paksa database ke besar
+
+  if(userAns === correctAns) {
+    dr_score++; 
+    dr_index++;
+    if(dr_index < dr_currentSoal.length) {
+      displaySoal();
+    } else {
+      finishGame("Selamat! Soal Berhasil Terjawab Semua.");
+    }
+  } else {
+    finishGame("Jawaban Salah!");
+  }
+}
+
+function finishGame(reason) {
+  // 1. Hentikan timer yang sedang berjalan
+  clearInterval(dr_timer);
+  
+  // 2. SANGAT PENTING: Set ke null agar deteksi 'visibilitychange' 
+  // tahu bahwa tantangan sudah benar-benar berakhir.
+  dr_timer = null; 
+
+  const box = document.getElementById('dr-box');
+  box.innerHTML = `
+    <div style="text-align:center; margin:auto">
+      <p style="font-weight:bold; color:#ef4444; margin-bottom:5px">${reason}</p>
+      <p style="font-size:12px; color:#64748b">Winstreak Soal Terjawab</p>
+      <h1 style="color:var(--blue); font-size:48px; margin:10px 0">${dr_score}</h1>
+      ${dr_isSimulasi ? `<button class="dr-btn-footer" onclick="loadDrilling()">KEMBALI</button>` : `
+        <div style="display:flex; gap:10px; justify-content:center">
+          <button class="dr-btn btn-tantangan" onclick="loadDrilling()">BUANG HASIL</button>
+          <button class="dr-btn btn-simulasi" onclick="showSubmitForm()">SIMPAN HASIL</button>
+        </div>
+      `}
+    </div>`;
+}
+
+async function loadRanking() {
+  const box = document.getElementById('dr-box');
+  box.innerHTML = "<p style='text-align:center; margin:auto;'>Memuat Peringkat Global...</p>";
+  
+  try {
+    const res = await fetch(DR_API_URL + "?action=getRanking");
+    const data = await res.json();
+    
+    // Header Tabel sesuai permintaan: Ranking, Nama, Asal Sekolah, PTN Impian, Prodi Impian, Subtes, Winstreak
+    box.innerHTML = `
+      <h4 style="text-align:center; margin-top:0; margin-bottom:15px; color:var(--blue);">🏆 PERINGKAT GLOBAL</h4>
+      <div style="overflow-x:auto; flex:1; width:100%;">
+        <table style="width:100%; border-collapse:collapse; font-size:12px; min-width:600px;">
+          <thead style="position:sticky; top:0; background:#f8faff; z-index:10;">
+            <tr>
+              <th style="padding:10px 5px; border-bottom:2px solid #e0e7ff; text-align:center; width:50px;">Rank</th>
+              <th style="padding:10px; border-bottom:2px solid #e0e7ff; text-align:left;">Nama</th>
+              <th style="padding:10px; border-bottom:2px solid #e0e7ff; text-align:left;">Asal Sekolah</th>
+              <th style="padding:10px; border-bottom:2px solid #e0e7ff; text-align:left;">PTN Impian</th>
+              <th style="padding:10px; border-bottom:2px solid #e0e7ff; text-align:left;">Prodi Impian</th>
+              <th style="padding:10px; border-bottom:2px solid #e0e7ff; text-align:center;">Subtes</th>
+              <th style="padding:10px; border-bottom:2px solid #e0e7ff; text-align:center;">WS</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${data.map((r, i) => `
+              <tr style="border-bottom:1px solid #f1f5f9;">
+                <td style="text-align:center; padding:10px; font-weight:bold; color:#64748b;">${i+1}</td>
+                <td style="padding:10px; font-weight:bold; color:#1e3a8a; word-break:break-word;">${r[0]}</td>
+                <td style="padding:10px; color:#475569; word-break:break-word;">${r[1]}</td>
+                <td style="padding:10px; color:#475569; word-break:break-word;">${r[2]}</td>
+                <td style="padding:10px; color:#475569; word-break:break-word;">${r[3]}</td>
+                <td style="padding:10px; text-align:center; font-size:10px; color:#64748b;">${r[4]}</td>
+                <td style="padding:10px; text-align:center; font-weight:900; color:var(--blue); font-size:14px;">${r[5]}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+      <div style="text-align:center; padding-top:10px;">
+        <button class="dr-btn-footer" onclick="loadDrilling()">KEMBALI</button>
+      </div>`;
+  } catch(e) { 
+    box.innerHTML = "<p style='text-align:center; margin:auto;'>Gagal memuat data ranking.</p>"; 
+  }
+}
+
+function showSubmitForm() {
+  const box = document.getElementById('dr-box');
+  box.innerHTML = `
+    <div style="text-align:center">
+      <h4 style="margin-top:0">Simpan Hasil</h4>
+      <input type="text" id="res-nama" placeholder="Nama Lengkap" style="width:90%; padding:10px; margin-bottom:8px; border-radius:8px; border:1px solid #ddd;">
+      <input type="text" id="res-sekolah" placeholder="Asal Sekolah" style="width:90%; padding:10px; margin-bottom:8px; border-radius:8px; border:1px solid #ddd;">
+      <input type="text" id="res-ptn" placeholder="Target PTN" style="width:90%; padding:10px; margin-bottom:8px; border-radius:8px; border:1px solid #ddd;">
+      <input type="text" id="res-prodi" placeholder="Target Prodi" style="width:90%; padding:10px; margin-bottom:15px; border-radius:8px; border:1px solid #ddd;">
+      <button class="dr-btn btn-simulasi" style="width:90%" onclick="submitToGlobal()">KIRIM DATA</button>
+    </div>`;
+}
+
+// ... kode showSubmitForm() Anda ...
+
+// TARUH DI SINI (Paling Bawah)
+document.addEventListener("visibilitychange", function() {
+  // Cek apakah halaman sedang disembunyikan (minimize/pindah tab)
+  if (document.hidden) {
+    // Deteksi: Jika timer sedang berjalan (tidak null)
+    if (typeof dr_timer !== 'undefined' && dr_timer !== null) {
+      // Panggil fungsi mengakhiri game
+      finishGame("Tantangan Berakhir: Dilarang meminimalkan browser atau berpindah tab!");
+      
+      // Berikan peringatan agar siswa tahu kenapa mereka kalah
+      alert("Tantangan dihentikan karena Anda meninggalkan halaman!");
+    }
+  }
+});
+
+// Tambahkan juga fungsi submitToGlobal yang terpotong di kode Anda tadi:
+async function submitToGlobal() {
+  const data = {
+    nama: document.getElementById('res-nama').value,
+    sekolah: document.getElementById('res-sekolah').value,
+    ptn: document.getElementById('res-ptn').value,
+    prodi: document.getElementById('res-prodi').value,
+    subtes: dr_selectedSubtes.join(','),
+    winstreak: dr_score
+  };
+
+  if(!data.nama || !data.sekolah) return alert("Nama dan Sekolah wajib diisi!");
+
+  document.getElementById('dr-box').innerHTML = "<p style='text-align:center; margin:auto;'>Sedang mengirim data...</p>";
+
+  try {
+    await fetch(DR_API_URL, {
+      method: 'POST',
+      body: JSON.stringify({action: 'submitHasil', ...data})
+    });
+    alert("Hasil berhasil disimpan!");
+    loadDrilling();
+  } catch(e) { 
+    alert("Gagal mengirim data!"); 
+    loadDrilling();
+  }
+}    
+
+
     
 </script>
 
