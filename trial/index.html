@@ -804,6 +804,7 @@ select,input{
   <button onclick="showMenu('statistik')">Statistik Prodi</button>
   <button onclick="showMenu('cari-prodi')">Cari Prodi</button>
   <button onclick="showMenu('kisi-kisi')">Kisi-Kisi</button>
+  <button onclick="showMenu('drilling')">Drilling Soal</button>
   <button onclick="cekAksesTryout()" style="background: #fff1f2; color: #e11d48; border: 1px solid #fda4af; font-weight: bold;">Tryout UTBK</button>
 </div>
 
@@ -873,6 +874,7 @@ function showMenu(menu){
   if(menu=="statistik") loadStatistik();
   if(menu=="cari-prodi") loadCariProdi();
   if(menu=="kisi-kisi") loadKisiKisi();
+  if(menu=="drilling") loadDrilling();
 }
 
 // ================= RASIONALISASI ==================
@@ -2521,6 +2523,373 @@ function cp_changePage(dir) {
   cp_currentPage += dir;
   cp_render();
   document.querySelector('.cp-table-wrap').scrollTop = 0;
+}
+
+// ================= DRILLING SOAL GAME SYSTEM ==================
+let dr_soalRaw = [];
+let dr_currentSoal = [];
+let dr_index = 0;
+let dr_score = 0;
+let dr_timer;
+let dr_timeLeft = 0; // dalam milidetik
+let dr_selectedSubtes = [];
+let dr_isSimulasi = false;
+
+// API URL (Ganti dengan URL Web App Script Anda yang baru)
+const DR_API_URL = "https://script.google.com/macros/s/AKfycbxiG64e3m9yfmrgDvqsVss9L4s3ZN9l_4A00MQcYE4R4e_ZWgixfY8OkT8pKNRyTXEHWQ/exec"; 
+
+function loadDrilling() {
+  const content = document.getElementById("content");
+  content.innerHTML = `
+  <style>
+    .dr-wrapper { max-width: 800px; margin: 0 auto; animation: fadeIn 0.4s ease; padding: 10px; }
+    .dr-header { text-align: center; margin-bottom: 20px; }
+    .dr-header h2 { color: var(--blue); margin-bottom: 5px; }
+    .dr-header p { font-size: 13px; color: #64748b; line-height: 1.5; }
+
+    .dr-main-box { 
+      background: white; border-radius: 20px; border: 2px solid #e0e7ff; 
+      min-height: 400px; padding: 25px; position: relative;
+      box-shadow: 0 10px 25px rgba(30,94,255,0.1);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+    }
+    
+    .dr-aturan-list { text-align: left; font-size: 13px; color: #334155; line-height: 1.6; width: 100%; }
+    .dr-aturan-list h4 { text-align: center; color: var(--blue); border-bottom: 2px dashed #e0e7ff; padding-bottom: 10px; }
+
+    .dr-btn-group { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 20px; width: 100%; }
+    .dr-btn { 
+      padding: 15px 25px; border-radius: 12px; border: none; color: white; 
+      font-weight: bold; cursor: pointer; font-size: 14px; transition: 0.3s; 
+    }
+    .btn-simulasi { background: #22c55e; flex: 1; min-width: 140px; }
+    .btn-tantangan { background: #ef4444; flex: 1; min-width: 140px; }
+    .btn-ranking { background: #3b82f6; width: 100%; margin-top: 5px; }
+    .dr-btn:hover { opacity: 0.9; transform: translateY(-2px); }
+
+    /* Soal Display */
+    .dr-img-container { 
+      width: 100%; height: 350px; overflow-y: auto; border: 1px solid #f1f5f9; 
+      border-radius: 10px; background: #f8fafc; margin-bottom: 15px;
+    }
+    .dr-img-container img { width: 100%; display: block; }
+    
+    .dr-timer-box { 
+      background: #0f172a; color: #22c55e; padding: 8px 15px; border-radius: 8px;
+      font-family: 'Courier New', Courier, monospace; font-weight: bold; font-size: 18px;
+      align-self: flex-end; margin-bottom: 10px;
+    }
+
+    .dr-input-box { width: 100%; display: flex; gap: 10px; }
+    .dr-input-box input { 
+      flex: 1; padding: 12px; border-radius: 10px; border: 2px solid #cbd5e1; 
+      font-size: 16px; outline: none; text-align: center; font-weight: bold;
+    }
+    
+    /* Overlay / Hover */
+    .dr-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 1000;
+    }
+    .dr-modal { background: white; padding: 25px; border-radius: 20px; width: 90%; max-width: 400px; }
+    .dr-modal h4 { margin-top: 0; color: var(--blue); }
+    .subtes-item { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-weight: bold; font-size: 14px; }
+
+    /* Countdown */
+    .countdown-text { font-size: 80px; font-weight: 900; color: var(--blue); animation: pulse 1s infinite; }
+    @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
+  </style>
+
+  <div class="dr-wrapper">
+    <div class="dr-header">
+      <h2>🎯 DRILLING SOAL</h2>
+      <p>Fitur ini merupakan tantangan untuk siswa latihan mengerjakan soal semua subtes UTBK, dengan ketentuan waktu yang sesuai aturan dari SNPMB. Subtes yang akan jadi acuan soal adalah PU,PPU,PBM,PK,LBI,LBE,PM dengan masing-masing durasi pengerjakan sesuai dengan aturan</p>
+    </div>
+
+    <div id="dr-box" class="dr-main-box">
+       <div class="dr-aturan-list">
+          <h4>Aturan Tantangan Soal</h4>
+          <p>1. Kalian bisa memilih untuk melakukan tantangan, semua subtes beberapa subtes atau hanya subtes tertentu untuk soal yang akan dikerjakan.</p>
+          <p>2. Kalian akan diberikan waktu tertentu untuk mengerjakan tiap 1 soal subtes sesuai aturan SNPMB sebagai berikut.</p>
+          <ul style="list-style: none; padding-left: 10px;">
+            <li>- 1 soal PU (60 detik)</li>
+            <li>- 1 soal PPU (45 detik)</li>
+            <li>- 1 soal PBM (75 detik)</li>
+            <li>- 1 soal PK (60 detik)</li>
+            <li>- 1 soal LBI (85 detik)</li>
+            <li>- 1 soal LBE (60 detik)</li>
+            <li>- 1 soal PM (85 detik)</li>
+          </ul>
+          <p>3. Jawaban bisa diinput dikotak jawaban dibawah soal.</p>
+          <p>4. Apabila jawaban benar bisa melanjutkan ke soal berikutnya dan waktu tersisa akan bertambah komulatif sesuai durasi subtes 1 soal, apabila jawaban salah maka tantangan dianggap berakhir.</p>
+          <p>5. Apabila kehabisan waktu dianggap tantangan berakhir.</p>
+          <p>6. Setelah tantangan berakhir, anda dapat mensubmit hasil ke ranking global siswa yang pernah mengerjakan atau menghapusnya.</p>
+       </div>
+    </div>
+
+    <div id="dr-btn-area" class="dr-btn-group">
+      <button class="dr-btn btn-simulasi" onclick="startDrill(true)">SIMULASI</button>
+      <button class="dr-btn btn-tantangan" onclick="openSubtesModal()">MULAI TANTANGAN</button>
+      <button class="dr-btn btn-ranking" onclick="loadRanking()">PERINGKAT GLOBAL</button>
+    </div>
+  </div>
+
+  <div id="subtesModal" class="dr-overlay">
+    <div class="dr-modal">
+      <h4>Pilih Subtes</h4>
+      <div class="subtes-item"><input type="checkbox" id="all-st" onchange="toggleAllST(this)"> <label for="all-st">Pilih semua</label></div>
+      <hr>
+      <div id="st-list">
+        ${['PU','PPU','PBM','PK','LBI','LBE','PM'].map(st => `
+          <div class="subtes-item"><input type="checkbox" class="st-check" value="${st}"> ${st}</div>
+        `).join('')}
+      </div>
+      <div style="text-align:right; margin-top:20px;">
+        <button class="dr-btn btn-simulasi" style="padding:10px 20px" onclick="startDrill(false)">MULAI</button>
+      </div>
+    </div>
+  </div>
+  `;
+}
+
+// --- LOGIKA GAME ---
+
+function toggleAllST(el) {
+  document.querySelectorAll('.st-check').forEach(c => c.checked = el.checked);
+}
+
+function openSubtesModal() {
+  document.getElementById('subtesModal').style.display = 'flex';
+}
+
+async function startDrill(isSimulasi) {
+  dr_isSimulasi = isSimulasi;
+  document.getElementById('subtesModal').style.display = 'none';
+  
+  if(!isSimulasi) {
+    dr_selectedSubtes = Array.from(document.querySelectorAll('.st-check:checked')).map(c => c.value);
+    if(dr_selectedSubtes.length === 0) return alert("Pilih minimal 1 subtes!");
+  }
+
+  const box = document.getElementById('dr-box');
+  const btnArea = document.getElementById('dr-btn-area');
+  
+  btnArea.style.display = 'none';
+  box.innerHTML = `<div class="countdown-text">...</div><p>Sedang memuat soal...</p>`;
+
+  try {
+    // Ambil data soal
+    const res = await fetch(DR_API_URL + "?action=getSoal");
+    const data = await res.json();
+    
+    // Filter & Acak
+    if(isSimulasi) {
+      dr_currentSoal = data.filter(s => s[1].toUpperCase() === 'SIMULASI');
+    } else {
+      dr_currentSoal = data.filter(s => dr_selectedSubtes.includes(s[1].toUpperCase()));
+    }
+    
+    if(dr_currentSoal.length === 0) {
+      alert("Soal tidak ditemukan untuk kategori ini!");
+      loadDrilling();
+      return;
+    }
+
+    dr_currentSoal.sort(() => Math.random() - 0.5);
+    dr_index = 0;
+    dr_score = 0;
+    dr_timeLeft = 0;
+
+    // Countdown 3 2 1
+    for(let i=3; i>0; i--) {
+      box.innerHTML = `<div class="countdown-text">${i}</div>`;
+      await new Promise(r => setTimeout(r, 1000));
+    }
+
+    displaySoal();
+
+  } catch(e) {
+    alert("Gagal memuat data!");
+    loadDrilling();
+  }
+}
+
+function displaySoal() {
+  const soal = dr_currentSoal[dr_index];
+  const box = document.getElementById('dr-box');
+  
+  // Tambahkan waktu
+  dr_timeLeft += parseInt(soal[4]) * 1000;
+
+  box.innerHTML = `
+    <div class="dr-timer-box" id="dr-timer-display">00:00:00</div>
+    <div class="dr-img-container">
+      <img src="${soal[2]}" alt="Soal">
+    </div>
+    <div class="dr-input-box">
+      <input type="text" id="dr-answer" placeholder="Jawaban Anda..." autocomplete="off">
+      <button class="dr-btn btn-simulasi" style="flex:none" onclick="confirmAnswer()">SUBMIT</button>
+    </div>
+    ${dr_isSimulasi ? `
+      <p style="font-size:10px; color:#64748b; margin-top:10px; text-align:center;">
+        Jawab dengan huruf kapital untuk pilihan ganda, Jawab dengan bilangan bulat untuk soal isian singkat, jawab dengan format spt BBS untuk soal Benar Salah
+      </p>
+    ` : ''}
+  `;
+
+  startTimer();
+}
+
+function startTimer() {
+  clearInterval(dr_timer);
+  dr_timer = setInterval(() => {
+    dr_timeLeft -= 10;
+    if(dr_timeLeft <= 0) {
+      clearInterval(dr_timer);
+      finishGame("Waktu Habis!");
+      return;
+    }
+    updateTimerDisplay();
+  }, 10);
+}
+
+function updateTimerDisplay() {
+  let ms = Math.floor((dr_timeLeft % 1000) / 10);
+  let sec = Math.floor((dr_timeLeft / 1000) % 60);
+  let min = Math.floor((dr_timeLeft / (1000 * 60)) % 60);
+  
+  document.getElementById('dr-timer-display').innerText = 
+    `${min.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}:${ms.toString().padStart(2,'0')}`;
+}
+
+function confirmAnswer() {
+  if(confirm("Apakah Anda yakin dengan jawaban ini?")) {
+    checkAnswer();
+  }
+}
+
+function checkAnswer() {
+  const userAns = document.getElementById('dr-answer').value.trim().toUpperCase();
+  const correctAns = dr_currentSoal[dr_index][3].toString().trim().toUpperCase();
+
+  if(userAns === correctAns) {
+    dr_score++;
+    dr_index++;
+    if(dr_index < dr_currentSoal.length) {
+      displaySoal();
+    } else {
+      finishGame("Selamat! Semua soal terselesaikan.");
+    }
+  } else {
+    finishGame("Jawaban Salah!");
+  }
+}
+
+function finishGame(reason) {
+  clearInterval(dr_timer);
+  const box = document.getElementById('dr-box');
+  
+  let html = `<h3>Tantangan Berakhir!</h3>
+              <p>${reason}</p>
+              <h1 style="color:var(--blue)">Winstreak: ${dr_score}</h1>`;
+  
+  if(dr_isSimulasi) {
+    html += `<button class="dr-btn btn-simulasi" onclick="loadDrilling()">OK</button>`;
+  } else {
+    html += `
+      <div class="dr-btn-group">
+        <button class="dr-btn btn-tantangan" onclick="loadDrilling()">BUANG HASIL</button>
+        <button class="dr-btn btn-simulasi" onclick="showSubmitForm()">SIMPAN HASIL</button>
+      </div>
+    `;
+  }
+  box.innerHTML = html;
+}
+
+function showSubmitForm() {
+  const box = document.getElementById('dr-box');
+  box.innerHTML = `
+    <h4>Submit Ranking</h4>
+    <div class="dr-box" style="width:100%; text-align:left;">
+      <label style="font-size:12px;">Nama Lengkap:</label>
+      <input type="text" id="res-nama" class="dr-input-style" style="width:100%; padding:10px; margin-bottom:10px; border-radius:8px; border:1px solid #ddd;">
+      <label style="font-size:12px;">Asal Sekolah:</label>
+      <input type="text" id="res-sekolah" style="width:100%; padding:10px; margin-bottom:10px; border-radius:8px; border:1px solid #ddd;">
+      <label style="font-size:12px;">Target PTN:</label>
+      <input type="text" id="res-ptn" style="width:100%; padding:10px; margin-bottom:10px; border-radius:8px; border:1px solid #ddd;">
+      <label style="font-size:12px;">Target Prodi:</label>
+      <input type="text" id="res-prodi" style="width:100%; padding:10px; margin-bottom:15px; border-radius:8px; border:1px solid #ddd;">
+      <button class="dr-btn btn-simulasi" style="width:100%" onclick="submitToGlobal()">SUBMIT RANKING</button>
+    </div>
+  `;
+}
+
+async function submitToGlobal() {
+  const data = {
+    nama: document.getElementById('res-nama').value,
+    sekolah: document.getElementById('res-sekolah').value,
+    ptn: document.getElementById('res-ptn').value,
+    prodi: document.getElementById('res-prodi').value,
+    subtes: dr_selectedSubtes.join(','),
+    winstreak: dr_score
+  };
+
+  if(!data.nama) return alert("Nama wajib diisi!");
+
+  document.getElementById('dr-box').innerHTML = "<p>Sedang mengirim data...</p>";
+
+  try {
+    await fetch(DR_API_URL, {
+      method: 'POST',
+      body: JSON.stringify({action: 'submitHasil', ...data})
+    });
+    alert("Hasil berhasil disimpan!");
+    loadDrilling();
+  } catch(e) { alert("Gagal mengirim data!"); }
+}
+
+async function loadRanking() {
+  const box = document.getElementById('dr-box');
+  box.innerHTML = "<p>Memuat Peringkat Global...</p>";
+
+  try {
+    const res = await fetch(DR_API_URL + "?action=getRanking");
+    const data = await res.json();
+    
+    let tableHtml = `
+      <h4 style="margin-bottom:10px">Peringkat Global</h4>
+      <div style="width:100%; overflow-x:auto;">
+        <table style="width:100%; border-collapse:collapse; font-size:11px;">
+          <thead style="background:#f8faff">
+            <tr>
+              <th style="padding:8px; border:1px solid #eee">Rank</th>
+              <th style="padding:8px; border:1px solid #eee">Nama</th>
+              <th style="padding:8px; border:1px solid #eee">Sekolah</th>
+              <th style="padding:8px; border:1px solid #eee">PTN/Prodi</th>
+              <th style="padding:8px; border:1px solid #eee">Subtes</th>
+              <th style="padding:8px; border:1px solid #eee">WS</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${data.map((r, i) => `
+              <tr>
+                <td style="padding:8px; border:1px solid #eee; text-align:center">${i+1}</td>
+                <td style="padding:8px; border:1px solid #eee"><b>${r[0]}</b></td>
+                <td style="padding:8px; border:1px solid #eee">${r[1]}</td>
+                <td style="padding:8px; border:1px solid #eee">${r[2]} - ${r[3]}</td>
+                <td style="padding:8px; border:1px solid #eee">${r[4]}</td>
+                <td style="padding:8px; border:1px solid #eee; text-align:center; font-weight:bold; color:var(--blue)">${r[5]}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+      <button class="dr-btn btn-simulasi" style="margin-top:15px;" onclick="loadDrilling()">KEMBALI</button>
+    `;
+    box.innerHTML = tableHtml;
+  } catch(e) { 
+    box.innerHTML = "<p>Gagal memuat ranking.</p>";
+  }
 }
     
 </script>
