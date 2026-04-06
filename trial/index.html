@@ -2856,24 +2856,49 @@ function finishGame(reason) {
 
 async function loadRanking() {
   const box = document.getElementById('dr-box');
-  box.innerHTML = "<p style='text-align:center; margin:auto;'>Memuat Ranking...</p>";
+  box.innerHTML = "<p style='text-align:center; margin:auto;'>Memuat Peringkat Global...</p>";
+  
   try {
     const res = await fetch(DR_API_URL + "?action=getRanking");
     const data = await res.json();
+    
+    // Header Tabel sesuai permintaan: Ranking, Nama, Asal Sekolah, PTN Impian, Prodi Impian, Subtes, Winstreak
     box.innerHTML = `
-      <h4 style="text-align:center; margin-top:0">Peringkat Global</h4>
-      <div style="overflow-x:auto; flex:1">
-        <table style="width:100%; border-collapse:collapse; font-size:11px;">
-          <thead style="position:sticky; top:0; background:white">
-            <tr><th style="padding:5px; border-bottom:1px solid #ddd">Rank</th><th style="text-align:left; padding:5px; border-bottom:1px solid #ddd">Nama</th><th style="padding:5px; border-bottom:1px solid #ddd">WS</th></tr>
+      <h4 style="text-align:center; margin-top:0; margin-bottom:15px; color:var(--blue);">🏆 PERINGKAT GLOBAL</h4>
+      <div style="overflow-x:auto; flex:1; width:100%;">
+        <table style="width:100%; border-collapse:collapse; font-size:12px; min-width:600px;">
+          <thead style="position:sticky; top:0; background:#f8faff; z-index:10;">
+            <tr>
+              <th style="padding:10px 5px; border-bottom:2px solid #e0e7ff; text-align:center; width:50px;">Rank</th>
+              <th style="padding:10px; border-bottom:2px solid #e0e7ff; text-align:left;">Nama</th>
+              <th style="padding:10px; border-bottom:2px solid #e0e7ff; text-align:left;">Asal Sekolah</th>
+              <th style="padding:10px; border-bottom:2px solid #e0e7ff; text-align:left;">PTN Impian</th>
+              <th style="padding:10px; border-bottom:2px solid #e0e7ff; text-align:left;">Prodi Impian</th>
+              <th style="padding:10px; border-bottom:2px solid #e0e7ff; text-align:center;">Subtes</th>
+              <th style="padding:10px; border-bottom:2px solid #e0e7ff; text-align:center;">WS</th>
+            </tr>
           </thead>
           <tbody>
-            ${data.map((r, i) => `<tr><td style="text-align:center; padding:5px">${i+1}</td><td style="padding:5px"><b>${r[0]}</b><br><small>${r[2]}</small></td><td style="text-align:center; font-weight:bold; color:var(--blue)">${r[5]}</td></tr>`).join('')}
+            ${data.map((r, i) => `
+              <tr style="border-bottom:1px solid #f1f5f9;">
+                <td style="text-align:center; padding:10px; font-weight:bold; color:#64748b;">${i+1}</td>
+                <td style="padding:10px; font-weight:bold; color:#1e3a8a; word-break:break-word;">${r[0]}</td>
+                <td style="padding:10px; color:#475569; word-break:break-word;">${r[1]}</td>
+                <td style="padding:10px; color:#475569; word-break:break-word;">${r[2]}</td>
+                <td style="padding:10px; color:#475569; word-break:break-word;">${r[3]}</td>
+                <td style="padding:10px; text-align:center; font-size:10px; color:#64748b;">${r[4]}</td>
+                <td style="padding:10px; text-align:center; font-weight:900; color:var(--blue); font-size:14px;">${r[5]}</td>
+              </tr>
+            `).join('')}
           </tbody>
         </table>
       </div>
-      <button class="dr-btn-footer" onclick="loadDrilling()">KEMBALI</button>`;
-  } catch(e) { box.innerHTML = "<p>Gagal muat.</p>"; }
+      <div style="text-align:center; padding-top:10px;">
+        <button class="dr-btn-footer" onclick="loadDrilling()">KEMBALI</button>
+      </div>`;
+  } catch(e) { 
+    box.innerHTML = "<p style='text-align:center; margin:auto;'>Gagal memuat data ranking.</p>"; 
+  }
 }
 
 function showSubmitForm() {
