@@ -2534,6 +2534,7 @@ let dr_timer;
 let dr_timeLeft = 0;
 let dr_selectedSubtes = [];
 let dr_isSimulasi = false;
+let dr_zoomLevel = 100;
 
 // API URL (Ganti dengan URL Web App Script Anda)
 const DR_API_URL = "https://script.google.com/macros/s/AKfycbxiG64e3m9yfmrgDvqsVss9L4s3ZN9l_4A00MQcYE4R4e_ZWgixfY8OkT8pKNRyTXEHWQ/exec"; 
@@ -2604,6 +2605,18 @@ function loadDrilling() {
       font-size: 11px; font-weight: bold; border: none; cursor: pointer; margin-top: auto; align-self: center;
     }
     .countdown-text { font-size: 60px; font-weight: 900; color: var(--blue); margin: auto; }
+    .btn-reload { 
+  background: #64748b; 
+  color: white; 
+  border: none; 
+  padding: 5px 12px; 
+  border-radius: 6px; 
+  font-size: 12px; 
+  cursor: pointer; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
   </style>
 
   <div class="dr-wrapper">
@@ -2707,24 +2720,42 @@ async function startDrill(isSimulasi) {
 
 function displaySoal() {
   const soal = dr_currentSoal[dr_index];
-  const box = document.getElementById('dr-box');
+  const box = document.getElementById("dr-box");
+  
+  // Reset zoom setiap ganti soal baru
+  dr_zoomLevel = 100;
   dr_timeLeft += parseInt(soal[4]) * 1000;
 
   box.innerHTML = `
     <div class="dr-controls-row">
-      <button class="btn-reload" onclick="reloadImg()">🔄 Muat Ulang Soal</button>
+      <div style="display:flex; gap:5px;">
+        <button class="btn-reload" onclick="reloadImg()" title="Muat Ulang">🔄</button>
+        <button class="btn-reload" onclick="zoomSoal(10)" title="Perbesar"><b>+</b></button>
+        <button class="btn-reload" onclick="zoomSoal(-10)" title="Perkecil"><b>-</b></button>
+      </div>
       <div class="dr-timer-box" id="dr-timer-display">00:00:00</div>
     </div>
-    <div class="dr-img-container">
-      <img id="soalImg" src="${soal[2]}?t=${new Date().getTime()}" alt="Soal">
+    
+    <div class="dr-img-container" id="dr-scroll-pane">
+      <img id="soalImg" src="${soal[2]}?t=${new Date().getTime()}" 
+           style="width: 100%; transition: width 0.2s ease; display: block;" alt="Soal">
     </div>
+
     <div class="dr-input-box" style="margin-top:10px">
-      <input type="text" id="dr-answer" placeholder="Jawaban..." autocomplete="off">
+      <input type="text" id="dr-answer" placeholder="Ketik Jawaban..." autocomplete="off">
       <button class="dr-btn" style="background:var(--blue); flex:none" onclick="confirmAnswer()">SUBMIT</button>
     </div>
-    ${dr_isSimulasi ? `<p style="font-size:9px; color:#94a3b8; text-align:center; margin-top:5px">KAPITAL / ANGKA / BBS</p>` : ''}
+    ${dr_isSimulasi ? `<p style="font-size:9px; color:#94a3b8; text-align:center; margin-top:5px">HURUF KAPITAL / ANGKA / BBS</p>` : ''}
   `;
   startTimer();
+}
+
+// Fungsi Zoom Baru
+function zoomSoal(delta) {
+  const img = document.getElementById("soalImg");
+  // Batas zoom minimal 100% (fit box) dan maksimal 300%
+  dr_zoomLevel = Math.max(100, Math.min(300, dr_zoomLevel + delta));
+  img.style.width = dr_zoomLevel + "%";
 }
 
 function reloadImg() {
@@ -2752,13 +2783,24 @@ function updateTimerDisplay() {
 function confirmAnswer() { if(confirm("Yakin dengan jawaban ini?")) checkAnswer(); }
 
 function checkAnswer() {
-  const userAns = document.getElementById('dr-answer').value.trim().toUpperCase();
+  const inputElement = document.getElementById('dr-answer');
+  // .toUpperCase() memastikan input "a" jadi "A"
+  const userAns = inputElement.value.trim().toUpperCase();
+  
+  // Pastikan jawaban database juga di-string dan di-UPPERCASE untuk perbandingan adil
   const correctAns = dr_currentSoal[dr_index][3].toString().trim().toUpperCase();
+
   if(userAns === correctAns) {
-    dr_score++; dr_index++;
-    if(dr_index < dr_currentSoal.length) displaySoal();
-    else finishGame("Selamat! Soal Berhasil Terjawab Semua.");
-  } else finishGame("Jawaban Salah!");
+    dr_score++; 
+    dr_index++;
+    if(dr_index < dr_currentSoal.length) {
+      displaySoal();
+    } else {
+      finishGame("Selamat! Soal Berhasil Terjawab Semua.");
+    }
+  } else {
+    finishGame("Jawaban Salah!");
+  }
 }
 
 function finishGame(reason) {
