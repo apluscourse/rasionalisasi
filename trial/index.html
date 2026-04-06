@@ -280,6 +280,35 @@ body{
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
+/* --- VARIAN TOMBOL MERAH (Kisi-Kisi, Drilling, Tryout) --- */
+
+/* Gaya Dasar Tombol Merah */
+.menu-bar button.btn-red {
+  color: #e11d48; /* Warna teks merah */
+  border: 1px solid #fda4af; /* Border merah muda */
+  background-color: #fff1f2; /* Background merah sangat muda */
+}
+
+/* Hover Tombol Merah */
+.menu-bar button.btn-red:hover {
+  background-color: #ffe4e6;
+  border-color: #fecdd3;
+  box-shadow: 0 4px 8px rgba(225, 29, 72, 0.1);
+}
+
+/* Tombol Merah Saat Aktif (Terpilih) */
+.menu-bar button.btn-red.active {
+  background-color: #e11d48; /* Merah solid */
+  color: white;
+  border: none;
+  box-shadow: 0 3px 10px rgba(225, 29, 72, 0.3);
+}
+
+/* Hover Tombol Merah Saat Aktif */
+.menu-bar button.btn-red.active:hover {
+  background-color: #be123c; /* Merah lebih gelap */
+}
+    
 /* CARD */
 .card{
   background:var(--card);
@@ -803,9 +832,9 @@ select,input{
   <button onclick="showMenu('target')">Target Belajar</button>
   <button onclick="showMenu('statistik')">Statistik Prodi</button>
   <button onclick="showMenu('cari-prodi')">Cari Prodi</button>
-  <button onclick="showMenu('kisi-kisi')">Kisi-Kisi</button>
-  <button onclick="showMenu('drilling')">Drilling Soal</button>
-  <button onclick="cekAksesTryout()" style="background: #fff1f2; color: #e11d48; border: 1px solid #fda4af; font-weight: bold;">Tryout UTBK</button>
+  <button class="btn-red" onclick="showMenu('kisi-kisi')">Kisi-Kisi</button>
+  <button class="btn-red" onclick="showMenu('drilling')">Drilling Soal</button>
+  <button class="btn-red" onclick="cekAksesTryout()">Tryout UTBK</button>
 </div>
 
 <div id="content"></div>
