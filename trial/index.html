@@ -2838,7 +2838,13 @@ function checkAnswer() {
 }
 
 function finishGame(reason) {
+  // 1. Hentikan timer yang sedang berjalan
   clearInterval(dr_timer);
+  
+  // 2. SANGAT PENTING: Set ke null agar deteksi 'visibilitychange' 
+  // tahu bahwa tantangan sudah benar-benar berakhir.
+  dr_timer = null; 
+
   const box = document.getElementById('dr-box');
   box.innerHTML = `
     <div style="text-align:center; margin:auto">
@@ -2913,6 +2919,52 @@ function showSubmitForm() {
       <button class="dr-btn btn-simulasi" style="width:90%" onclick="submitToGlobal()">KIRIM DATA</button>
     </div>`;
 }
+
+// ... kode showSubmitForm() Anda ...
+
+// TARUH DI SINI (Paling Bawah)
+document.addEventListener("visibilitychange", function() {
+  // Cek apakah halaman sedang disembunyikan (minimize/pindah tab)
+  if (document.hidden) {
+    // Deteksi: Jika timer sedang berjalan (tidak null)
+    if (typeof dr_timer !== 'undefined' && dr_timer !== null) {
+      // Panggil fungsi mengakhiri game
+      finishGame("Tantangan Berakhir: Dilarang meminimalkan browser atau berpindah tab!");
+      
+      // Berikan peringatan agar siswa tahu kenapa mereka kalah
+      alert("Tantangan dihentikan karena Anda meninggalkan halaman!");
+    }
+  }
+});
+
+// Tambahkan juga fungsi submitToGlobal yang terpotong di kode Anda tadi:
+async function submitToGlobal() {
+  const data = {
+    nama: document.getElementById('res-nama').value,
+    sekolah: document.getElementById('res-sekolah').value,
+    ptn: document.getElementById('res-ptn').value,
+    prodi: document.getElementById('res-prodi').value,
+    subtes: dr_selectedSubtes.join(','),
+    winstreak: dr_score
+  };
+
+  if(!data.nama || !data.sekolah) return alert("Nama dan Sekolah wajib diisi!");
+
+  document.getElementById('dr-box').innerHTML = "<p style='text-align:center; margin:auto;'>Sedang mengirim data...</p>";
+
+  try {
+    await fetch(DR_API_URL, {
+      method: 'POST',
+      body: JSON.stringify({action: 'submitHasil', ...data})
+    });
+    alert("Hasil berhasil disimpan!");
+    loadDrilling();
+  } catch(e) { 
+    alert("Gagal mengirim data!"); 
+    loadDrilling();
+  }
+}    
+    
     
 </script>
 
