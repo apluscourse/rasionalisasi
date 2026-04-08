@@ -57,7 +57,26 @@ nav {
     .btn-subtes { transition: all 0.2s; border: 1px solid #e5e7eb; cursor: pointer; }
     .btn-subtes.active { background-color: #10b981 !important; color: white; border-color: #059669; transform: translateY(-2px); }
     .day-label { color: #1e40af; font-weight: 800; font-size: 0.85rem; }
-    .dropdown:hover .dropdown-menu { display: block; }
+/* Hapus selector :hover yang lama, ganti dengan class khusus ini */
+.dropdown-menu.show {
+    display: block;
+    animation: animate__fadeInUp; /* Tambahkan animasi saat muncul */
+    animation-duration: 0.3s;
+}
+
+/* Pastikan dropdown-menu tersembunyi secara default */
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    bottom: 110%; /* Muncul di atas tombol */
+    right: 0;
+    width: 200px;
+    background: white;
+    border-radius: 1rem;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    z-index: 100;
+    overflow: hidden;
+}
   
     /* Menghilangkan celah putih di pinggir halaman */
 body {
@@ -160,15 +179,17 @@ nav {
           Setelah mengisi form booking, anda akan diarahkan ke WA admin, teks ringkasan akan otomatis tersalin.
         </p>
         
-        <div class="relative dropdown">
-          <button id="submitBtn" disabled class="bg-gray-400 text-white px-10 py-4 rounded-full font-black shadow-xl cursor-not-allowed transition-all uppercase tracking-widest">
-            Selesaikan Pendaftaran
-          </button>
-          <div class="dropdown-menu hidden absolute bottom-full right-0 mb-3 w-56 bg-white rounded-2xl shadow-2xl border border-gray-100 py-2">
-            <button onclick="finishRegistration('admin1')" class="block w-full text-left px-5 py-4 hover:bg-blue-50 text-blue-700 font-bold border-b border-gray-50 transition-colors">🚀 Kirim ke Admin 1</button>
-            <button onclick="finishRegistration('admin2')" class="block w-full text-left px-5 py-4 hover:bg-blue-50 text-blue-700 font-bold transition-colors">🚀 Kirim ke Admin 2</button>
-          </div>
-        </div>
+<div class="relative dropdown">
+  <button id="submitBtn" disabled onclick="toggleAdminMenu(event)" 
+          class="bg-gray-400 text-white px-10 py-4 rounded-full font-black shadow-xl cursor-not-allowed transition-all uppercase tracking-widest">
+    Selesaikan Pendaftaran
+  </button>
+  
+  <div id="adminMenu" class="dropdown-menu">
+    <button onclick="finishRegistration('admin1')" class="block w-full text-left px-5 py-4 hover:bg-blue-50 text-blue-700 font-bold border-b transition-colors">🚀 Admin 1</button>
+    <button onclick="finishRegistration('admin2')" class="block w-full text-left px-5 py-4 hover:bg-blue-50 text-blue-700 font-bold transition-colors">🚀 Admin 2</button>
+  </div>
+</div>
       </div>
     </div>
   </div>
@@ -283,6 +304,23 @@ nav {
     }
 
     initTable();
+
+function toggleAdminMenu(event) {
+  // Mencegah menu tertutup seketika saat diklik
+  event.stopPropagation();
+  
+  const menu = document.getElementById('adminMenu');
+  menu.classList.toggle('show');
+}
+
+// Tambahan: Tutup menu secara otomatis jika user klik di mana saja selain tombol
+window.onclick = function(event) {
+  const menu = document.getElementById('adminMenu');
+  if (menu.classList.contains('show')) {
+    menu.classList.remove('show');
+  }
+}
+    
   </script>
 </body>
 </html>
