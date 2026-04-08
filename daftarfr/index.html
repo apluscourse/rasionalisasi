@@ -245,7 +245,7 @@ nav {
       Object.keys(selections).sort((a,b) => parseInt(a.replace('day','')) - parseInt(b.replace('day',''))).forEach(key => {
         if (selections[key].length > 0) {
           const dayIdx = parseInt(key.replace('day','')) - 1;
-          scheduleText += `*${days[dayIdx].d} (${days[dayIdx].t})\n${selections[key].join(',')}\n`;
+          scheduleText += `*${days[dayIdx].d} (${days[dayIdx].t})*\n${selections[key].join(',')}\n`;
           selections[key].forEach(s => (s === 'PK' || s === 'PM') ? countPKPM++ : countOther++);
         }
       });
