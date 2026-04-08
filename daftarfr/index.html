@@ -139,8 +139,8 @@ nav {
             <tr>
               <th class="p-4">JADWAL</th>
               <th class="p-4">HARI/TGL</th>
-              <th colspan="3" class="p-4 text-center border-l border-blue-500">16.00 WIB</th>
-              <th colspan="4" class="p-4 text-center border-l border-blue-500">19.00 WIB</th>
+              <th colspan="3" class="p-4 text-center border-l border-blue-500">16.00 - 18.00 WIB</th>
+              <th colspan="4" class="p-4 text-center border-l border-blue-500">19.00 - 21.00 WIB</th>
             </tr>
           </thead>
           <tbody id="scheduleBody"></tbody>
@@ -233,7 +233,7 @@ nav {
         }
       });
 
-      const fullSummary = `*Data Siswa*\nNama lengkap : ${nama}\nAsal Sekolah : ${asal}\nWhatsapp : ${wa}\n\n*Jadwal Kelas*\n${scheduleText}\nTotal :\nPK/PM : ${countPKPM} kelas\nSelain PK/PM : ${countOther} kelas`;
+      const fullSummary = `*Data Siswa*\nNama lengkap : ${nama}\nAsal Sekolah : ${asal}\nWhatsapp : ${wa}\n\n*Jadwal Kelas*\n${scheduleText}\n*Total :*\nPK/PM : ${countPKPM} kelas\nSelain PK/PM : ${countOther} kelas`;
       document.getElementById('summaryBox').innerText = fullSummary;
       
       const btn = document.getElementById('submitBtn');
