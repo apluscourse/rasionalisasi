@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Form Booking Kelas FR UTBK 2026</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+  <style>
+
+/* --- Penambahan CSS Header Fix --- */
+:root {
+    --blue-nav: #1f6feb;
+    --text-nav: #1f2d3d;
+}
+
+nav {
+    background: #ffffff;
+    padding: 10px 5%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    z-index: 1000;
+    margin-bottom: 20px; /* Memberi jarak ke judul form */
+}
+
+.logo-nav { 
+    height: 30px; 
+    width: auto; 
+    display: flex; 
+    align-items: center; 
+}
+
+.nav-links { 
+    display: flex; 
+    gap: 20px; 
+}
+
+.nav-links a { 
+    text-decoration: none; 
+    color: var(--text-nav); 
+    font-weight: 600; 
+    font-size: 14px; 
+}
+
+@media (max-width: 480px) {
+    .nav-links { gap: 10px; }
+    .nav-links a { font-size: 12px; }
+}
+
+    :root { --blue-light: #e0f2fe; --blue-main: #3b82f6; }
+    body { background-color: var(--blue-light); font-family: sans-serif; }
+    .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-radius: 1.5rem; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08); }
+    .btn-subtes { transition: all 0.2s; border: 1px solid #e5e7eb; cursor: pointer; }
+    .btn-subtes.active { background-color: #10b981 !important; color: white; border-color: #059669; transform: translateY(-2px); }
+    .day-label { color: #1e40af; font-weight: 800; font-size: 0.85rem; }
+    .dropdown:hover .dropdown-menu { display: block; }
+  
+    /* Menghilangkan celah putih di pinggir halaman */
+body {
+    margin: 0;
+    padding: 0;
+}
+
+nav {
+    background: #ffffff;
+    padding: 12px 5%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    
+    /* Penempatan agar menutup penuh kanan kiri & fix di atas */
+    position: fixed; /* Berubah dari sticky ke fixed agar lebih stabil */
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    z-index: 9999; /* Angka tinggi agar tidak tertutup tabel/elemen lain */
+}
+
+/* Sesuaikan class ini dengan pembungkus konten Anda */
+.max-w-5xl, .hero, .container-utama {
+    padding-top: 80px; /* Jarak agar konten tidak tertutup header */
+}
+  
+  </style>
+</head>
+<body class="p-4 md:p-10">
+
+<nav>
+    <a href="#" class="logo-nav">
+        <img src="https://i.imgur.com/zyRxiIM.png" alt="Logo" style="height: 100%;">
+    </a>
+    <div class="nav-links">
+        <a href="#about">Tentang</a>
+        <a href="#contact">Kontak</a>
+        <a href="#" style="color: var(--blue-nav);">Login</a>
+    </div>
+</nav>
+
+
+  <div class="max-w-5xl mx-auto animate__animated animate__fadeIn">
+    <div class="text-center mb-10">
+      <h1 class="text-3xl md:text-5xl font-black text-blue-900 leading-tight">FORM BOOKING PENDAFTARAN<br>KELAS FR UTBK 2026</h1>
+    </div>
+
+    <div class="glass-card p-6 md:p-8 mb-8">
+      <h3 class="text-lg font-bold text-blue-800 mb-5 flex items-center">
+        <span class="bg-blue-600 text-white w-7 h-7 rounded-full flex items-center justify-center mr-2 text-sm">A</span> Data Siswa
+      </h3>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-10">
+        <div>
+          <label class="block text-sm font-bold text-gray-600 mb-1">Nama Lengkap *</label>
+          <input type="text" id="nama" oninput="updateSummary()" placeholder="masukkan nama lengkap" class="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-400 outline-none transition-all">
+        </div>
+        <div>
+          <label class="block text-sm font-bold text-gray-600 mb-1">Asal Sekolah *</label>
+          <input type="text" id="asal" oninput="updateSummary()" placeholder="masukkan asal sekolah/gapyear" class="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-400 outline-none transition-all">
+        </div>
+        <div>
+          <label class="block text-sm font-bold text-gray-600 mb-1">Whatsapp *</label>
+          <input type="number" id="wa" oninput="updateSummary()" placeholder="masukkan nomor WA" class="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-400 outline-none transition-all">
+        </div>
+      </div>
+
+      <div class="text-center mb-6">
+        <h3 class="text-xl font-bold text-blue-900 uppercase">Pilih Jadwal Les Kelas FR</h3>
+        <p class="text-blue-500 font-medium">Klik pada subtes di jadwal yang diinginkan</p>
+      </div>
+
+      <div class="overflow-x-auto rounded-xl border border-blue-100 shadow-sm">
+        <table class="w-full text-sm text-left bg-white">
+          <thead class="bg-blue-600 text-white text-xs uppercase tracking-wider">
+            <tr>
+              <th class="p-4">JADWAL</th>
+              <th class="p-4">HARI/TGL</th>
+              <th colspan="3" class="p-4 text-center border-l border-blue-500">16.00 WIB</th>
+              <th colspan="4" class="p-4 text-center border-l border-blue-500">19.00 WIB</th>
+            </tr>
+          </thead>
+          <tbody id="scheduleBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="glass-card p-6 md:p-8 animate__animated animate__fadeInUp">
+      <h3 class="font-bold text-gray-700 mb-4 flex items-center">
+        <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+        Ringkasan Pendaftaran
+      </h3>
+      <div id="summaryBox" class="bg-gray-50 p-5 rounded-xl border-2 border-dashed border-blue-200 font-mono text-sm leading-relaxed mb-6 overflow-hidden"></div>
+      
+      <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+        <p class="text-sm text-gray-500 italic text-center md:text-left">
+          Setelah mengisi form booking, anda akan diarahkan ke WA admin, teks ringkasan akan otomatis tersalin.
+        </p>
+        
+        <div class="relative dropdown">
+          <button id="submitBtn" disabled class="bg-gray-400 text-white px-10 py-4 rounded-full font-black shadow-xl cursor-not-allowed transition-all uppercase tracking-widest">
+            Selesaikan Pendaftaran
+          </button>
+          <div class="dropdown-menu hidden absolute bottom-full right-0 mb-3 w-56 bg-white rounded-2xl shadow-2xl border border-gray-100 py-2">
+            <button onclick="finishRegistration('admin1')" class="block w-full text-left px-5 py-4 hover:bg-blue-50 text-blue-700 font-bold border-b border-gray-50 transition-colors">🚀 Kirim ke Admin 1</button>
+            <button onclick="finishRegistration('admin2')" class="block w-full text-left px-5 py-4 hover:bg-blue-50 text-blue-700 font-bold transition-colors">🚀 Kirim ke Admin 2</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Konfigurasi API - PASTE URL SCRIPT GOOGLE DISINI
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbwXxTKMm078yWis_JIxcc1CT90chdSasH0eMkoPV-f4SAiQr-wu5SE4u6WewP2asH7Q/exec';
+
+    const days = [
+      {d: "DAY 1", t: "SELASA, 21 APRIL"}, {d: "DAY 2", t: "RABU, 22 APRIL"},
+      {d: "DAY 3", t: "KAMIS, 23 APRIL"}, {d: "DAY 4", t: "JUMAT, 24 APRIL"},
+      {d: "DAY 5", t: "SABTU, 25 APRIL"}, {d: "DAY 6", t: "MINGGU, 26 APRIL"},
+      {d: "DAY 7", t: "SENIN, 27 APRIL"}, {d: "DAY 8", t: "SELASA, 28 APRIL"},
+      {d: "DAY 9", t: "RABU, 29 APRIL"}, {d: "DAY 10", t: "KAMIS, 30 APRIL"}
+    ];
+    const subtests = ["PK", "PU", "PPU", "PM", "PBM", "LBI", "LBE"];
+    let selections = {};
+
+    function initTable() {
+      const tbody = document.getElementById('scheduleBody');
+      days.forEach((day, idx) => {
+        const row = document.createElement('tr');
+        row.className = "border-b border-gray-50 hover:bg-blue-50 transition-colors";
+        let html = `<td class="p-4 day-label">${day.d}</td>
+                    <td class="p-4 text-xs font-bold text-gray-500">${day.t}</td>`;
+        subtests.forEach(sub => {
+          html += `<td class="p-1 text-center">
+                    <button onclick="toggleSubtest(${idx+1}, '${sub}', this)" class="btn-subtes w-full py-3 rounded-lg text-xs font-black bg-gray-50 text-gray-400 uppercase">${sub}</button>
+                  </td>`;
+        });
+        row.innerHTML = html;
+        tbody.appendChild(row);
+      });
+    }
+
+    function toggleSubtest(dayNum, sub, el) {
+      const key = `day${dayNum}`;
+      if (!selections[key]) selections[key] = [];
+      const index = selections[key].indexOf(sub);
+      if (index > -1) {
+        selections[key].splice(index, 1);
+        el.classList.remove('active');
+      } else {
+        selections[key].push(sub);
+        el.classList.add('active');
+      }
+      updateSummary();
+    }
+
+    function updateSummary() {
+      const nama = document.getElementById('nama').value;
+      const asal = document.getElementById('asal').value;
+      const wa = document.getElementById('wa').value;
+      let scheduleText = "";
+      let countPKPM = 0; let countOther = 0;
+
+      Object.keys(selections).sort((a,b) => parseInt(a.replace('day','')) - parseInt(b.replace('day',''))).forEach(key => {
+        if (selections[key].length > 0) {
+          const dayIdx = parseInt(key.replace('day','')) - 1;
+          scheduleText += `*${days[dayIdx].d} (${days[dayIdx].t})\n${selections[key].join(',')}\n`;
+          selections[key].forEach(s => (s === 'PK' || s === 'PM') ? countPKPM++ : countOther++);
+        }
+      });
+
+      const fullSummary = `*Data Siswa*\nNama lengkap : ${nama}\nAsal Sekolah : ${asal}\nWhatsapp : ${wa}\n\n*Jadwal Kelas*\n${scheduleText}\nTotal :\nPK/PM : ${countPKPM} kelas\nSelain PK/PM : ${countOther} kelas`;
+      document.getElementById('summaryBox').innerText = fullSummary;
+      
+      const btn = document.getElementById('submitBtn');
+      if (nama && asal && wa) {
+        btn.disabled = false;
+        btn.className = "bg-blue-600 text-white px-10 py-4 rounded-full font-black shadow-xl hover:bg-blue-700 active:scale-95 transition-all cursor-pointer uppercase tracking-widest";
+      } else {
+        btn.disabled = true;
+        btn.className = "bg-gray-400 text-white px-10 py-4 rounded-full font-black shadow-xl cursor-not-allowed transition-all uppercase tracking-widest";
+      }
+    }
+
+    async function finishRegistration(admin) {
+      const summaryText = document.getElementById('summaryBox').innerText;
+      const submitBtn = document.getElementById('submitBtn');
+      const data = {
+        nama: document.getElementById('nama').value,
+        asal: document.getElementById('asal').value,
+        wa: document.getElementById('wa').value
+      };
+      for(let i=1; i<=10; i++) data[`day${i}`] = selections[`day${i}`]?.length ? selections[`day${i}`].join(',') : "-";
+
+      submitBtn.innerText = "SEDANG MEMPROSES...";
+      submitBtn.disabled = true;
+
+      try {
+        // 1. Copy Clipboard
+        await navigator.clipboard.writeText(summaryText);
+        
+        // 2. Kirim ke API Spreadsheet
+        await fetch(scriptURL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        // 3. Redirect ke WhatsApp
+        const num = admin === 'admin1' ? '6285815023510' : '62895423024582';
+        window.location.href = `https://api.whatsapp.com/send?phone=${num}&text=${encodeURIComponent(summaryText)}`;
+
+      } catch (e) {
+        alert("Gagal mengirim. Periksa koneksi atau URL API.");
+        submitBtn.innerText = "Selesaikan Pendaftaran";
+        submitBtn.disabled = false;
+      }
+    }
+
+    initTable();
+  </script>
+</body>
+</html>
