@@ -7,26 +7,9 @@
     <style>
         .box-soal { position: relative; overflow: hidden; border: 2px solid #e5e7eb; }
         #imgSoal { width: 100%; transition: transform 0.2s; transform-origin: top left; }
-        
-        /* Loader Animation */
-        .loader { border: 5px solid #f3f3f3; border-top: 5px solid #2563eb; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        
-        #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        
-        /* Toast Message */
-        #toast-msg { position: fixed; bottom: 20px; right: 20px; background: #10b981; color: white; padding: 12px 24px; border-radius: 8px; font-weight: bold; opacity: 0; transition: opacity 0.3s; z-index: 1000; }
     </style>
 </head>
 <body class="bg-slate-100 p-4">
-
-    <div id="loading-overlay" class="hidden">
-        <div class="loader"></div>
-        <p class="mt-4 font-bold text-blue-600">Memuat Soal...</p>
-    </div>
-
-    <div id="toast-msg">Jawaban berhasil disimpan!</div>
-
     <div class="max-w-3xl mx-auto bg-white shadow-xl rounded-xl p-6">
         <h1 class="text-3xl font-extrabold text-center text-blue-800 mb-8">KUIS A+ COURSE</h1>
 
@@ -48,7 +31,7 @@
             
             <div id="main-quiz" class="hidden">
                 <div class="flex justify-between items-center bg-slate-800 text-white p-3 rounded-t-lg">
-                    <div id="timerDisplay" class="text-xl font-mono font-bold text-yellow-400">00:00:00:00</div>
+                    <div id="timerDisplay" class="text-xl font-mono font-bold">00:00</div>
                     <div class="flex gap-2">
                         <button onclick="reloadImg()" class="bg-slate-600 px-3 py-1 rounded text-xs">Reload</button>
                         <button onclick="zoom(0.1)" class="bg-slate-600 px-3 py-1 rounded text-xs">Zoom In</button>
@@ -81,7 +64,7 @@
     </div>
 
     <script>
-        const BASE_URL = 'https://script.google.com/macros/s/AKfycbxf0ZgZar3CLeVHSZ7QKWi6YL3oC1KrcGzum_oNQhOmkqpVKUtPbBuKNi5YtubJtZh6/exec'; 
+        const BASE_URL = 'https://script.google.com/macros/s/AKfycbxf0ZgZar3CLeVHSZ7QKWi6YL3oC1KrcGzum_oNQhOmkqpVKUtPbBuKNi5YtubJtZh6/exec'; // Masukkan URL Web App Apps Script
         
         let dbSiswa = [];
         let dataSoal = [];
@@ -89,8 +72,9 @@
         let idx = 0;
         let scale = 1;
         let timer;
-        let timeRemaining; // dalam milidetik
+        let timeLeft = 0;
 
+        // Load awal
         fetch(`${BASE_URL}?action=getInitial`)
             .then(res => res.json())
             .then(data => {
@@ -101,10 +85,12 @@
 
         function updateSiswaDanMapel() {
             const kls = document.getElementById('selKelas').value;
+            // Update Siswa
             const sEl = document.getElementById('selSiswa');
             sEl.innerHTML = '<option value="">-- Pilih Nama Siswa --</option>';
             dbSiswa.filter(s => s.kelas == kls).forEach(s => sEl.innerHTML += `<option value="${s.nama}">${s.nama}</option>`);
             
+            // Update Mapel
             fetch(`${BASE_URL}?action=getMapel&kelas=${kls}`)
                 .then(res => res.json())
                 .then(mapels => {
@@ -119,9 +105,6 @@
             const mpl = document.getElementById('selMapel').value;
             if(!kls || !mpl) return alert("Lengkapi data!");
 
-            // Tampilkan Loading
-            document.getElementById('loading-overlay').classList.remove('hidden');
-
             document.getElementById('selKelas').disabled = true;
             document.getElementById('selMapel').disabled = true;
             document.getElementById('btnMulai').style.display = 'none';
@@ -130,13 +113,7 @@
                 .then(res => res.json())
                 .then(res => {
                     dataSoal = res;
-                    // Sembunyikan Loading
-                    document.getElementById('loading-overlay').classList.add('hidden');
                     startCountdown();
-                })
-                .catch(err => {
-                    document.getElementById('loading-overlay').classList.add('hidden');
-                    alert("Gagal memuat soal!");
                 });
         }
 
@@ -157,30 +134,16 @@
             }, 1000);
         }
 
-        function formatTimeLong(ms) {
-            let h = Math.floor(ms / 3600000);
-            let m = Math.floor((ms % 3600000) / 60000);
-            let s = Math.floor((ms % 60000) / 1000);
-            let mil = Math.floor((ms % 1000) / 10);
-
-            let pad = (n) => n.toString().padStart(2, '0');
-            return `${pad(h)}:${pad(m)}:${pad(s)}:${pad(mil)}`;
-        }
-
         function initQuiz() {
-            timeRemaining = dataSoal[0].waktu * 60 * 1000;
+            timeLeft = dataSoal[0].waktu * 60;
             renderSoal();
-            
-            // Update setiap 50ms untuk kelancaran milidetik
             timer = setInterval(() => {
-                timeRemaining -= 50;
-                document.getElementById('timerDisplay').innerText = formatTimeLong(timeRemaining);
-                
-                if(timeRemaining <= 0) {
-                    clearInterval(timer);
-                    finishQuiz(true); // Kirim flag true agar tidak tanya konfirmasi lagi
-                }
-            }, 50);
+                let m = Math.floor(timeLeft / 60);
+                let s = timeLeft % 60;
+                document.getElementById('timerDisplay').innerText = `${m}:${s < 10 ? '0'+s : s}`;
+                if(timeLeft <= 0) finishQuiz();
+                timeLeft--;
+            }, 1000);
         }
 
         function renderSoal() {
@@ -197,24 +160,11 @@
         }
 
         function go(i) { idx = i; renderSoal(); }
-
-        function saveAns() { 
-            userAnswers[idx] = document.getElementById('ansInput').value.toUpperCase(); 
-            // Tampilkan Teks Sementara (Toast)
-            const toast = document.getElementById('toast-msg');
-            toast.style.opacity = "1";
-            setTimeout(() => { toast.style.opacity = "0"; }, 2000);
-        }
-
+        function saveAns() { userAnswers[idx] = document.getElementById('ansInput').value.toUpperCase(); }
         function zoom(v) { scale = Math.min(Math.max(0.5, scale + v), 2); document.getElementById('imgSoal').style.transform = `scale(${scale})`; }
-        function reloadImg() { const img = document.getElementById('imgSoal'); const src = img.src.split('?')[0]; img.src = src + '?t=' + Date.now(); }
+        function reloadImg() { const src = document.getElementById('imgSoal').src; document.getElementById('imgSoal').src = src.split('?')[0] + '?t=' + Date.now(); }
 
-        function finishQuiz(auto = false) {
-            // Notifikasi Konfirmasi
-            if(!auto) {
-                if(!confirm("Apakah Anda yakin ingin menyelesaikan kuis? Periksa kembali jawaban Anda.")) return;
-            }
-
+        function finishQuiz() {
             clearInterval(timer);
             let benar = 0;
             dataSoal.forEach((s, i) => { if((userAnswers[i]||"") === s.kunci.toUpperCase()) benar++; });
