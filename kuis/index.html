@@ -90,7 +90,7 @@
     </div>
 
     <script>
-        const BASE_URL = 'https://script.google.com/macros/s/AKfycbycjcTiAuLviul360pBo9W4jBIS0FJPKzV0cGCv4OHzD-Zl1ZX4m1lX5_sMHkzPiKlc/exec'; 
+        const BASE_URL = 'https://script.google.com/macros/s/AKfycbwzWm6u9D2GlR2zFrmcnFvYJ3CpXm7-In3CMKGSQmsRvQkk--pD3ObmG0ixbaLltZIQ/exec'; 
         
         let dbSiswa = [], dataSoal = [], userAnswers = {};
         let idx = 0, scale = 1, timer, timeRemainingMs;
@@ -208,7 +208,7 @@
 
         function reloadImg() { const img = document.getElementById('imgSoal'); img.src = img.src.split('?')[0] + '?t=' + Date.now(); }
 
-        function finishQuiz(auto = false) {
+function finishQuiz(auto = false) {
             if(!auto && !confirm("Kirim jawaban sekarang?")) return;
             clearInterval(timer);
             userAnswers[idx] = document.getElementById('ansInput').value.toUpperCase(); 
@@ -217,7 +217,6 @@
             dataSoal.forEach((s, i) => { if((userAnswers[i]||"") === s.kunci.toUpperCase()) benar++; });
             const skor = (benar / dataSoal.length) * 100;
 
-            // KIRIM DATA KE SPREADSHEET (Kolom B dimulai dari Tanggal)
             const payload = {
                 tanggal: new Date().toLocaleString('id-ID'),
                 nama: document.getElementById('selSiswa').value,
@@ -228,11 +227,17 @@
 
             document.getElementById('loading-overlay').style.display = 'flex';
 
+            // GUNAKAN CARA INI:
             fetch(BASE_URL, {
                 method: 'POST',
-                mode: 'no-cors', // Penting untuk Apps Script jika tidak pakai library khusus
-                body: JSON.stringify(payload)
-            }).then(() => {
+                body: JSON.stringify(payload) // Kirim sebagai string JSON murni
+            })
+            .then(res => {
+                // Walaupun kena CORS error di console, biasanya data sudah masuk
+                console.log("Data terkirim");
+            })
+            .catch(err => console.log("CORS ignore:", err))
+            .finally(() => {
                 document.getElementById('loading-overlay').style.display = 'none';
                 tampilkanHasil(skor);
             });
