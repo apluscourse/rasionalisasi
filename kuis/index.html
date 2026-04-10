@@ -7,56 +7,26 @@
     <style>
         .box-soal { position: relative; overflow: hidden; border: 2px solid #e5e7eb; }
         #imgSoal { width: 100%; transition: transform 0.2s; transform-origin: top left; }
-
-        /* Animasi Spinner Loading */
-.loader {
-    border: 5px solid #f3f3f3;
-    border-top: 5px solid #3498db;
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-/* Overlay Loading */
-#loading-overlay {
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(255, 255, 255, 0.8);
-    display: flex; flex-direction: column;
-    justify-content: center; align-items: center;
-    z-index: 9999;
-}
-
-/* Animasi Toast Jawaban */
-#toast-msg {
-    position: fixed;
-    bottom: 20px; right: 20px;
-    background: #10b981;
-    color: white;
-    padding: 10px 20px;
-    border-radius: 8px;
-    font-weight: bold;
-    opacity: 0;
-    transition: opacity 0.5s ease;
-    z-index: 1000;
-}
+        
+        /* Loader Animation */
+        .loader { border: 5px solid #f3f3f3; border-top: 5px solid #2563eb; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        
+        /* Toast Message */
+        #toast-msg { position: fixed; bottom: 20px; right: 20px; background: #10b981; color: white; padding: 12px 24px; border-radius: 8px; font-weight: bold; opacity: 0; transition: opacity 0.3s; z-index: 1000; }
     </style>
 </head>
 <body class="bg-slate-100 p-4">
 
     <div id="loading-overlay" class="hidden">
-    <div class="loader"></div>
-    <p class="mt-4 font-bold text-blue-600">Sedang memuat data...</p>
-</div>
+        <div class="loader"></div>
+        <p class="mt-4 font-bold text-blue-600">Memuat Soal...</p>
+    </div>
 
-<div id="toast-msg">Jawaban berhasil disimpan!</div>
-    
+    <div id="toast-msg">Jawaban berhasil disimpan!</div>
+
     <div class="max-w-3xl mx-auto bg-white shadow-xl rounded-xl p-6">
         <h1 class="text-3xl font-extrabold text-center text-blue-800 mb-8">KUIS A+ COURSE</h1>
 
@@ -78,7 +48,7 @@
             
             <div id="main-quiz" class="hidden">
                 <div class="flex justify-between items-center bg-slate-800 text-white p-3 rounded-t-lg">
-                    <div id="timerDisplay" class="text-xl font-mono font-bold">00:00</div>
+                    <div id="timerDisplay" class="text-xl font-mono font-bold text-yellow-400">00:00:00:00</div>
                     <div class="flex gap-2">
                         <button onclick="reloadImg()" class="bg-slate-600 px-3 py-1 rounded text-xs">Reload</button>
                         <button onclick="zoom(0.1)" class="bg-slate-600 px-3 py-1 rounded text-xs">Zoom In</button>
@@ -111,7 +81,7 @@
     </div>
 
     <script>
-        const BASE_URL = 'https://script.google.com/macros/s/AKfycbxf0ZgZar3CLeVHSZ7QKWi6YL3oC1KrcGzum_oNQhOmkqpVKUtPbBuKNi5YtubJtZh6/exec'; // Masukkan URL Web App Apps Script
+        const BASE_URL = 'https://script.google.com/macros/s/AKfycbxf0ZgZar3CLeVHSZ7QKWi6YL3oC1KrcGzum_oNQhOmkqpVKUtPbBuKNi5YtubJtZh6/exec'; 
         
         let dbSiswa = [];
         let dataSoal = [];
@@ -119,9 +89,8 @@
         let idx = 0;
         let scale = 1;
         let timer;
-        let timeLeft = 0;
+        let timeRemaining; // dalam milidetik
 
-        // Load awal
         fetch(`${BASE_URL}?action=getInitial`)
             .then(res => res.json())
             .then(data => {
@@ -132,12 +101,10 @@
 
         function updateSiswaDanMapel() {
             const kls = document.getElementById('selKelas').value;
-            // Update Siswa
             const sEl = document.getElementById('selSiswa');
             sEl.innerHTML = '<option value="">-- Pilih Nama Siswa --</option>';
             dbSiswa.filter(s => s.kelas == kls).forEach(s => sEl.innerHTML += `<option value="${s.nama}">${s.nama}</option>`);
             
-            // Update Mapel
             fetch(`${BASE_URL}?action=getMapel&kelas=${kls}`)
                 .then(res => res.json())
                 .then(mapels => {
@@ -147,34 +114,31 @@
                 });
         }
 
-function showLoading(status) {
-    const loader = document.getElementById('loading-overlay');
-    status ? loader.classList.remove('hidden') : loader.classList.add('hidden');
-}
-        
-function persiapanMulai() {
-    const kls = document.getElementById('selKelas').value;
-    const mpl = document.getElementById('selMapel').value;
-    if(!kls || !mpl) return alert("Lengkapi data!");
+        function persiapanMulai() {
+            const kls = document.getElementById('selKelas').value;
+            const mpl = document.getElementById('selMapel').value;
+            if(!kls || !mpl) return alert("Lengkapi data!");
 
-    showLoading(true); // Aktifkan loading
+            // Tampilkan Loading
+            document.getElementById('loading-overlay').classList.remove('hidden');
 
-    document.getElementById('selKelas').disabled = true;
-    document.getElementById('selMapel').disabled = true;
-    document.getElementById('btnMulai').style.display = 'none';
+            document.getElementById('selKelas').disabled = true;
+            document.getElementById('selMapel').disabled = true;
+            document.getElementById('btnMulai').style.display = 'none';
 
-    fetch(`${BASE_URL}?action=getSoal&kelas=${kls}&mapel=${mpl}`)
-        .then(res => res.json())
-        .then(res => {
-            dataSoal = res;
-            showLoading(false); // Matikan loading setelah data dapat
-            startCountdown();
-        })
-        .catch(err => {
-            showLoading(false);
-            alert("Gagal memuat soal, periksa koneksi internet.");
-        });
-}
+            fetch(`${BASE_URL}?action=getSoal&kelas=${kls}&mapel=${mpl}`)
+                .then(res => res.json())
+                .then(res => {
+                    dataSoal = res;
+                    // Sembunyikan Loading
+                    document.getElementById('loading-overlay').classList.add('hidden');
+                    startCountdown();
+                })
+                .catch(err => {
+                    document.getElementById('loading-overlay').classList.add('hidden');
+                    alert("Gagal memuat soal!");
+                });
+        }
 
         function startCountdown() {
             document.getElementById('setup-area').classList.add('hidden');
@@ -193,48 +157,31 @@ function persiapanMulai() {
             }, 1000);
         }
 
- function formatWaktu(detikTotal) {
-    let jam = Math.floor(detikTotal / 3600);
-    let sisaSetelahJam = detikTotal % 3600;
-    let menit = Math.floor(sisaSetelahJam / 60);
-    let detik = sisaSetelahJam % 60;
+        function formatTimeLong(ms) {
+            let h = Math.floor(ms / 3600000);
+            let m = Math.floor((ms % 3600000) / 60000);
+            let s = Math.floor((ms % 60000) / 1000);
+            let mil = Math.floor((ms % 1000) / 10);
 
-    // Format: selalu tampilkan 0 di depan angka satuan (01, 02, dst)
-    let h = jam < 10 ? '0' + jam : jam;
-    let m = menit < 10 ? '0' + menit : menit;
-    let s = detik < 10 ? '0' + detik : detik;
-
-    // Jika waktu di atas 1 jam, tampilkan HH:MM:SS
-    // Jika di bawah 1 jam, cukup MM:SS
-    if (jam > 0) {
-        return `${h}:${m}:${s}`;
-    } else {
-        return `${m}:${s}`;
-    }
-}
-
-function initQuiz() {
-    // Pastikan timer sebelumnya bersih jika ada
-    if (timer) clearInterval(timer);
-
-    // Ambil waktu dari soal pertama (dalam menit) dan ubah ke detik
-    timeLeft = parseInt(dataSoal[0].waktu) * 60;
-
-    renderSoal();
-
-    timer = setInterval(() => {
-        // Update tampilan menggunakan fungsi helper
-        document.getElementById('timerDisplay').innerText = formatWaktu(timeLeft);
-
-        if (timeLeft <= 0) {
-            clearInterval(timer); // Hentikan interval
-            finishQuiz();        // Panggil fungsi selesai
-            return;              // Keluar dari fungsi agar tidak lanjut ke timeLeft--
+            let pad = (n) => n.toString().padStart(2, '0');
+            return `${pad(h)}:${pad(m)}:${pad(s)}:${pad(mil)}`;
         }
 
-        timeLeft--;
-    }, 1000);
-}
+        function initQuiz() {
+            timeRemaining = dataSoal[0].waktu * 60 * 1000;
+            renderSoal();
+            
+            // Update setiap 50ms untuk kelancaran milidetik
+            timer = setInterval(() => {
+                timeRemaining -= 50;
+                document.getElementById('timerDisplay').innerText = formatTimeLong(timeRemaining);
+                
+                if(timeRemaining <= 0) {
+                    clearInterval(timer);
+                    finishQuiz(true); // Kirim flag true agar tidak tanya konfirmasi lagi
+                }
+            }, 50);
+        }
 
         function renderSoal() {
             const s = dataSoal[idx];
@@ -250,57 +197,42 @@ function initQuiz() {
         }
 
         function go(i) { idx = i; renderSoal(); }
-function saveAns() {
-    const input = document.getElementById('ansInput').value.toUpperCase();
-    if(input === "") return alert("Isi jawaban dulu!");
 
-    userAnswers[idx] = input;
-    
-    // Tampilkan Toast
-    const toast = document.getElementById('toast-msg');
-    toast.style.opacity = "1";
-    
-    // Hilangkan Toast setelah 2 detik
-    setTimeout(() => {
-        toast.style.opacity = "0";
-    }, 2000);
-}
+        function saveAns() { 
+            userAnswers[idx] = document.getElementById('ansInput').value.toUpperCase(); 
+            // Tampilkan Teks Sementara (Toast)
+            const toast = document.getElementById('toast-msg');
+            toast.style.opacity = "1";
+            setTimeout(() => { toast.style.opacity = "0"; }, 2000);
+        }
+
         function zoom(v) { scale = Math.min(Math.max(0.5, scale + v), 2); document.getElementById('imgSoal').style.transform = `scale(${scale})`; }
-        function reloadImg() { const src = document.getElementById('imgSoal').src; document.getElementById('imgSoal').src = src.split('?')[0] + '?t=' + Date.now(); }
+        function reloadImg() { const img = document.getElementById('imgSoal'); const src = img.src.split('?')[0]; img.src = src + '?t=' + Date.now(); }
 
-function finishQuiz() {
-    if(!confirm("Yakin ingin menyelesaikan kuis?")) return;
-    
-    clearInterval(timer);
-    showLoading(true); // Loading saat hitung & kirim data
+        function finishQuiz(auto = false) {
+            // Notifikasi Konfirmasi
+            if(!auto) {
+                if(!confirm("Apakah Anda yakin ingin menyelesaikan kuis? Periksa kembali jawaban Anda.")) return;
+            }
 
-    let benar = 0;
-    dataSoal.forEach((s, i) => { if((userAnswers[i]||"") === s.kunci.toUpperCase()) benar++; });
-    const skor = (benar / dataSoal.length) * 100;
+            clearInterval(timer);
+            let benar = 0;
+            dataSoal.forEach((s, i) => { if((userAnswers[i]||"") === s.kunci.toUpperCase()) benar++; });
+            const skor = (benar / dataSoal.length) * 100;
 
-    const hasil = {
-        nama: document.getElementById('selSiswa').value,
-        kelas: document.getElementById('selKelas').value,
-        mapel: document.getElementById('selMapel').value,
-        nilai: skor.toFixed(2)
-    };
+            const hasil = {
+                nama: document.getElementById('selSiswa').value,
+                kelas: document.getElementById('selKelas').value,
+                mapel: document.getElementById('selMapel').value,
+                nilai: skor.toFixed(2)
+            };
 
-    fetch(BASE_URL, { method: 'POST', body: JSON.stringify(hasil) })
-    .then(() => {
-        showLoading(false);
-        document.getElementById('quiz-area').innerHTML = ""; 
-        document.getElementById('result-area').classList.remove('hidden');
-        document.getElementById('nilaiBesar').innerText = "Nilai Kuis Anda\n" + skor.toFixed(2);
-    })
-    .catch(() => {
-        // Tetap tampilkan nilai jika pengiriman gagal (opsional)
-        showLoading(false);
-        alert("Nilai gagal terkirim ke database, tapi ini skor Anda.");
-        document.getElementById('quiz-area').innerHTML = ""; 
-        document.getElementById('result-area').classList.remove('hidden');
-        document.getElementById('nilaiBesar').innerText = "Nilai Kuis Anda\n" + skor.toFixed(2);
-    });
-}
+            fetch(BASE_URL, { method: 'POST', body: JSON.stringify(hasil) });
+
+            document.getElementById('quiz-area').innerHTML = ""; 
+            document.getElementById('result-area').classList.remove('hidden');
+            document.getElementById('nilaiBesar').innerText = "Nilai Kuis Anda\n" + skor.toFixed(2);
+        }
 
         function showReview() {
             document.getElementById('nilaiBesar').classList.add('hidden');
@@ -323,7 +255,6 @@ function finishQuiz() {
             document.getElementById('review-list').classList.add('hidden');
             document.getElementById('btnBackToScore').classList.add('hidden');
         }
-      
     </script>
 </body>
 </html>
