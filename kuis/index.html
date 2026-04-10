@@ -7,9 +7,56 @@
     <style>
         .box-soal { position: relative; overflow: hidden; border: 2px solid #e5e7eb; }
         #imgSoal { width: 100%; transition: transform 0.2s; transform-origin: top left; }
+
+        /* Animasi Spinner Loading */
+.loader {
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #3498db;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Overlay Loading */
+#loading-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(255, 255, 255, 0.8);
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    z-index: 9999;
+}
+
+/* Animasi Toast Jawaban */
+#toast-msg {
+    position: fixed;
+    bottom: 20px; right: 20px;
+    background: #10b981;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: bold;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    z-index: 1000;
+}
     </style>
 </head>
 <body class="bg-slate-100 p-4">
+
+    <div id="loading-overlay" class="hidden">
+    <div class="loader"></div>
+    <p class="mt-4 font-bold text-blue-600">Sedang memuat data...</p>
+</div>
+
+<div id="toast-msg">Jawaban berhasil disimpan!</div>
+    
     <div class="max-w-3xl mx-auto bg-white shadow-xl rounded-xl p-6">
         <h1 class="text-3xl font-extrabold text-center text-blue-800 mb-8">KUIS A+ COURSE</h1>
 
@@ -100,22 +147,34 @@
                 });
         }
 
-        function persiapanMulai() {
-            const kls = document.getElementById('selKelas').value;
-            const mpl = document.getElementById('selMapel').value;
-            if(!kls || !mpl) return alert("Lengkapi data!");
+function showLoading(status) {
+    const loader = document.getElementById('loading-overlay');
+    status ? loader.classList.remove('hidden') : loader.classList.add('hidden');
+}
+        
+function persiapanMulai() {
+    const kls = document.getElementById('selKelas').value;
+    const mpl = document.getElementById('selMapel').value;
+    if(!kls || !mpl) return alert("Lengkapi data!");
 
-            document.getElementById('selKelas').disabled = true;
-            document.getElementById('selMapel').disabled = true;
-            document.getElementById('btnMulai').style.display = 'none';
+    showLoading(true); // Aktifkan loading
 
-            fetch(`${BASE_URL}?action=getSoal&kelas=${kls}&mapel=${mpl}`)
-                .then(res => res.json())
-                .then(res => {
-                    dataSoal = res;
-                    startCountdown();
-                });
-        }
+    document.getElementById('selKelas').disabled = true;
+    document.getElementById('selMapel').disabled = true;
+    document.getElementById('btnMulai').style.display = 'none';
+
+    fetch(`${BASE_URL}?action=getSoal&kelas=${kls}&mapel=${mpl}`)
+        .then(res => res.json())
+        .then(res => {
+            dataSoal = res;
+            showLoading(false); // Matikan loading setelah data dapat
+            startCountdown();
+        })
+        .catch(err => {
+            showLoading(false);
+            alert("Gagal memuat soal, periksa koneksi internet.");
+        });
+}
 
         function startCountdown() {
             document.getElementById('setup-area').classList.add('hidden');
@@ -134,17 +193,48 @@
             }, 1000);
         }
 
-        function initQuiz() {
-            timeLeft = dataSoal[0].waktu * 60;
-            renderSoal();
-            timer = setInterval(() => {
-                let m = Math.floor(timeLeft / 60);
-                let s = timeLeft % 60;
-                document.getElementById('timerDisplay').innerText = `${m}:${s < 10 ? '0'+s : s}`;
-                if(timeLeft <= 0) finishQuiz();
-                timeLeft--;
-            }, 1000);
+ function formatWaktu(detikTotal) {
+    let jam = Math.floor(detikTotal / 3600);
+    let sisaSetelahJam = detikTotal % 3600;
+    let menit = Math.floor(sisaSetelahJam / 60);
+    let detik = sisaSetelahJam % 60;
+
+    // Format: selalu tampilkan 0 di depan angka satuan (01, 02, dst)
+    let h = jam < 10 ? '0' + jam : jam;
+    let m = menit < 10 ? '0' + menit : menit;
+    let s = detik < 10 ? '0' + detik : detik;
+
+    // Jika waktu di atas 1 jam, tampilkan HH:MM:SS
+    // Jika di bawah 1 jam, cukup MM:SS
+    if (jam > 0) {
+        return `${h}:${m}:${s}`;
+    } else {
+        return `${m}:${s}`;
+    }
+}
+
+function initQuiz() {
+    // Pastikan timer sebelumnya bersih jika ada
+    if (timer) clearInterval(timer);
+
+    // Ambil waktu dari soal pertama (dalam menit) dan ubah ke detik
+    timeLeft = parseInt(dataSoal[0].waktu) * 60;
+
+    renderSoal();
+
+    timer = setInterval(() => {
+        // Update tampilan menggunakan fungsi helper
+        document.getElementById('timerDisplay').innerText = formatWaktu(timeLeft);
+
+        if (timeLeft <= 0) {
+            clearInterval(timer); // Hentikan interval
+            finishQuiz();        // Panggil fungsi selesai
+            return;              // Keluar dari fungsi agar tidak lanjut ke timeLeft--
         }
+
+        timeLeft--;
+    }, 1000);
+}
 
         function renderSoal() {
             const s = dataSoal[idx];
@@ -160,29 +250,57 @@
         }
 
         function go(i) { idx = i; renderSoal(); }
-        function saveAns() { userAnswers[idx] = document.getElementById('ansInput').value.toUpperCase(); }
+function saveAns() {
+    const input = document.getElementById('ansInput').value.toUpperCase();
+    if(input === "") return alert("Isi jawaban dulu!");
+
+    userAnswers[idx] = input;
+    
+    // Tampilkan Toast
+    const toast = document.getElementById('toast-msg');
+    toast.style.opacity = "1";
+    
+    // Hilangkan Toast setelah 2 detik
+    setTimeout(() => {
+        toast.style.opacity = "0";
+    }, 2000);
+}
         function zoom(v) { scale = Math.min(Math.max(0.5, scale + v), 2); document.getElementById('imgSoal').style.transform = `scale(${scale})`; }
         function reloadImg() { const src = document.getElementById('imgSoal').src; document.getElementById('imgSoal').src = src.split('?')[0] + '?t=' + Date.now(); }
 
-        function finishQuiz() {
-            clearInterval(timer);
-            let benar = 0;
-            dataSoal.forEach((s, i) => { if((userAnswers[i]||"") === s.kunci.toUpperCase()) benar++; });
-            const skor = (benar / dataSoal.length) * 100;
+function finishQuiz() {
+    if(!confirm("Yakin ingin menyelesaikan kuis?")) return;
+    
+    clearInterval(timer);
+    showLoading(true); // Loading saat hitung & kirim data
 
-            const hasil = {
-                nama: document.getElementById('selSiswa').value,
-                kelas: document.getElementById('selKelas').value,
-                mapel: document.getElementById('selMapel').value,
-                nilai: skor.toFixed(2)
-            };
+    let benar = 0;
+    dataSoal.forEach((s, i) => { if((userAnswers[i]||"") === s.kunci.toUpperCase()) benar++; });
+    const skor = (benar / dataSoal.length) * 100;
 
-            fetch(BASE_URL, { method: 'POST', body: JSON.stringify(hasil) });
+    const hasil = {
+        nama: document.getElementById('selSiswa').value,
+        kelas: document.getElementById('selKelas').value,
+        mapel: document.getElementById('selMapel').value,
+        nilai: skor.toFixed(2)
+    };
 
-            document.getElementById('quiz-area').innerHTML = ""; 
-            document.getElementById('result-area').classList.remove('hidden');
-            document.getElementById('nilaiBesar').innerText = "Nilai Kuis Anda\n" + skor.toFixed(2);
-        }
+    fetch(BASE_URL, { method: 'POST', body: JSON.stringify(hasil) })
+    .then(() => {
+        showLoading(false);
+        document.getElementById('quiz-area').innerHTML = ""; 
+        document.getElementById('result-area').classList.remove('hidden');
+        document.getElementById('nilaiBesar').innerText = "Nilai Kuis Anda\n" + skor.toFixed(2);
+    })
+    .catch(() => {
+        // Tetap tampilkan nilai jika pengiriman gagal (opsional)
+        showLoading(false);
+        alert("Nilai gagal terkirim ke database, tapi ini skor Anda.");
+        document.getElementById('quiz-area').innerHTML = ""; 
+        document.getElementById('result-area').classList.remove('hidden');
+        document.getElementById('nilaiBesar').innerText = "Nilai Kuis Anda\n" + skor.toFixed(2);
+    });
+}
 
         function showReview() {
             document.getElementById('nilaiBesar').classList.add('hidden');
@@ -205,6 +323,7 @@
             document.getElementById('review-list').classList.add('hidden');
             document.getElementById('btnBackToScore').classList.add('hidden');
         }
+      
     </script>
 </body>
 </html>
