@@ -9,21 +9,19 @@
         .box-soal { position: relative; overflow: hidden; border: 2px solid #e5e7eb; border-radius: 8px; }
         #imgSoal { width: 100%; transition: transform 0.2s; transform-origin: top left; }
         
-        /* Animasi Spinner Loading */
         .loader { border: 4px solid #f3f3f3; border-top: 4px solid #2563eb; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(3600deg); } }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
         #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; }
         
-        /* Toast Jawaban Tersimpan */
-        #toast-msg { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #10b981; color: white; padding: 10px 20px; border-radius: 99px; font-weight: bold; opacity: 0; transition: opacity 0.3s; z-index: 1000; pointer-events: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        #toast-msg { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #10b981; color: white; padding: 10px 20px; border-radius: 99px; font-weight: bold; opacity: 0; transition: opacity 0.3s; z-index: 1000; pointer-events: none; }
     </style>
 </head>
 <body class="bg-slate-100 p-2 sm:p-4">
 
     <div id="loading-overlay" class="hidden">
         <div class="loader"></div>
-        <p class="mt-4 font-bold text-blue-600 animate-pulse">Menyiapkan Soal...</p>
+        <p class="mt-4 font-bold text-blue-600">Memuat Soal...</p>
     </div>
 
     <div id="toast-msg">Jawaban Tersimpan!</div>
@@ -32,13 +30,13 @@
         <h1 class="text-2xl sm:text-3xl font-extrabold text-center text-blue-800 mb-6">KUIS A+ COURSE</h1>
 
         <div id="setup-area" class="space-y-4">
-            <select id="selKelas" class="w-full border p-3 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none" onchange="updateSiswaDanMapel()">
+            <select id="selKelas" class="w-full border p-3 rounded-lg outline-none focus:ring-2 focus:ring-blue-400" onchange="updateSiswaDanMapel()">
                 <option value="">-- Pilih Kelas --</option>
             </select>
-            <select id="selSiswa" class="w-full border p-3 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none">
+            <select id="selSiswa" class="w-full border p-3 rounded-lg outline-none focus:ring-2 focus:ring-blue-400">
                 <option value="">-- Pilih Nama Siswa --</option>
             </select>
-            <select id="selMapel" class="w-full border p-3 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none">
+            <select id="selMapel" class="w-full border p-3 rounded-lg outline-none focus:ring-2 focus:ring-blue-400">
                 <option value="">-- Pilih Mata Pelajaran --</option>
             </select>
             <button onclick="persiapanMulai()" id="btnMulai" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition active:scale-95">MULAI KUIS</button>
@@ -64,11 +62,11 @@
                 <div id="nomor-pills" class="flex flex-wrap gap-2 mb-6 justify-center"></div>
 
                 <div class="flex flex-col sm:flex-row gap-2 mb-6">
-                    <input type="text" id="ansInput" class="flex-1 border-2 border-blue-200 p-3 rounded-lg text-center font-bold uppercase focus:border-blue-500 outline-none" placeholder="Ketik Jawaban...">
-                    <button onclick="saveAns()" class="bg-green-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-green-700 active:scale-95 transition">SIMPAN JAWABAN</button>
+                    <input type="text" id="ansInput" class="flex-1 border-2 border-blue-200 p-3 rounded-lg text-center font-bold uppercase focus:border-blue-500 outline-none" placeholder="Jawaban...">
+                    <button onclick="saveAns()" class="bg-green-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-green-700 active:scale-95 transition">SIMPAN</button>
                 </div>
 
-                <button onclick="finishQuiz()" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-blue-700 active:scale-95 transition">SELESAIKAN KUIS</button>
+                <button onclick="finishQuiz()" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-blue-700 transition">SELESAIKAN KUIS</button>
             </div>
         </div>
 
@@ -76,7 +74,6 @@
             <div id="nilaiBesar" class="text-5xl sm:text-6xl font-black text-blue-700 py-10"></div>
             <button onclick="showReview()" class="bg-green-600 text-white px-8 py-3 rounded-lg font-bold">Lihat Kunci Jawaban</button>
             <div id="review-list" class="hidden mt-8 text-left space-y-8"></div>
-            <button id="btnBackToScore" onclick="backToScore()" class="hidden w-full mt-6 bg-red-500 text-white py-2 rounded">Kembali</button>
         </div>
     </div>
 
@@ -89,29 +86,31 @@
         let idx = 0;
         let scale = 1;
         let timer;
-        let timeRemainingMs; // Menggunakan milidetik
+        let timeRemainingMs;
 
-        // 1. Ambil Data Awal (Hanya Sekali)
-        window.onload = () => {
+        // Load awal HANYA untuk mengambil daftar kelas
+        window.onload = function() {
             fetch(`${BASE_URL}?action=getInitial`)
                 .then(res => res.json())
                 .then(data => {
                     dbSiswa = data.siswa;
                     const el = document.getElementById('selKelas');
                     data.kelasUnique.forEach(k => {
-                        let opt = document.createElement('option');
-                        opt.value = k; opt.innerText = k;
-                        el.appendChild(opt);
+                        el.innerHTML += `<option value="${k}">${k}</option>`;
                     });
                 });
         };
 
         function updateSiswaDanMapel() {
             const kls = document.getElementById('selKelas').value;
+            if(!kls) return;
+
+            // Update Siswa
             const sEl = document.getElementById('selSiswa');
             sEl.innerHTML = '<option value="">-- Pilih Nama Siswa --</option>';
             dbSiswa.filter(s => s.kelas == kls).forEach(s => sEl.innerHTML += `<option value="${s.nama}">${s.nama}</option>`);
             
+            // Update Mapel
             fetch(`${BASE_URL}?action=getMapel&kelas=${kls}`)
                 .then(res => res.json())
                 .then(mapels => {
@@ -125,21 +124,22 @@
             const kls = document.getElementById('selKelas').value;
             const mpl = document.getElementById('selMapel').value;
             const sis = document.getElementById('selSiswa').value;
-            if(!kls || !mpl || !sis) return alert("Harap lengkapi semua data!");
+            if(!kls || !mpl || !sis) return alert("Lengkapi pilihan!");
 
-            // Tampilkan Loading
+            // TAMPILKAN LOADING (Hanya saat ini)
             document.getElementById('loading-overlay').classList.remove('hidden');
 
             fetch(`${BASE_URL}?action=getSoal&kelas=${kls}&mapel=${mpl}`)
                 .then(res => res.json())
                 .then(res => {
                     dataSoal = res;
-                    document.getElementById('loading-overlay').classList.add('hidden'); // Sembunyikan Loading
+                    // SEMBUNYIKAN LOADING
+                    document.getElementById('loading-overlay').classList.add('hidden');
                     startCountdown();
                 })
-                .catch(err => {
+                .catch(() => {
                     document.getElementById('loading-overlay').classList.add('hidden');
-                    alert("Koneksi gagal/Server sibuk. Coba lagi.");
+                    alert("Gagal mengambil soal. Coba lagi.");
                 });
         }
 
@@ -160,7 +160,6 @@
             }, 1000);
         }
 
-        // Fungsi Format Timer Jam:Menit:Detik:Milidetik
         function formatTimeLong(ms) {
             if (ms < 0) ms = 0;
             let h = Math.floor(ms / 3600000);
@@ -172,18 +171,14 @@
         }
 
         function initQuiz() {
-            // Ubah menit dari spreadsheet ke milidetik
             timeRemainingMs = parseFloat(dataSoal[0].waktu) * 60 * 1000;
             renderSoal();
-            
-            // Update tampilan setiap 50 milidetik agar milidetik terlihat berjalan
             timer = setInterval(() => {
                 timeRemainingMs -= 50;
                 document.getElementById('timerDisplay').innerText = formatTimeLong(timeRemainingMs);
-                
                 if(timeRemainingMs <= 0) {
                     clearInterval(timer);
-                    finishQuiz(true); // Selesai otomatis tanpa konfirmasi
+                    finishQuiz(true);
                 }
             }, 50);
         }
@@ -196,20 +191,17 @@
             const p = document.getElementById('nomor-pills');
             p.innerHTML = "";
             dataSoal.forEach((_, i) => {
-                const active = i === idx ? 'bg-blue-600 text-white scale-110' : 'bg-gray-200';
-                p.innerHTML += `<button onclick="go(${i})" class="w-10 h-10 rounded-full font-bold transition ${active}">${i+1}</button>`;
+                const active = i === idx ? 'bg-blue-600 text-white' : 'bg-gray-200';
+                p.innerHTML += `<button onclick="go(${i})" class="w-10 h-10 rounded-full font-bold ${active}">${i+1}</button>`;
             });
-            // Fokus ke input untuk kenyamanan
-            document.getElementById('ansInput').focus();
         }
 
-        function go(i) { 
-            saveAnsSilently(); // Simpan otomatis saat pindah nomor
+        function go(i) {
+            userAnswers[idx] = document.getElementById('ansInput').value.toUpperCase(); 
             idx = i; 
             renderSoal(); 
         }
 
-        // Simpan dengan notifikasi toast
         function saveAns() { 
             userAnswers[idx] = document.getElementById('ansInput').value.toUpperCase(); 
             const toast = document.getElementById('toast-msg');
@@ -217,29 +209,17 @@
             setTimeout(() => { toast.style.opacity = "0"; }, 1500);
         }
 
-        // Simpan tanpa notifikasi (saat pindah soal)
-        function saveAnsSilently() {
-            userAnswers[idx] = document.getElementById('ansInput').value.toUpperCase(); 
-        }
-
-        function zoom(v) { 
-            scale = Math.min(Math.max(0.5, scale + v), 3); 
-            document.getElementById('imgSoal').style.transform = `scale(${scale})`; 
-        }
-
+        function zoom(v) { scale = Math.min(Math.max(0.5, scale + v), 3); document.getElementById('imgSoal').style.transform = `scale(${scale})`; }
         function reloadImg() { 
-            const img = document.getElementById('imgSoal'); 
-            const currentSrc = img.src.split('?')[0]; 
-            img.src = currentSrc + '?t=' + Date.now(); 
+            const img = document.getElementById('imgSoal');
+            img.src = img.src.split('?')[0] + '?t=' + Date.now(); 
         }
 
         function finishQuiz(auto = false) {
-            if(!auto) {
-                if(!confirm("Yakin ingin mengakhiri kuis dan mengirim nilai?")) return;
-            }
+            if(!auto && !confirm("Yakin ingin menyelesaikan kuis?")) return;
 
             clearInterval(timer);
-            saveAnsSilently();
+            userAnswers[idx] = document.getElementById('ansInput').value.toUpperCase(); 
 
             let benar = 0;
             dataSoal.forEach((s, i) => { if((userAnswers[i]||"") === s.kunci.toUpperCase()) benar++; });
@@ -252,37 +232,27 @@
                 nilai: skor.toFixed(2)
             };
 
-            // Kirim data ke background
             fetch(BASE_URL, { method: 'POST', body: JSON.stringify(hasil) });
 
             document.getElementById('quiz-area').innerHTML = ""; 
             document.getElementById('result-area').classList.remove('hidden');
-            document.getElementById('nilaiBesar').innerHTML = `<p class='text-xl text-slate-500'>Skor Anda:</p>${skor.toFixed(2)}`;
+            document.getElementById('nilaiBesar').innerHTML = `<p class='text-xl'>Skor Anda:</p>${skor.toFixed(2)}`;
         }
 
         function showReview() {
-            document.getElementById('nilaiBesar').classList.add('hidden');
-            document.getElementById('review-list').classList.remove('hidden');
-            document.getElementById('btnBackToScore').classList.remove('hidden');
             const list = document.getElementById('review-list');
+            list.classList.remove('hidden');
             list.innerHTML = "";
             dataSoal.forEach((s, i) => {
                 const u = userAnswers[i] || "-";
-                const cek = u === s.kunci.toUpperCase() ? "text-green-600 font-bold" : "text-red-600 font-bold";
-                const simbol = u === s.kunci.toUpperCase() ? "✅" : "❌";
-                list.innerHTML += `<div class="border-b-2 pb-6 bg-slate-50 p-3 rounded-lg">
-                    <p class="font-bold text-blue-800 mb-2">Soal No. ${i+1}</p>
-                    <img src="${s.soalUrl}" class="w-full rounded mb-3 border">
-                    <p class="${cek}">Jawaban Anda: ${u} ${simbol}</p>
-                    <p class="text-slate-600">Kunci: ${s.kunci}</p>
+                const isBenar = u === s.kunci.toUpperCase();
+                list.innerHTML += `<div class="border-b pb-4">
+                    <p class="font-bold">No. ${i+1}</p>
+                    <img src="${s.soalUrl}" class="w-full mb-2 border">
+                    <p class="${isBenar ? 'text-green-600' : 'text-red-600'} font-bold">Jawaban Anda: ${u} ${isBenar ? '✅' : '❌'}</p>
+                    <p>Kunci: ${s.kunci}</p>
                 </div>`;
             });
-        }
-
-        function backToScore() {
-            document.getElementById('nilaiBesar').classList.remove('hidden');
-            document.getElementById('review-list').classList.add('hidden');
-            document.getElementById('btnBackToScore').classList.add('hidden');
         }
     </script>
 </body>
