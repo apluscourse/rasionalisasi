@@ -209,39 +209,44 @@
         function reloadImg() { const img = document.getElementById('imgSoal'); img.src = img.src.split('?')[0] + '?t=' + Date.now(); }
 
 function finishQuiz(auto = false) {
-            if(!auto && !confirm("Kirim jawaban sekarang?")) return;
-            clearInterval(timer);
-            userAnswers[idx] = document.getElementById('ansInput').value.toUpperCase(); 
+    if(!auto && !confirm("Kirim jawaban sekarang?")) return;
+    clearInterval(timer);
+    
+    // Pastikan jawaban terakhir tersimpan
+    userAnswers[idx] = document.getElementById('ansInput').value.toUpperCase(); 
 
-            let benar = 0;
-            dataSoal.forEach((s, i) => { if((userAnswers[i]||"") === s.kunci.toUpperCase()) benar++; });
-            const skor = (benar / dataSoal.length) * 100;
+    let benar = 0;
+    dataSoal.forEach((s, i) => { 
+        if((userAnswers[i]||"") === s.kunci.toUpperCase()) benar++; 
+    });
+    const skor = (benar / dataSoal.length) * 100;
 
-            const payload = {
-                tanggal: new Date().toLocaleString('id-ID'),
-                nama: document.getElementById('selSiswa').value,
-                kelas: document.getElementById('selKelas').value,
-                mapel: document.getElementById('selMapel').value,
-                nilai: skor.toFixed(2)
-            };
+    // Payload ini dibuat persis seperti versi awal Anda yang berhasil
+    const hasil = {
+        nama: document.getElementById('selSiswa').value,
+        kelas: document.getElementById('selKelas').value,
+        mapel: document.getElementById('selMapel').value,
+        nilai: skor.toFixed(2)
+    };
 
-            document.getElementById('loading-overlay').style.display = 'flex';
+    document.getElementById('loading-overlay').style.display = 'flex';
 
-            // GUNAKAN CARA INI:
-            fetch(BASE_URL, {
-                method: 'POST',
-                body: JSON.stringify(payload) // Kirim sebagai string JSON murni
-            })
-            .then(res => {
-                // Walaupun kena CORS error di console, biasanya data sudah masuk
-                console.log("Data terkirim");
-            })
-            .catch(err => console.log("CORS ignore:", err))
-            .finally(() => {
-                document.getElementById('loading-overlay').style.display = 'none';
-                tampilkanHasil(skor);
-            });
-        }
+    // Gunakan fetch sederhana seperti versi awal Anda
+    fetch(BASE_URL, { 
+        method: 'POST', 
+        body: JSON.stringify(hasil) 
+    })
+    .then(() => {
+        document.getElementById('loading-overlay').style.display = 'none';
+        tampilkanHasil(skor);
+    })
+    .catch(err => {
+        // Jika error tetap tampilkan hasil agar siswa tidak bingung
+        console.error(err);
+        document.getElementById('loading-overlay').style.display = 'none';
+        tampilkanHasil(skor);
+    });
+}
 
         function tampilkanHasil(skor) {
             document.getElementById('quiz-area').classList.add('hidden'); 
