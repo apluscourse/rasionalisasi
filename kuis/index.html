@@ -2,52 +2,72 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KUIS A+ COURSE</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        .box-soal { position: relative; overflow: hidden; border: 2px solid #e5e7eb; }
+        /* Desain Box Soal & Image */
+        .box-soal { position: relative; overflow: hidden; border: 2px solid #e5e7eb; border-radius: 8px; }
         #imgSoal { width: 100%; transition: transform 0.2s; transform-origin: top left; }
+        
+        /* Spinner Animasi */
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #2563eb; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        /* Overlay Loading - Default Tersembunyi */
+        #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); z-index: 9999; display: none; flex-direction: column; justify-content: center; align-items: center; }
+        
+        /* Toast Simpan Jawaban */
+        #toast-msg { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #10b981; color: white; padding: 10px 20px; border-radius: 99px; font-weight: bold; opacity: 0; transition: opacity 0.3s; z-index: 1000; pointer-events: none; }
     </style>
 </head>
-<body class="bg-slate-100 p-4">
-    <div class="max-w-3xl mx-auto bg-white shadow-xl rounded-xl p-6">
-        <h1 class="text-3xl font-extrabold text-center text-blue-800 mb-8">KUIS A+ COURSE</h1>
+<body class="bg-slate-100 p-2 sm:p-4">
+
+    <div id="loading-overlay">
+        <div class="loader"></div>
+        <p class="mt-4 font-bold text-blue-600">Memuat Soal...</p>
+    </div>
+
+    <div id="toast-msg">Jawaban Tersimpan!</div>
+
+    <div class="max-w-3xl mx-auto bg-white shadow-xl rounded-xl p-4 sm:p-6">
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-center text-blue-800 mb-6">KUIS A+ COURSE</h1>
 
         <div id="setup-area" class="space-y-4">
-            <select id="selKelas" class="w-full border p-3 rounded" onchange="updateSiswaDanMapel()">
+            <select id="selKelas" class="w-full border p-3 rounded-lg outline-none focus:ring-2 focus:ring-blue-400" onchange="updateSiswaDanMapel()">
                 <option value="">-- Pilih Kelas --</option>
             </select>
-            <select id="selSiswa" class="w-full border p-3 rounded">
+            <select id="selSiswa" class="w-full border p-3 rounded-lg outline-none">
                 <option value="">-- Pilih Nama Siswa --</option>
             </select>
-            <select id="selMapel" class="w-full border p-3 rounded">
+            <select id="selMapel" class="w-full border p-3 rounded-lg outline-none">
                 <option value="">-- Pilih Mata Pelajaran --</option>
             </select>
-            <button onclick="persiapanMulai()" id="btnMulai" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition">MULAI KUIS</button>
+            <button onclick="persiapanMulai()" id="btnMulai" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition active:scale-95">MULAI KUIS</button>
         </div>
 
         <div id="quiz-area" class="hidden">
             <div id="countdown" class="text-7xl font-bold text-center py-20 text-blue-600"></div>
             
             <div id="main-quiz" class="hidden">
-                <div class="flex justify-between items-center bg-slate-800 text-white p-3 rounded-t-lg">
-                    <div id="timerDisplay" class="text-xl font-mono font-bold">00:00</div>
+                <div class="flex flex-col sm:flex-row justify-between items-center bg-slate-800 text-white p-3 rounded-t-lg gap-3">
+                    <div id="timerDisplay" class="text-xl font-mono font-bold text-yellow-400">00:00:00:00</div>
                     <div class="flex gap-2">
                         <button onclick="reloadImg()" class="bg-slate-600 px-3 py-1 rounded text-xs">Reload</button>
-                        <button onclick="zoom(0.1)" class="bg-slate-600 px-3 py-1 rounded text-xs">Zoom In</button>
-                        <button onclick="zoom(-0.1)" class="bg-slate-600 px-3 py-1 rounded text-xs">Zoom Out</button>
+                        <button onclick="zoom(0.1)" class="bg-slate-600 px-3 py-1 rounded text-xs">Zoom +</button>
+                        <button onclick="zoom(-0.1)" class="bg-slate-600 px-3 py-1 rounded text-xs">Zoom -</button>
                     </div>
                 </div>
 
-                <div class="box-soal bg-white p-1">
+                <div class="box-soal bg-white p-1 mb-4">
                     <img id="imgSoal" src="" alt="Soal">
                 </div>
 
-                <div id="nomor-pills" class="flex flex-wrap gap-2 my-4 justify-center"></div>
+                <div id="nomor-pills" class="flex flex-wrap gap-2 mb-6 justify-center"></div>
 
-                <div class="flex gap-2 mb-6">
-                    <input type="text" id="ansInput" class="flex-1 border-2 border-blue-200 p-3 rounded text-center font-bold uppercase" placeholder="Jawaban Anda...">
-                    <button onclick="saveAns()" class="bg-green-600 text-white px-6 rounded font-bold hover:bg-green-700">Simpan</button>
+                <div class="flex flex-col sm:flex-row gap-2 mb-6">
+                    <input type="text" id="ansInput" class="flex-1 border-2 border-blue-200 p-3 rounded-lg text-center font-bold uppercase focus:border-blue-500 outline-none" placeholder="Jawaban...">
+                    <button onclick="saveAns()" class="bg-green-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-green-700 transition">SIMPAN</button>
                 </div>
 
                 <button onclick="finishQuiz()" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg">SELESAIKAN KUIS</button>
@@ -55,16 +75,14 @@
         </div>
 
         <div id="result-area" class="hidden text-center">
-            <div id="nilaiBesar" class="text-6xl font-black text-blue-700 py-10"></div>
+            <div id="nilaiBesar" class="text-5xl sm:text-6xl font-black text-blue-700 py-10"></div>
             <button onclick="showReview()" class="bg-green-600 text-white px-8 py-3 rounded-lg font-bold">Lihat Kunci Jawaban</button>
-            
             <div id="review-list" class="hidden mt-8 text-left space-y-8"></div>
-            <button id="btnBackToScore" onclick="backToScore()" class="hidden w-full mt-6 bg-red-500 text-white py-2 rounded">Kembali</button>
         </div>
     </div>
 
     <script>
-        const BASE_URL = 'https://script.google.com/macros/s/AKfycbxf0ZgZar3CLeVHSZ7QKWi6YL3oC1KrcGzum_oNQhOmkqpVKUtPbBuKNi5YtubJtZh6/exec'; // Masukkan URL Web App Apps Script
+        const BASE_URL = 'https://script.google.com/macros/s/AKfycbxf0ZgZar3CLeVHSZ7QKWi6YL3oC1KrcGzum_oNQhOmkqpVKUtPbBuKNi5YtubJtZh6/exec'; 
         
         let dbSiswa = [];
         let dataSoal = [];
@@ -72,25 +90,34 @@
         let idx = 0;
         let scale = 1;
         let timer;
-        let timeLeft = 0;
+        let timeRemainingMs;
 
-        // Load awal
-        fetch(`${BASE_URL}?action=getInitial`)
-            .then(res => res.json())
-            .then(data => {
-                dbSiswa = data.siswa;
-                const el = document.getElementById('selKelas');
-                data.kelasUnique.forEach(k => el.innerHTML += `<option value="${k}">${k}</option>`);
-            });
+        // LOAD AWAL HANYA UNTUK KELAS
+        window.onload = function() {
+            // Memastikan loading benar-benar tertutup saat refresh
+            document.getElementById('loading-overlay').style.display = 'none';
+
+            fetch(`${BASE_URL}?action=getInitial`)
+                .then(res => res.json())
+                .then(data => {
+                    dbSiswa = data.siswa;
+                    const el = document.getElementById('selKelas');
+                    data.kelasUnique.forEach(k => {
+                        let opt = document.createElement('option');
+                        opt.value = k; opt.text = k;
+                        el.add(opt);
+                    });
+                });
+        };
 
         function updateSiswaDanMapel() {
             const kls = document.getElementById('selKelas').value;
-            // Update Siswa
+            if(!kls) return;
+
             const sEl = document.getElementById('selSiswa');
             sEl.innerHTML = '<option value="">-- Pilih Nama Siswa --</option>';
             dbSiswa.filter(s => s.kelas == kls).forEach(s => sEl.innerHTML += `<option value="${s.nama}">${s.nama}</option>`);
             
-            // Update Mapel
             fetch(`${BASE_URL}?action=getMapel&kelas=${kls}`)
                 .then(res => res.json())
                 .then(mapels => {
@@ -103,17 +130,23 @@
         function persiapanMulai() {
             const kls = document.getElementById('selKelas').value;
             const mpl = document.getElementById('selMapel').value;
-            if(!kls || !mpl) return alert("Lengkapi data!");
+            const sis = document.getElementById('selSiswa').value;
+            if(!kls || !mpl || !sis) return alert("Pilih data dengan lengkap!");
 
-            document.getElementById('selKelas').disabled = true;
-            document.getElementById('selMapel').disabled = true;
-            document.getElementById('btnMulai').style.display = 'none';
+            // MUNCULKAN LOADING HANYA DI SINI
+            document.getElementById('loading-overlay').style.display = 'flex';
 
             fetch(`${BASE_URL}?action=getSoal&kelas=${kls}&mapel=${mpl}`)
                 .then(res => res.json())
                 .then(res => {
                     dataSoal = res;
+                    // SEMBUNYIKAN LOADING SETELAH DATA DAPAT
+                    document.getElementById('loading-overlay').style.display = 'none';
                     startCountdown();
+                })
+                .catch(() => {
+                    document.getElementById('loading-overlay').style.display = 'none';
+                    alert("Koneksi bermasalah.");
                 });
         }
 
@@ -134,16 +167,27 @@
             }, 1000);
         }
 
+        function formatTimeLong(ms) {
+            if (ms < 0) ms = 0;
+            let h = Math.floor(ms / 3600000);
+            let m = Math.floor((ms % 3600000) / 60000);
+            let s = Math.floor((ms % 60000) / 1000);
+            let mil = Math.floor((ms % 1000) / 10);
+            let pad = (n) => n.toString().padStart(2, '0');
+            return `${pad(h)}:${pad(m)}:${pad(s)}:${pad(mil)}`;
+        }
+
         function initQuiz() {
-            timeLeft = dataSoal[0].waktu * 60;
+            timeRemainingMs = parseFloat(dataSoal[0].waktu) * 60 * 1000;
             renderSoal();
             timer = setInterval(() => {
-                let m = Math.floor(timeLeft / 60);
-                let s = timeLeft % 60;
-                document.getElementById('timerDisplay').innerText = `${m}:${s < 10 ? '0'+s : s}`;
-                if(timeLeft <= 0) finishQuiz();
-                timeLeft--;
-            }, 1000);
+                timeRemainingMs -= 50;
+                document.getElementById('timerDisplay').innerText = formatTimeLong(timeRemainingMs);
+                if(timeRemainingMs <= 0) {
+                    clearInterval(timer);
+                    finishQuiz(true);
+                }
+            }, 50);
         }
 
         function renderSoal() {
@@ -159,13 +203,31 @@
             });
         }
 
-        function go(i) { idx = i; renderSoal(); }
-        function saveAns() { userAnswers[idx] = document.getElementById('ansInput').value.toUpperCase(); }
-        function zoom(v) { scale = Math.min(Math.max(0.5, scale + v), 2); document.getElementById('imgSoal').style.transform = `scale(${scale})`; }
-        function reloadImg() { const src = document.getElementById('imgSoal').src; document.getElementById('imgSoal').src = src.split('?')[0] + '?t=' + Date.now(); }
+        function go(i) {
+            userAnswers[idx] = document.getElementById('ansInput').value.toUpperCase(); 
+            idx = i; 
+            renderSoal(); 
+        }
 
-        function finishQuiz() {
+        function saveAns() { 
+            userAnswers[idx] = document.getElementById('ansInput').value.toUpperCase(); 
+            const toast = document.getElementById('toast-msg');
+            toast.style.opacity = "1";
+            setTimeout(() => { toast.style.opacity = "0"; }, 1500);
+        }
+
+        function zoom(v) { scale = Math.min(Math.max(0.5, scale + v), 3); document.getElementById('imgSoal').style.transform = `scale(${scale})`; }
+        function reloadImg() { 
+            const img = document.getElementById('imgSoal');
+            img.src = img.src.split('?')[0] + '?t=' + Date.now(); 
+        }
+
+        function finishQuiz(auto = false) {
+            if(!auto && !confirm("Yakin ingin menyelesaikan kuis?")) return;
+
             clearInterval(timer);
+            userAnswers[idx] = document.getElementById('ansInput').value.toUpperCase(); 
+
             let benar = 0;
             dataSoal.forEach((s, i) => { if((userAnswers[i]||"") === s.kunci.toUpperCase()) benar++; });
             const skor = (benar / dataSoal.length) * 100;
@@ -181,29 +243,23 @@
 
             document.getElementById('quiz-area').innerHTML = ""; 
             document.getElementById('result-area').classList.remove('hidden');
-            document.getElementById('nilaiBesar').innerText = "Nilai Kuis Anda\n" + skor.toFixed(2);
+            document.getElementById('nilaiBesar').innerHTML = `<p class='text-xl'>Skor Anda:</p>${skor.toFixed(2)}`;
         }
 
         function showReview() {
-            document.getElementById('nilaiBesar').classList.add('hidden');
-            document.getElementById('review-list').classList.remove('hidden');
-            document.getElementById('btnBackToScore').classList.remove('hidden');
             const list = document.getElementById('review-list');
+            list.classList.remove('hidden');
             list.innerHTML = "";
             dataSoal.forEach((s, i) => {
                 const u = userAnswers[i] || "-";
-                const cek = u === s.kunci.toUpperCase() ? "✅ BENAR" : "❌ SALAH";
-                list.innerHTML += `<div class="border-b pb-4">
-                    <img src="${s.soalUrl}" class="w-full mb-2">
-                    <p class="font-bold">Jawaban Anda: ${u} | Kunci: ${s.kunci} | ${cek}</p>
+                const isBenar = u === s.kunci.toUpperCase();
+                list.innerHTML += `<div class="border-b pb-4 mt-4">
+                    <p class="font-bold">No. ${i+1}</p>
+                    <img src="${s.soalUrl}" class="w-full mb-2 border">
+                    <p class="${isBenar ? 'text-green-600' : 'text-red-600'} font-bold">Jawaban Anda: ${u} ${isBenar ? '✅' : '❌'}</p>
+                    <p>Kunci: ${s.kunci}</p>
                 </div>`;
             });
-        }
-
-        function backToScore() {
-            document.getElementById('nilaiBesar').classList.remove('hidden');
-            document.getElementById('review-list').classList.add('hidden');
-            document.getElementById('btnBackToScore').classList.add('hidden');
         }
     </script>
 </body>
