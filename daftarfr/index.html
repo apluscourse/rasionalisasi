@@ -182,8 +182,8 @@ nav {
   </button>
   
   <div id="adminMenu" class="dropdown-menu">
-    <button onclick="finishRegistration('admin1')" class="block w-full text-left px-5 py-4 hover:bg-blue-50 text-blue-700 font-bold border-b transition-colors"> ✆ Admin 1 (085815023510) </button>
-    <button onclick="finishRegistration('admin2')" class="block w-full text-left px-5 py-4 hover:bg-blue-50 text-blue-700 font-bold transition-colors"> ✆ Admin 2 (0895423024582) </button>
+    <button onclick="finishRegistration('admin1')" class="block w-full text-left px-5 py-4 hover:bg-blue-50 text-blue-700 font-bold border-b transition-colors"> ✆ Admin 1 (0895423024582) </button>
+    <button onclick="finishRegistration('admin2')" class="block w-full text-left px-5 py-4 hover:bg-blue-50 text-blue-700 font-bold transition-colors"> ✆ Admin 2 (085815023510) </button>
   </div>
 </div>
       </div>
@@ -289,7 +289,7 @@ nav {
         });
 
         // 3. Redirect ke WhatsApp
-        const num = admin === 'admin1' ? '6285815023510' : '62895423024582';
+        const num = admin === 'admin1' ? '62895423024582' : '6285815023510';
         window.location.href = `https://api.whatsapp.com/send?phone=${num}&text=${encodeURIComponent(summaryText)}`;
 
       } catch (e) {
