@@ -246,9 +246,14 @@
 const API = "https://script.google.com/macros/s/AKfycbyoy-PrfcoFtptBY0BuaUp89vjxUgNRKQ_yggu6KpvAVwbxSpIxyKNpfNqGkMu1CE6nAQ/exec"; 
 const userEmail = sessionStorage.getItem("user_email");
 
-// Proteksi Halaman
-if (!userEmail) {
-    window.location.href = "index.html";
+// 1. PROTEKSI INSTAN (Mencegah Looping & Bypass)
+// Jika tidak ada email di session, langsung tendang keluar sebelum melakukan apapun
+if (!userEmail || userEmail === "" || userEmail === "null") {
+    console.log("Akses ilegal terdeteksi, mengalihkan ke login...");
+    window.location.replace("index.html"); // Menggunakan replace agar user tidak bisa tekan 'Back'
+} else {
+    // Jalankan fungsi load data hanya jika email ada
+    window.onload = loadUser;
 }
 
 function toggleMenu() {
@@ -271,24 +276,27 @@ function showSection(id, el) {
     el.classList.add('active');
     document.getElementById("section-title").innerText = id.charAt(0).toUpperCase() + id.slice(1);
     
-    // Auto-close sidebar on mobile after clicking menu
     if (window.innerWidth <= 768) {
         document.getElementById("sidebar").classList.remove("open");
     }
 }
 
 function loadUser() {
+    // Double check email sebelum fetch untuk keamanan tambahan
+    if (!userEmail) return logout();
+
     fetch(`${API}?action=get_user&email=${encodeURIComponent(userEmail)}`)
     .then(r => r.json())
     .then(d => {
-        // Crosscheck: Jika email tidak ada di sheet user (Force Logout)
+        // Jika API mengirim status force_logout (email tidak ada di sheet user)
         if (d.status === "force_logout") {
-            alert("Sesi berakhir atau akun tidak ditemukan. Silakan login kembali.");
+            alert("Akun tidak valid atau telah dihapus oleh Admin.");
             logout();
             return;
         }
 
         document.getElementById("loading-home").style.display = "none";
+        
         if (d.data_lengkap) {
             document.getElementById("view-biodata").style.display = "block";
             document.getElementById("form-biodata").style.display = "none";
@@ -301,8 +309,9 @@ function loadUser() {
         }
     })
     .catch(err => {
-        alert("Gagal memuat data. Periksa koneksi internet.");
-        console.error(err);
+        console.error("Fetch Error:", err);
+        // Jika gagal koneksi/error, jangan looping, cukup beri peringatan
+        document.getElementById("loading-home").innerHTML = "Gagal memuat data. Silakan coba login kembali.";
     });
 }
 
@@ -313,9 +322,7 @@ function simpanData() {
 
     if(!nama || !sekolah || !wa) return alert("Harap isi semua kolom!");
 
-    // Tampilkan loading saat simpan
     const btn = document.querySelector("#form-biodata .btn");
-    const originalText = btn.innerText;
     btn.innerText = "Menyimpan...";
     btn.disabled = true;
 
@@ -334,13 +341,11 @@ function simpanData() {
         if(d.status === "ok") {
             alert("Biodata berhasil diperbarui!");
             location.reload();
-        } else {
-            alert("Gagal menyimpan: " + d.message);
         }
     })
     .catch(err => alert("Terjadi kesalahan server."))
     .finally(() => {
-        btn.innerText = originalText;
+        btn.innerText = "Simpan & Masuk";
         btn.disabled = false;
     });
 }
@@ -355,12 +360,8 @@ function editMode() {
 
 function logout() {
     sessionStorage.clear();
-    window.location.href = "index.html";
+    window.location.replace("index.html");
 }
-
-// Inisialisasi
-loadUser();
 </script>
-
 </body>
 </html>
