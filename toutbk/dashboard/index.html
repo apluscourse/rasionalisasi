@@ -250,7 +250,7 @@ const userEmail = sessionStorage.getItem("user_email");
 // Jika tidak ada email di session, langsung tendang keluar sebelum melakukan apapun
 if (!userEmail || userEmail === "" || userEmail === "null") {
     console.log("Akses ilegal terdeteksi, mengalihkan ke login...");
-    window.location.replace("index.html"); // Menggunakan replace agar user tidak bisa tekan 'Back'
+    window.location.replace("/"); // Menggunakan replace agar user tidak bisa tekan 'Back'
 } else {
     // Jalankan fungsi load data hanya jika email ada
     window.onload = loadUser;
