@@ -1,131 +1,47 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <title>Dashboard TryoutUTBK</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        :root {
-            --blue: #1f6feb;
-            --blue2: #4fa3ff;
-            --bg: #f4f8ff;
-            --card: #ffffff;
-            --text: #1f2d3d;
-            --sidebar-w: 250px;
-        }
+<style>
+    #sidebar {
+        width: 250px;
+        height: 100vh;
+        background: white;
+        box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: fixed;
+        left: 0;
+        top: 0;
+        z-index: 1000;
+    }
 
-        body {
-            margin: 0;
-            font-family: 'Segoe UI', sans-serif;
-            background: var(--bg);
-            display: flex;
-        }
+    /* Kondisi Sidebar Sembunyi */
+    #sidebar.hidden {
+        transform: translateX(-250px);
+    }
 
-        /* SIDEBAR */
-        #sidebar {
-            width: var(--sidebar-w);
-            height: 100vh;
-            background: white;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.05);
-            transition: 0.3s;
-            position: fixed;
-            z-index: 100;
-        }
+    #main {
+        flex: 1;
+        margin-left: 250px; /* Jarak default sidebar */
+        padding: 30px;
+        transition: margin-left 0.3s;
+    }
 
-        #sidebar.closed { margin-left: -250px; }
+    /* Saat sidebar sembunyi, main content jadi penuh */
+    #main.full-width {
+        margin-left: 0;
+    }
 
-        .sidebar-header {
-            padding: 20px;
-            text-align: center;
-            border-bottom: 1px solid #eee;
-        }
+    .toggle-btn {
+        font-size: 20px;
+        cursor: pointer;
+        padding: 10px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        margin-right: 20px;
+    }
 
-        .menu-list { padding: 10px; }
-        .menu-item {
-            padding: 15px;
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-            border-radius: 12px;
-            margin-bottom: 5px;
-            font-weight: 600;
-            color: var(--text);
-            transition: 0.2s;
-        }
-
-        .menu-item i { margin-right: 15px; width: 20px; text-align: center; }
-        .menu-item:hover, .menu-item.active {
-            background: var(--bg);
-            color: var(--blue);
-        }
-
-        /* MAIN CONTENT */
-        #main {
-            flex: 1;
-            margin-left: var(--sidebar-w);
-            padding: 30px;
-            transition: 0.3s;
-        }
-        #main.full { margin-left: 0; }
-
-        .top-bar {
-            display: flex;
-            align-items: center;
-            margin-bottom: 30px;
-        }
-
-        .toggle-btn {
-            font-size: 24px;
-            cursor: pointer;
-            margin-right: 20px;
-        }
-
-        .content-section { display: none; }
-        .content-section.active { display: block; }
-
-        /* CARDS & FORMS */
-        .card {
-            background: white;
-            padding: 25px;
-            border-radius: 18px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            max-width: 500px;
-        }
-
-        input {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 15px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-        }
-
-        .btn {
-            background: var(--blue);
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 700;
-            width: 100%;
-            margin-bottom: 10px;
-        }
-
-        .btn-outline {
-            background: white;
-            color: var(--blue);
-            border: 2px solid var(--blue);
-        }
-
-        @media (max-width: 768px) {
-            #sidebar { margin-left: -250px; }
-            #sidebar.open { margin-left: 0; }
-            #main { margin-left: 0; }
-        }
-    </style>
-</head>
-<body>
+    @media (max-width: 768px) {
+        #main { margin-left: 0; }
+    }
+</style>
 
 <div id="sidebar">
     <div class="sidebar-header">
@@ -135,77 +51,45 @@
         <div class="menu-item active" onclick="showSection('home', this)"><i class="fas fa-home"></i> Home</div>
         <div class="menu-item" onclick="showSection('tryout', this)"><i class="fas fa-edit"></i> Tryout</div>
         <div class="menu-item" onclick="showSection('hasil', this)"><i class="fas fa-poll"></i> Hasil</div>
-        <div class="menu-item" style="color: red; margin-top: 50px;" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</div>
+        <div class="menu-item" style="color: #ff4757; margin-top: 50px;" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</div>
     </div>
 </div>
 
 <div id="main">
     <div class="top-bar">
-        <i class="fas fa-bars toggle-btn" onclick="toggleSidebar()"></i>
+        <div class="toggle-btn" onclick="toggleMenu()">
+            <i class="fas fa-bars"></i>
+        </div>
         <h2 id="section-title">Home</h2>
     </div>
-
-    <div id="home" class="content-section active">
-        <div id="loading-home">Memuat data...</div>
-        
-        <div id="form-biodata" class="card" style="display: none;">
-            <h3>Lengkapi Biodata</h3>
-            <p>Silakan isi data diri sebelum memulai.</p>
-            <input id="in-nama" placeholder="Nama Lengkap">
-            <input id="in-sekolah" placeholder="Asal Sekolah">
-            <input id="in-wa" placeholder="Nomor WhatsApp (Contoh: 0812...)">
-            <button class="btn" onclick="simpanData()">Simpan Biodata</button>
-        </div>
-
-        <div id="view-biodata" class="card" style="display: none;">
-            <p><strong>Nama:</strong> <span id="txt-nama">-</span></p>
-            <p><strong>Sekolah:</strong> <span id="txt-sekolah">-</span></p>
-            <p><strong>WhatsApp:</strong> <span id="txt-wa">-</span></p>
-            <button class="btn btn-outline" onclick="editMode()">Edit Data</button>
-        </div>
+    
     </div>
-
-    <div id="tryout" class="content-section">
-        <div class="card">
-            <h3>Pilih Paket Tryout</h3>
-            <button class="btn">Paket Tryout 1</button>
-            <button class="btn">Paket Tryout 2</button>
-            <button class="btn">Paket Tryout 3</button>
-        </div>
-    </div>
-
-    <div id="hasil" class="content-section">
-        <div class="card">
-            <h3>Konten Menyusul</h3>
-        </div>
-    </div>
-</div>
 
 <script>
-const API = "https://script.google.com/macros/s/AKfycbxdiLPdCUUFYt9GgUx0N4nnl8VymUCsrVWxmAhDr1j6xjw9p9HQ6mDR1PvBLRF9HGJoTw/exec"; // Masukkan URL script yang sama
-const userEmail = sessionStorage.getItem("user_email");
-
-if (!userEmail) window.location.href = "index.html";
-
-function toggleSidebar() {
-    document.getElementById("sidebar").classList.toggle("closed");
-    document.getElementById("main").classList.toggle("full");
-    if(window.innerWidth <= 768) document.getElementById("sidebar").classList.toggle("open");
+// Logika Menu Buka Tutup
+function toggleMenu() {
+    const sidebar = document.getElementById("sidebar");
+    const main = document.getElementById("main");
+    
+    sidebar.classList.toggle("hidden");
+    main.classList.toggle("full-width");
 }
 
-function showSection(id, el) {
-    document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
-    document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-    el.classList.add('active');
-    document.getElementById("section-title").innerText = id.charAt(0).toUpperCase() + id.slice(1);
-}
-
-// Logika Ambil Data
+// Logika Load User dengan Proteksi Force Logout
 function loadUser() {
+    const userEmail = sessionStorage.getItem("user_email");
+    if (!userEmail) { logout(); return; }
+
     fetch(`${API}?action=get_user&email=${userEmail}`)
     .then(r => r.json())
     .then(d => {
+        // Cek jika akun dihapus admin dari sheet 'user'
+        if (d.status === "force_logout") {
+            alert("⚠️ Akun Anda tidak ditemukan atau telah dinonaktifkan.");
+            logout();
+            return;
+        }
+
         document.getElementById("loading-home").style.display = "none";
         if (d.data_lengkap) {
             document.getElementById("view-biodata").style.display = "block";
@@ -215,45 +99,16 @@ function loadUser() {
         } else {
             document.getElementById("form-biodata").style.display = "block";
         }
+    })
+    .catch(err => {
+        console.error("Error loading data:", err);
     });
-}
-
-function simpanData() {
-    let nama = document.getElementById("in-nama").value;
-    let sekolah = document.getElementById("in-sekolah").value;
-    let wa = document.getElementById("in-wa").value;
-
-    if(!nama || !sekolah || !wa) return alert("Isi semua data!");
-
-    fetch(API, {
-        method: "POST",
-        body: JSON.stringify({
-            action: "update_biodata",
-            email: userEmail,
-            nama: nama,
-            sekolah: sekolah,
-            wa: wa
-        })
-    }).then(() => {
-        alert("Data berhasil disimpan!");
-        location.reload();
-    });
-}
-
-function editMode() {
-    document.getElementById("view-biodata").style.display = "none";
-    document.getElementById("form-biodata").style.display = "block";
-    document.getElementById("in-nama").value = document.getElementById("txt-nama").innerText;
-    document.getElementById("in-sekolah").value = document.getElementById("txt-sekolah").innerText;
-    document.getElementById("in-wa").value = document.getElementById("txt-wa").innerText;
 }
 
 function logout() {
     sessionStorage.clear();
-    window.location.href = "index.html";
+    window.location.href = "index.html"; // Sesuaikan nama file login Anda
 }
 
 loadUser();
 </script>
-</body>
-</html>
