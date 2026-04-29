@@ -1,0 +1,73 @@
+<div class="login-card">
+  <div class="login-header">
+    <h2>Login. TryoutUTBK</h2>
+    <p>Masuk ke akun belajar kamu</p>
+  </div>
+
+  <input id="email" type="text" placeholder="Username/Email">
+  <input id="pass" type="password" placeholder="Password">
+
+  <button id="loginBtn" onclick="login()">LOGIN</button>
+  
+  <div id="loading-text">Memvalidasi data<span class="dots"></span></div>
+</div>
+
+<script>
+// GANTI DENGAN URL DEPLOYMENT APPS SCRIPT BARU ANDA
+const API = "https://script.google.com/macros/s/AKfycby3_6Ou_OQMgHwE1T-pZARU3GK6PWVLoBBsigRGc6cOizuWEmR5XaPwI9lMQV8peXRBoA/exec";
+
+function login() {
+  let email = document.getElementById("email").value;
+  let pass = document.getElementById("pass").value;
+  let btn = document.getElementById("loginBtn");
+  let loadTxt = document.getElementById("loading-text");
+
+  if (!email || !pass) {
+    alert("Silakan isi data dengan lengkap!");
+    return;
+  }
+
+  btn.disabled = true;
+  loadTxt.style.display = "block";
+
+  // Membersihkan sesi lama
+  sessionStorage.clear();
+
+  // Menggunakan POST agar kredensial tidak terlihat di log URL browser/server
+  fetch(API, {
+    method: "POST",
+    body: JSON.stringify({
+      email: email,
+      password: pass
+    })
+  })
+  .then(r => r.json())
+  .then(d => {
+    if (d.status === "ok") {
+      // Menggunakan sessionStorage (Lebih aman dari localStorage karena terhapus saat tab ditutup)
+      sessionStorage.setItem("session_token", d.token);
+      sessionStorage.setItem("user_role", d.role);
+      
+      // Mengarahkan ke dashboard.html sesuai permintaan
+      window.location.href = "dashboard.html";
+    } else {
+      alert("❌ " + d.message);
+      resetUI();
+    }
+  })
+  .catch((err) => {
+    console.error(err);
+    alert("Terjadi kesalahan koneksi.");
+    resetUI();
+  });
+}
+
+function resetUI() {
+  document.getElementById("loginBtn").disabled = false;
+  document.getElementById("loading-text").style.display = "none";
+}
+
+document.addEventListener("keypress", function(e) {
+  if (e.key === "Enter") login();
+});
+</script>
