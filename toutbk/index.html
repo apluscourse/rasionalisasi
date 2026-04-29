@@ -202,16 +202,6 @@ button:disabled {
       
       <div id="loading-text">Memvalidasi data<span class="dots"></span></div>
     </div>
-
-    <div class="contact-section">
-      <p>Untuk Pembelian Aplikasi Hubungi Admin <br> Klik Nomor Whatsapp dibawah ini</p>
-      <a href="https://wa.me/6285815023510" class="wa-link" target="_blank">
-        <i class="fab fa-whatsapp"></i> Admin 1 : 085815023510
-      </a>
-      <a href="https://wa.me/62895423024582" class="wa-link" target="_blank">
-        <i class="fab fa-whatsapp"></i> Admin 2 : 0895423024582
-      </a>
-    </div>
 </div>
 
 <script>
@@ -256,7 +246,7 @@ function login() {
     if (d.status === "ok") {
       sessionStorage.setItem("user_email", email);
       sessionStorage.setItem("token", d.token);
-      window.location.href = "dashboard.html";
+      window.location.href = "/toutbk/dashboard/";
     } else {
       alert("❌ " + d.message);
       resetUI();
