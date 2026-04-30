@@ -172,8 +172,9 @@
     </style>
 </head>
 <body>
+<div id="sidebar-overlay" onclick="toggleMenu()" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.1); z-index:999;"></div>
 
-<div id="sidebar">
+    <div id="sidebar">
     <div class="sidebar-header"><h3 style="margin:0; color: var(--blue);">TryoutUTBK</h3></div>
     <div class="menu-list">
         <div class="menu-item active" onclick="showSection('home', this)"><i class="fas fa-home"></i> Home</div>
@@ -226,34 +227,77 @@
             </div>
         </div>
 
+<!-- SECTION: EXAM VIEW (REVISED) -->
 <div id="to-exam-view" style="display:none;">
-    <!-- Container utama kini otomatis berada di tengah karena margin: auto di class .card -->
     <div class="card">
+        <!-- Header: Timer & Controls -->
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
             <div style="display: flex; gap: 10px; align-items: center;">
-                <button class="btn-outline" style="width: auto; padding: 5px 10px;" onclick="adjustZoom(0.1)"><i class="fas fa-search-plus"></i></button>
-                <button class="btn-outline" style="width: auto; padding: 5px 10px;" onclick="adjustZoom(-0.1)"><i class="fas fa-search-minus"></i></button>
-                <div id="review-label" style="display:none; color: #1f6feb; font-weight: bold; padding-left: 10px; font-size: 0.9rem;">MODE REVIEW</div>
-            </div>
-            <div id="exam-timer" style="font-weight: 800; font-size: 1.2rem; color: #ff4757; padding: 5px 12px; border-radius: 10px; border: 1px solid #ffd8d8;">00:00</div>
-        </div>
-
-        <div id="exam-content" style="display: none;">
-            <div id="soal-container">
-                <img id="img-soal" src="" style="width: 100%; height: 100%; object-fit: contain;">
-            </div>
-                   <!-- Navigasi angka dibuat lebih ringkas -->
-            <div id="nav-no-soal" style="display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 20px; justify-content: center;"></div>
-            
-            <div id="answer-section" style="background: #f0f7ff; padding: 15px; border-radius: 15px; border: 1px dashed var(--blue);">
-                <h4 id="label-no-soal" style="margin-top: 0;">Soal No. 1</h4>
-                <div id="feedback-review" style="display:none; margin-bottom: 10px; padding: 10px; border-radius: 8px; font-size: 14px;"></div>
-                <div style="display: flex; gap: 10px;">
-                    <input id="ans-input" placeholder="A-E" maxlength="1" style="text-transform: uppercase; text-align: center; width: 80px; margin-bottom:0;">
-                    <button id="btn-save" class="btn" style="flex: 1;" onclick="saveAnswer()">Simpan Jawaban</button>
+                <button class="btn-outline" style="width: auto; padding: 5px 12px;" onclick="adjustZoom(0.1)" title="Zoom In">
+                    <i class="fas fa-search-plus"></i>
+                </button>
+                <button class="btn-outline" style="width: auto; padding: 5px 12px;" onclick="adjustZoom(-0.1)" title="Zoom Out">
+                    <i class="fas fa-search-minus"></i>
+                </button>
+                <div id="review-label" style="display:none; color: #1f6feb; font-weight: bold; padding-left: 10px; font-size: 0.9rem; border-left: 2px solid #1f6feb; margin-left: 5px;">
+                    &nbsp;&nbsp;MODE REVIEW
                 </div>
             </div>
-            <button id="btn-finish-exam" class="btn" style="background: #ff4757; margin-top: 20px;" onclick="finishExam(true)">Selesaikan Subtes</button>
+            <div id="exam-timer" style="font-weight: 800; font-size: 1.2rem; color: #ff4757; padding: 5px 15px; border-radius: 10px; border: 2px solid #ffd8d8; background: #fff5f5;">
+                00:00
+            </div>
+        </div>
+
+        <!-- 1. Overlay Countdown (Penting: Untuk mencegah error JS saat load soal) -->
+        <div id="countdown-overlay" style="display: none; text-align: center; padding: 50px 0;">
+            <div style="font-size: 1.2rem; color: var(--blue); margin-bottom: 10px; font-weight: 600;">Menyiapkan Soal...</div>
+            <div id="countdown-number" style="font-size: 5rem; font-weight: 900; color: var(--blue); line-height: 1;">3</div>
+        </div>
+
+        <!-- 2. Main Exam Content -->
+        <div id="exam-content" style="display: none;">
+            <!-- Box Soal -->
+            <div id="soal-container">
+                <img id="img-soal" src="" alt="Soal Ujian" style="width: 100%; height: 100%; object-fit: contain;">
+            </div>
+            
+            <!-- Navigasi Nomor Soal -->
+            <div id="nav-no-soal" style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 25px; justify-content: center;">
+                <!-- Diisi otomatis oleh renderNav() -->
+            </div>
+            
+            <!-- Input Jawaban -->
+            <div id="answer-section" style="background: #f0f7ff; padding: 20px; border-radius: 18px; border: 2px dashed var(--blue); position: relative;">
+                <h4 id="label-no-soal" style="margin-top: 0; color: var(--blue); font-size: 1.1rem;">Soal No. 1</h4>
+                
+                <!-- Feedback Review (Hanya muncul saat mode review) -->
+                <div id="feedback-review" style="display:none; margin-bottom: 15px; padding: 12px; border-radius: 10px; font-size: 14px; font-weight: 600; text-align: center;"></div>
+                
+                <div style="display: flex; gap: 12px; align-items: center;">
+                    <input id="ans-input" placeholder="A-E" maxlength="1" 
+                           style="text-transform: uppercase; text-align: center; width: 85px; margin-bottom: 0; font-size: 1.2rem; font-weight: bold; border: 2px solid var(--blue2);">
+                    
+                    <button id="btn-save" class="btn" style="flex: 1; margin: 0;" onclick="saveAnswer()">
+                        <i class="fas fa-save"></i> Simpan Jawaban
+                    </button>
+                </div>
+
+                <!-- Notifikasi Simpan (Penting: Digunakan oleh function saveAnswer) -->
+                <div id="save-notif" style="display: none; position: absolute; bottom: -25px; left: 50%; transform: translateX(-50%); color: #2ed573; font-size: 12px; font-weight: bold;">
+                    <i class="fas fa-check-circle"></i> Jawaban tersimpan!
+                </div>
+            </div>
+
+            <!-- Tombol Navigasi Bawah / Selesai -->
+            <div style="margin-top: 30px; display: flex; flex-direction: column; gap: 10px;">
+                <button id="btn-finish-exam" class="btn" style="background: #ff4757;" onclick="finishExam(true)">
+                    <i class="fas fa-flag-checkered"></i> Selesaikan Subtes
+                </button>
+                
+                <button id="btn-close-review" class="btn btn-outline" style="display:none;" onclick="location.reload()">
+                    <i class="fas fa-times-circle"></i> Tutup Review
+                </button>
+            </div>
         </div>
     </div>
 </div>
@@ -298,8 +342,20 @@ document.addEventListener("DOMContentLoaded", () => { if (userEmail) loadUser();
 function toggleMenu() {
     const sidebar = document.getElementById("sidebar");
     const main = document.getElementById("main");
-    if (window.innerWidth <= 768) sidebar.classList.toggle("open");
-    else { sidebar.classList.toggle("hidden"); main.classList.toggle("full-width"); }
+    const overlay = document.getElementById("sidebar-overlay");
+    const isMobile = window.innerWidth <= 768;
+
+    if (isMobile) {
+        // Logika untuk HP
+        sidebar.classList.toggle("open");
+        const isOpen = sidebar.classList.contains("open");
+        overlay.style.display = isOpen ? "block" : "none";
+    } else {
+        // Logika untuk Laptop/Desktop
+        sidebar.classList.toggle("hidden");
+        main.classList.toggle("full-width");
+        overlay.style.display = "none"; // Overlay tidak diperlukan di desktop
+    }
 }
 
 function showSection(id, el) {
@@ -308,6 +364,11 @@ function showSection(id, el) {
     document.getElementById(id).classList.add('active');
     el.classList.add('active');
     document.getElementById("section-title").innerText = id.charAt(0).toUpperCase() + id.slice(1);
+
+    // Tambahkan ini: Tutup menu otomatis setelah klik menu di HP
+    if (window.innerWidth <= 768 && document.getElementById("sidebar").classList.contains("open")) {
+        toggleMenu();
+    }
 }
 
 async function loadUser() {
