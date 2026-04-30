@@ -108,12 +108,7 @@
         .subtest-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
         .subtest-card { border: 1px solid #eef2f7; padding: 15px; border-radius: 12px; text-align: center; background: #fff; }
 
-        @media (max-width: 768px) {
-            #sidebar { transform: translateX(-100%); }
-            #sidebar.open { transform: translateX(0); }
-            #main { margin-left: 0 !important; padding: 20px; }
-        }
-
+        /* SOAL BOX */
         #soal-container {
             width: 100%; height: 450px; border: 1px solid #f0f0f0; 
             margin-bottom: 20px; border-radius: 10px; background: #fafafa; 
@@ -123,6 +118,13 @@
         #img-soal {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
             object-fit: contain; transition: transform 0.1s ease; transform-origin: center;
+            pointer-events: none; /* Penting agar tidak mengganggu drag */
+        }
+
+        @media (max-width: 768px) {
+            #sidebar { transform: translateX(-100%); }
+            #sidebar.open { transform: translateX(0); }
+            #main { margin-left: 0 !important; padding: 20px; }
         }
     </style>
 </head>
@@ -184,27 +186,29 @@
         <div id="to-exam-view" style="display:none;">
             <div class="card" style="max-width: 900px; position: relative; margin: auto;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <div style="display: flex; gap: 10px;">
+                    <div style="display: flex; gap: 10px; align-items: center;">
                         <button class="btn-outline" style="width: auto; padding: 5px 10px;" onclick="adjustZoom(0.1)"><i class="fas fa-search-plus"></i></button>
                         <button class="btn-outline" style="width: auto; padding: 5px 10px;" onclick="adjustZoom(-0.1)"><i class="fas fa-search-minus"></i></button>
                         <div id="review-status" style="display:none; color: #1f6feb; font-weight: bold;">MODE REVIEW</div>
                     </div>
-                    <div id="exam-timer" style="font-weight: 800; font-size: 1.4rem; color: #ff4757; padding: 5px 15px;">00:00</div>
+                    <div id="exam-timer" style="font-weight: 800; font-size: 1.4rem; color: #ff4757; padding: 5px 15px; border-radius: 10px; border: 1px solid #ffd8d8;">00:00</div>
                 </div>
-                <div id="countdown-overlay" style="text-align: center; font-size: 4rem; display: none;">3</div>
+
+                <div id="countdown-overlay" style="text-align: center; font-size: 4rem; padding: 60px 0; display: none; color: var(--blue);">3</div>
+
                 <div id="exam-content" style="display: none;">
                     <div id="soal-container">
                         <img id="img-soal" src="">
                     </div>
                     <div id="nav-no-soal" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 25px; justify-content: center;"></div>
-                    <div id="answer-section" style="background: #f0f7ff; padding: 20px; border-radius: 15px;">
+                    <div id="answer-section" style="background: #f0f7ff; padding: 20px; border-radius: 15px; border: 1px dashed var(--blue);">
                         <h4 id="label-no-soal">Soal No. 1</h4>
-                        <div id="review-info" style="display:none; margin-bottom: 10px; font-weight: bold;"></div>
+                        <div id="review-info" style="display:none; margin-bottom: 10px; font-weight: bold; border-radius: 8px; padding: 8px;"></div>
                         <div style="display: flex; gap: 10px;">
-                            <input id="ans-input" placeholder="A/B/C/D/E" maxlength="1" style="text-transform: uppercase; text-align: center; width: 120px; margin:0;">
+                            <input id="ans-input" placeholder="A/B/C/D/E" maxlength="1" style="text-transform: uppercase; text-align: center; width: 120px; margin:0; font-size: 18px;">
                             <button id="btn-save-ans" class="btn" style="flex: 1;" onclick="saveAnswer()">Simpan Jawaban</button>
                         </div>
-                        <p id="save-notif" style="color: #2ed573; display: none;">Jawaban tersimpan</p>
+                        <p id="save-notif" style="color: #2ed573; font-size: 13px; display: none;"><i class="fas fa-check-circle"></i> Tersimpan</p>
                     </div>
                     <button id="btn-finish" class="btn" style="background: #ff4757; margin-top: 30px;" onclick="finishExam(true)">Selesaikan Subtes</button>
                     <button id="btn-exit-review" class="btn btn-outline" style="display:none; margin-top: 30px;" onclick="location.reload()">Selesai Review</button>
@@ -214,11 +218,16 @@
 
         <div id="to-result-view" style="display:none;">
             <div class="card" style="text-align: center; margin: auto;">
+                <i class="fas fa-check-circle" style="font-size: 4rem; color: #2ed573;"></i>
                 <h3>Subtes Selesai!</h3>
-                <h1 id="res-score">0</h1>
-                <p id="res-detail">Benar: 0 | Salah: 0</p>
-                <button class="btn" onclick="startReview()">Lihat Kunci Jawaban</button>
-                <button class="btn btn-outline" onclick="location.reload()">Ke Dashboard</button>
+                <div style="margin: 20px 0; padding: 20px; background: #f8faff; border-radius: 15px;">
+                    <h1 id="res-score" style="font-size: 4rem; color: var(--blue); margin: 5px 0;">0</h1>
+                    <p id="res-detail">Benar: 0 | Salah: 0</p>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <button class="btn" onclick="startReview()">Lihat Kunci Jawaban</button>
+                    <button class="btn btn-outline" onclick="location.reload()">Ke Dashboard</button>
+                </div>
             </div>
         </div>
     </div>
@@ -229,6 +238,7 @@
 </div>
 
 <script>
+// --- KONFIGURASI ---
 const API = "https://script.google.com/macros/s/AKfycbw3VJTB5lpE4UXhO--7-5_HyVXkN8H1UrrbeF6gr1tDbc0qldoYfMQFG7fDYZIQgELuXg/exec";
 const API_SOAL = "https://script.google.com/macros/s/AKfycbxEHQ7moQYiS3X6NS2bBQSSNjl-6hiA1RDU9yHd6m5CIisIjd15oRrsttecwbAkO_uIVg/exec";
 const userEmail = sessionStorage.getItem("user_email");
@@ -243,6 +253,7 @@ const subtestInfo = { "PU": 30, "PPU": 15, "PBM": 25, "PK": 20, "LBI": 45, "LBE"
 if (!userEmail) window.location.replace("/toutbk/");
 document.addEventListener("DOMContentLoaded", () => { if (userEmail) loadUser(); });
 
+// CORE UI
 function toggleMenu() {
     const sidebar = document.getElementById("sidebar");
     const main = document.getElementById("main");
@@ -255,8 +266,10 @@ function showSection(id, el) {
     document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
     document.getElementById(id).classList.add('active');
     el.classList.add('active');
+    document.getElementById("section-title").innerText = id.charAt(0).toUpperCase() + id.slice(1);
 }
 
+// USER DATA
 async function loadUser() {
     try {
         const response = await fetch(`${API}?action=get_user&email=${encodeURIComponent(userEmail)}`);
@@ -273,12 +286,20 @@ async function loadUser() {
     } catch (err) { console.error(err); }
 }
 
+function simpanData() {
+    const n = document.getElementById("in-nama").value, s = document.getElementById("in-sekolah").value, w = document.getElementById("in-wa").value;
+    if(!n || !s || !w) return alert("Lengkapi data!");
+    fetch(API, { method: "POST", body: JSON.stringify({ action: "update_biodata", email: userEmail, nama: n, sekolah: s, wa: w }) })
+    .then(r => r.json()).then(d => { if(d.status === "ok") location.reload(); });
+}
+
+// PACKAGES
 async function loadPackages() {
     try {
         const resp = await fetch(`${API_SOAL}?action=get_packages`);
         const d = await resp.json();
         let html = "";
-        d.paket.forEach(p => { html += `<button class="btn" style="margin-bottom:12px;" onclick="openPackage('${p}')">${p.toUpperCase()}</button>`; });
+        d.paket.forEach(p => { html += `<button class="btn" style="margin-bottom:12px;" onclick="openPackage('${p}')"><i class="fas fa-box-open"></i> &nbsp; ${p.toUpperCase()}</button>`; });
         document.getElementById("package-list").innerHTML = html;
     } catch (e) { console.error(e); }
 }
@@ -290,11 +311,12 @@ function openPackage(p) {
     let html = "";
     Object.keys(subtestInfo).forEach(s => {
         const hasDone = userDataHistory.toLowerCase().includes((p+s).toLowerCase());
-        html += `<div class="subtest-card"><strong>${s}</strong><br><button class="btn" onclick="checkAndStart('${s}', ${hasDone})">${hasDone ? 'Ulang' : 'Mulai'}</button></div>`;
+        html += `<div class="subtest-card"><strong>${s}</strong><br><button class="btn" style="padding:8px; font-size:12px;" onclick="checkAndStart('${s}', ${hasDone})">${hasDone ? 'Ulang' : 'Mulai'}</button></div>`;
     });
     document.getElementById("subtest-list").innerHTML = html;
 }
 
+// EXAM CORE
 async function checkAndStart(sub, isRepeat) {
     if (!confirm("Mulai subtes " + sub + "?")) return;
     currentSubtest = sub;
@@ -304,7 +326,14 @@ async function checkAndStart(sub, isRepeat) {
         const resp = await fetch(`${API_SOAL}?action=get_soal&paket=${currentPacket}&subtes=${sub}`);
         const d = await resp.json();
         questions = d.soal; userAnswers = {}; currentQIdx = 0;
-        startExam();
+        
+        const overlay = document.getElementById("countdown-overlay");
+        overlay.style.display = "block";
+        let c = 3; overlay.innerText = c;
+        const int = setInterval(() => {
+            c--; overlay.innerText = c;
+            if(c <= 0) { clearInterval(int); overlay.style.display = "none"; startExam(); }
+        }, 1000);
     } catch (e) { alert("Gagal ambil soal"); }
 }
 
@@ -317,7 +346,7 @@ function startExam() {
         seconds--;
         let m = Math.floor(seconds / 60), s = seconds % 60;
         document.getElementById("exam-timer").innerText = `${m}:${s < 10 ? '0'+s : s}`;
-        if(seconds <= 0) finishExam(false);
+        if(seconds <= 0) { clearInterval(timer); finishExam(false); }
     }, 1000);
 }
 
@@ -339,10 +368,12 @@ function showQuestion(idx) {
     
     if (isReviewMode) {
         const info = document.getElementById("review-info");
-        const isCorrect = (userAnswers[idx] || "-") === q.kunci;
+        const userAns = userAnswers[idx] || "-";
+        const isCorrect = userAns === q.kunci;
         info.style.display = "block";
+        info.style.background = isCorrect ? "#e8fdf0" : "#fff2f2";
         info.style.color = isCorrect ? "#2ed573" : "#ff4757";
-        info.innerText = `Jawaban Anda: ${userAnswers[idx] || "-"} | Kunci: ${q.kunci}`;
+        info.innerHTML = `Jawaban: ${userAns} | Kunci: ${q.kunci} (${isCorrect ? 'BENAR' : 'SALAH'})`;
     }
     zoomLevel = 1;
     document.getElementById("img-soal").style.transform = `scale(1)`;
@@ -355,6 +386,7 @@ function saveAnswer() {
     renderNav();
     document.getElementById("save-notif").style.display = "block";
     setTimeout(() => { document.getElementById("save-notif").style.display = "none"; }, 1000);
+    if(currentQIdx < questions.length - 1) setTimeout(() => showQuestion(currentQIdx + 1), 500);
 }
 
 function adjustZoom(val) {
@@ -363,7 +395,7 @@ function adjustZoom(val) {
     document.getElementById("img-soal").style.transform = `scale(${zoomLevel})`;
 }
 
-// DRAG LOGIC
+// PAN/DRAG LOGIC
 const container = document.getElementById("soal-container");
 container.onmousedown = (e) => {
     isDragging = true;
@@ -377,12 +409,14 @@ window.onmousemove = (e) => {
     container.scrollTop = scrollPos.y - (e.clientY - startPos.y);
 };
 
+// FINISH & REVIEW
 async function finishExam(isManual) {
     if(isManual && !confirm("Akhiri subtes?")) return;
     clearInterval(timer);
-    let benar = 0, skorTotal = 0;
+    let benar = 0, skorTotal = 0, ansStr = [];
     questions.forEach((q, i) => {
-        if((userAnswers[i] || "-") === q.kunci) { benar++; skorTotal += q.skor; }
+        const u = userAnswers[i] || "-"; ansStr.push(u);
+        if(u === q.kunci) { benar++; skorTotal += q.skor; }
     });
     
     document.getElementById("to-exam-view").style.display = "none";
@@ -391,8 +425,8 @@ async function finishExam(isManual) {
     document.getElementById("res-detail").innerText = `Benar: ${benar} | Salah: ${questions.length - benar}`;
     
     fetch(API, { method: "POST", body: JSON.stringify({
-        action: "submit_score", email: userEmail, skor: skorTotal,
-        code: (currentPacket + currentSubtest).toLowerCase()
+        action: "submit_score", email: userEmail, code: (currentPacket + currentSubtest).toLowerCase(),
+        jawabanUser: ansStr.join(","), benar: benar, salah: questions.length-benar, skor: skorTotal
     })});
 }
 
