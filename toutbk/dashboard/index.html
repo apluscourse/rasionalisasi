@@ -326,7 +326,7 @@
 </div>
 
 <script>
-const API = "https://script.google.com/macros/s/AKfycbw3VJTB5lpE4UXhO--7-5_HyVXkN8H1UrrbeF6gr1tDbc0qldoYfMQFG7fDYZIQgELuXg/exec";
+const API = "https://script.google.com/macros/s/AKfycbxkzle7_7sxgelrklloRIwg_NIa3AOeEpuQY2HEWkuC0iC1D7-KYc7ilZb_S8iPQGS3lg/exec";
 const API_SOAL = "https://script.google.com/macros/s/AKfycbxEHQ7moQYiS3X6NS2bBQSSNjl-6hiA1RDU9yHd6m5CIisIjd15oRrsttecwbAkO_uIVg/exec";
 const userEmail = sessionStorage.getItem("user_email");
 
@@ -560,21 +560,52 @@ window.addEventListener('mousemove', (e) => {
 async function finishExam(manual) {
     if(manual && !confirm("Akhiri subtes?")) return;
     clearInterval(timer);
+
     let benar = 0, skor = 0, ansArr = [];
+    
+    // Perhitungan skor
     questions.forEach((q, i) => {
-        const u = userAnswers[i] || "-"; ansArr.push(u);
-        if(u === q.kunci) { benar++; skor += q.skor; }
+        const u = userAnswers[i] || "-"; 
+        ansArr.push(u);
+        // Menggunakan toUpperCase agar lebih aman saat pengecekan kunci jawaban
+        if(u.toUpperCase() === q.kunci.toUpperCase()) { 
+            benar++; 
+            skor += q.skor; 
+        }
     });
     
-    document.getElementById("to-exam-view").style.display = "none";
-    document.getElementById("to-result-view").style.display = "block";
+    // Update tampilan hasil di UI
     document.getElementById("res-score").innerText = skor;
     document.getElementById("res-detail").innerText = `Benar: ${benar} | Salah: ${questions.length - benar}`;
     
-    fetch(API, { method: "POST", body: JSON.stringify({
-        action: "submit_score", email: userEmail, code: (currentPacket + currentSubtest).toLowerCase(),
-        jawabanUser: ansArr.join(","), benar: benar, salah: questions.length-benar, skor: skor
-    })});
+    // Pindah ke tampilan hasil
+    document.getElementById("to-exam-view").style.display = "none";
+    document.getElementById("to-result-view").style.display = "block";
+    
+    // Kirim data ke Spreadsheet (Backend akan melakukan REPLACE jika kode sudah ada)
+    try {
+        const response = await fetch(API, { 
+            method: "POST", 
+            body: JSON.stringify({
+                action: "submit_score", 
+                email: userEmail, 
+                code: (currentPacket + currentSubtest).toLowerCase(),
+                jawabanUser: ansArr.join(","), 
+                benar: benar, 
+                salah: questions.length - benar, 
+                skor: skor
+            })
+        });
+
+        if (response.ok) {
+            // Penting: Load ulang data user agar history terbaru (untuk status tombol) sinkron
+            loadUser(); 
+            console.log("Skor berhasil diperbarui di database.");
+        }
+    } catch (error) {
+        console.error("Gagal mengirim skor:", error);
+        alert("Koneksi bermasalah, skor mungkin tidak tersimpan di database.");
+    }
 }
 
 function activateReview() {
