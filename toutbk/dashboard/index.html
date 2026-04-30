@@ -81,16 +81,21 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .card {
-            background: var(--card);
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.04);
-            max-width: 550px;
-            border: 1px solid rgba(0,0,0,0.02);
-            margin-bottom: 20px;
-        }
+.card {
+        background: var(--card);
+        padding: 30px;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+        /* Perubahan di sini: Lebar diperkecil untuk fokus maksimal */
+        max-width: 650px; 
+        width: 90%; /* Agar tetap responsif di layar kecil */
+        margin: 0 auto 20px auto; /* Membuat card berada di tengah */
+        border: 1px solid rgba(0,0,0,0.02);
+    }
 
+        #to-exam-view .card {
+        max-width: 700px; /* Sedikit lebih lebar dari card biasa untuk menampung gambar soal */
+    }
         input { width: 100%; padding: 14px; margin-bottom: 15px; border: 1px solid #e1e8ef; border-radius: 12px; box-sizing: border-box; }
 
         .btn {
@@ -109,17 +114,17 @@
         .subtest-card { border: 1px solid #eef2f7; padding: 15px; border-radius: 12px; text-align: center; background: #fff; }
 
         /* DRAG & ZOOM CONTAINER */
-        #soal-container {
-            width: 100%; 
-            height: 450px; 
-            border: 1px solid #f0f0f0; 
-            margin-bottom: 20px; 
-            border-radius: 10px; 
-            background: #fafafa; 
-            overflow: hidden; 
-            position: relative; 
-            cursor: grab;
-        }
+#soal-container {
+        width: 100%; 
+        height: 400px; /* Tinggi disesuaikan agar tidak terlalu memanjang ke bawah */
+        border: 1px solid #f0f0f0; 
+        margin-bottom: 20px; 
+        border-radius: 10px; 
+        background: #fafafa; 
+        overflow: hidden; 
+        position: relative; 
+        cursor: grab;
+    }
         #soal-container:active { cursor: grabbing; }
         #img-soal {
             position: absolute; 
@@ -138,6 +143,32 @@
             #sidebar.open { transform: translateX(0); }
             #main { margin-left: 0 !important; padding: 20px; }
         }
+
+/* Warna tombol status */
+.btn-selesai {
+    background: #2ed573 !important; /* Hijau */
+    color: white;
+}
+
+.btn-belum {
+    background: #ff4757 !important; /* Merah */
+    color: white;
+}
+
+.subtest-card {
+    border: 1px solid #eef2f7;
+    padding: 15px;
+    border-radius: 12px;
+    text-align: center;
+    background: #fff;
+    transition: transform 0.2s;
+}
+
+.subtest-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+}
+        
     </style>
 </head>
 <body>
@@ -195,38 +226,37 @@
             </div>
         </div>
 
-        <div id="to-exam-view" style="display:none;">
-            <div class="card" style="max-width: 900px; position: relative; margin: auto;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <div style="display: flex; gap: 10px; align-items: center;">
-                        <button class="btn-outline" style="width: auto; padding: 5px 10px;" onclick="adjustZoom(0.1)"><i class="fas fa-search-plus"></i></button>
-                        <button class="btn-outline" style="width: auto; padding: 5px 10px;" onclick="adjustZoom(-0.1)"><i class="fas fa-search-minus"></i></button>
-                        <div id="review-label" style="display:none; color: #1f6feb; font-weight: bold; padding-left: 10px;">MODE REVIEW</div>
-                    </div>
-                    <div id="exam-timer" style="font-weight: 800; font-size: 1.4rem; color: #ff4757; padding: 5px 15px; border-radius: 10px; border: 1px solid #ffd8d8;">00:00</div>
-                </div>
+<div id="to-exam-view" style="display:none;">
+    <!-- Container utama kini otomatis berada di tengah karena margin: auto di class .card -->
+    <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <button class="btn-outline" style="width: auto; padding: 5px 10px;" onclick="adjustZoom(0.1)"><i class="fas fa-search-plus"></i></button>
+                <button class="btn-outline" style="width: auto; padding: 5px 10px;" onclick="adjustZoom(-0.1)"><i class="fas fa-search-minus"></i></button>
+                <div id="review-label" style="display:none; color: #1f6feb; font-weight: bold; padding-left: 10px; font-size: 0.9rem;">MODE REVIEW</div>
+            </div>
+            <div id="exam-timer" style="font-weight: 800; font-size: 1.2rem; color: #ff4757; padding: 5px 12px; border-radius: 10px; border: 1px solid #ffd8d8;">00:00</div>
+        </div>
 
-                <div id="countdown-overlay" style="text-align: center; font-size: 4rem; padding: 60px 0; display: none; color: var(--blue);">3</div>
-
-                <div id="exam-content" style="display: none;">
-                    <div id="soal-container">
-                        <img id="img-soal" src="">
-                    </div>
-                    <div id="nav-no-soal" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 25px; justify-content: center;"></div>
-                    <div id="answer-section" style="background: #f0f7ff; padding: 20px; border-radius: 15px; border: 1px dashed var(--blue);">
-                        <h4 id="label-no-soal">Soal No. 1</h4>
-                        <div id="feedback-review" style="display:none; margin-bottom: 10px; padding: 10px; border-radius: 8px; font-weight: bold;"></div>
-                        <div style="display: flex; gap: 10px;">
-                            <input id="ans-input" placeholder="A/B/C/D/E" maxlength="1" style="text-transform: uppercase; text-align: center; width: 150px; margin-bottom:0; font-size: 18px;">
-                            <button id="btn-save" class="btn" style="flex: 1;" onclick="saveAnswer()">Simpan Jawaban</button>
-                        </div>
-                        <p id="save-notif" style="color: #2ed573; font-size: 13px; display: none; margin-top: 10px;"><i class="fas fa-check-circle"></i> Tersimpan</p>
-                    </div>
-                    <button id="btn-finish-exam" class="btn" style="background: #ff4757; margin-top: 30px;" onclick="finishExam(true)">Selesaikan Subtes</button>
-                    <button id="btn-close-review" class="btn btn-outline" style="display:none; margin-top: 30px;" onclick="location.reload()">Tutup Review</button>
+        <div id="exam-content" style="display: none;">
+            <div id="soal-container">
+                <img id="img-soal" src="" style="width: 100%; height: 100%; object-fit: contain;">
+            </div>
+                   <!-- Navigasi angka dibuat lebih ringkas -->
+            <div id="nav-no-soal" style="display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 20px; justify-content: center;"></div>
+            
+            <div id="answer-section" style="background: #f0f7ff; padding: 15px; border-radius: 15px; border: 1px dashed var(--blue);">
+                <h4 id="label-no-soal" style="margin-top: 0;">Soal No. 1</h4>
+                <div id="feedback-review" style="display:none; margin-bottom: 10px; padding: 10px; border-radius: 8px; font-size: 14px;"></div>
+                <div style="display: flex; gap: 10px;">
+                    <input id="ans-input" placeholder="A-E" maxlength="1" style="text-transform: uppercase; text-align: center; width: 80px; margin-bottom:0;">
+                    <button id="btn-save" class="btn" style="flex: 1;" onclick="saveAnswer()">Simpan Jawaban</button>
                 </div>
             </div>
+            <button id="btn-finish-exam" class="btn" style="background: #ff4757; margin-top: 20px;" onclick="finishExam(true)">Selesaikan Subtes</button>
         </div>
+    </div>
+</div>
 
         <div id="to-result-view" style="display:none;">
             <div class="card" style="text-align: center; margin: auto;">
@@ -310,10 +340,28 @@ function openPackage(p) {
     currentPacket = p;
     document.getElementById("to-package-view").style.display = "none";
     document.getElementById("to-subtest-view").style.display = "block";
+    document.getElementById("selected-package-title").innerText = "Subtes: " + p.toUpperCase();
+    
     let html = "";
     Object.keys(subtestInfo).forEach(s => {
-        const hasDone = userDataHistory.toLowerCase().includes((p+s).toLowerCase());
-        html += `<div class="subtest-card"><strong>${s}</strong><br><button class="btn" style="padding:8px; font-size:12px; margin-top:10px;" onclick="checkAndStart('${s}', ${hasDone})">${hasDone ? 'Ulang' : 'Mulai'}</button></div>`;
+        // Cek apakah kode paket+subtes ada di history user
+        // Contoh: "TPS1PU" atau "TPS1PK"
+        const examCode = (p + s).toLowerCase();
+        const hasDone = userDataHistory.toLowerCase().includes(examCode);
+        
+        // Tentukan kelas warna dan teks tombol
+        const btnClass = hasDone ? "btn-selesai" : "btn-belum";
+        const btnText = hasDone ? '<i class="fas fa-check-circle"></i> Selesai' : 'Mulai Sekarang';
+
+        html += `
+            <div class="subtest-card">
+                <div style="font-weight: 800; color: #4b6584; margin-bottom: 8px;">${s}</div>
+                <button class="btn ${btnClass}" 
+                        style="padding:10px; font-size:12px; border-radius: 8px;" 
+                        onclick="checkAndStart('${s}', ${hasDone})">
+                    ${btnText}
+                </button>
+            </div>`;
     });
     document.getElementById("subtest-list").innerHTML = html;
 }
