@@ -35,16 +35,8 @@
             z-index: 1000;
         }
 
-        #sidebar.hidden {
-            transform: translateX(-100%);
-        }
-
-        .sidebar-header {
-            padding: 25px 20px;
-            text-align: center;
-            border-bottom: 1px solid #f0f4f8;
-        }
-
+        #sidebar.hidden { transform: translateX(-100%); }
+        .sidebar-header { padding: 25px 20px; text-align: center; border-bottom: 1px solid #f0f4f8; }
         .menu-list { padding: 15px; }
         
         .menu-item {
@@ -60,11 +52,7 @@
         }
 
         .menu-item i { margin-right: 15px; width: 20px; text-align: center; font-size: 18px; }
-
-        .menu-item:hover, .menu-item.active {
-            background: var(--blue);
-            color: white;
-        }
+        .menu-item:hover, .menu-item.active { background: var(--blue); color: white; }
 
         /* MAIN CONTENT */
         #main {
@@ -75,33 +63,14 @@
             min-height: 100vh;
         }
 
-        #main.full-width {
-            margin-left: 0;
-        }
-
-        .top-bar {
-            display: flex;
-            align-items: center;
-            margin-bottom: 40px;
-            background: transparent;
-            position: relative;
-            z-index: 900;
-        }
+        #main.full-width { margin-left: 0; }
+        .top-bar { display: flex; align-items: center; margin-bottom: 40px; background: transparent; position: relative; z-index: 900; }
 
         .toggle-btn {
-            font-size: 20px;
-            cursor: pointer;
-            width: 45px;
-            height: 45px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            margin-right: 20px;
-            color: var(--blue);
-            border: none;
+            font-size: 20px; cursor: pointer; width: 45px; height: 45px;
+            display: flex; align-items: center; justify-content: center;
+            background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            margin-right: 20px; color: var(--blue); border: none;
         }
 
         .content-section { display: none; animation: fadeIn 0.4s ease; }
@@ -122,41 +91,19 @@
             margin-bottom: 20px;
         }
 
-        input {
-            width: 100%;
-            padding: 14px;
-            margin-bottom: 15px;
-            border: 1px solid #e1e8ef;
-            border-radius: 12px;
-            box-sizing: border-box;
-        }
+        input { width: 100%; padding: 14px; margin-bottom: 15px; border: 1px solid #e1e8ef; border-radius: 12px; box-sizing: border-box; }
 
         .btn {
             background: linear-gradient(135deg, var(--blue), var(--blue2));
-            color: white;
-            border: none;
-            padding: 14px;
-            border-radius: 12px;
-            cursor: pointer;
-            font-weight: 700;
-            width: 100%;
-            transition: 0.3s;
+            color: white; border: none; padding: 14px; border-radius: 12px;
+            cursor: pointer; font-weight: 700; width: 100%; transition: 0.3s;
         }
 
-        .btn-outline {
-            background: transparent;
-            color: var(--blue);
-            border: 2px solid var(--blue);
-            margin-top: 10px;
-        }
-
+        .btn-outline { background: transparent; color: var(--blue); border: 2px solid var(--blue); margin-top: 10px; }
         .btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
         /* CSS KHUSUS UJIAN */
-        .q-nav-btn {
-            width: 35px; height: 35px; border-radius: 8px; border: 1px solid #ddd; 
-            background: white; cursor: pointer; font-weight: bold;
-        }
+        .q-nav-btn { width: 35px; height: 35px; border-radius: 8px; border: 1px solid #ddd; background: white; cursor: pointer; font-weight: bold; }
         .q-nav-btn.filled { background: var(--blue); color: white; border-color: var(--blue); }
         .subtest-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
         .subtest-card { border: 1px solid #eef2f7; padding: 15px; border-radius: 12px; text-align: center; background: #fff; }
@@ -167,42 +114,22 @@
             #main { margin-left: 0 !important; padding: 20px; }
         }
 
-/* Update atau Tambahkan CSS ini */
-.exam-box {
-    width: 100%;
-    max-width: 800px; /* Ukuran maksimal di laptop */
-    height: 500px;    /* Tinggi fix agar konsisten */
-    background: #fafafa;
-    border: 1px solid #f0f0f0;
-    border-radius: 12px;
-    margin-bottom: 20px;
-    overflow: hidden; /* Penting untuk fitur geser */
-    position: relative;
-    cursor: grab;     /* Indikator bisa digeser */
-}
-
-.exam-box:active { cursor: grabbing; }
-
-#img-soal {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: contain; /* Mepeet atas bawah/kiri kanan tanpa distorsi */
-    transition: transform 0.1s ease;
-    transform-origin: center;
-    pointer-events: none; /* Agar tidak mengganggu event drag di parent */
-}
-        
+        #soal-container {
+            width: 100%; height: 450px; border: 1px solid #f0f0f0; 
+            margin-bottom: 20px; border-radius: 10px; background: #fafafa; 
+            overflow: hidden; position: relative; cursor: grab;
+        }
+        #soal-container:active { cursor: grabbing; }
+        #img-soal {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+            object-fit: contain; transition: transform 0.1s ease; transform-origin: center;
+        }
     </style>
 </head>
 <body>
 
 <div id="sidebar">
-    <div class="sidebar-header">
-        <h3 style="margin:0; color: var(--blue);">TryoutUTBK</h3>
-    </div>
+    <div class="sidebar-header"><h3 style="margin:0; color: var(--blue);">TryoutUTBK</h3></div>
     <div class="menu-list">
         <div class="menu-item active" onclick="showSection('home', this)"><i class="fas fa-home"></i> Home</div>
         <div class="menu-item" onclick="showSection('tryout', this)"><i class="fas fa-edit"></i> Tryout</div>
@@ -213,25 +140,20 @@
 
 <div id="main">
     <div class="top-bar">
-        <button class="toggle-btn" onclick="toggleMenu()" aria-label="Menu">
-            <i class="fas fa-bars"></i>
-        </button>
+        <button class="toggle-btn" onclick="toggleMenu()"><i class="fas fa-bars"></i></button>
         <h2 id="section-title" style="margin:0">Home</h2>
     </div>
 
     <!-- SECTION: HOME -->
     <div id="home" class="content-section active">
         <div id="loading-home"><i class="fas fa-spinner fa-spin"></i> Memuat data siswa...</div>
-        
         <div id="form-biodata" class="card" style="display: none;">
             <h3>Lengkapi Biodata</h3>
-            <p style="color: #666; margin-bottom: 20px;">Halo! Silakan lengkapi profil kamu.</p>
             <input id="in-nama" type="text" placeholder="Nama Lengkap">
             <input id="in-sekolah" type="text" placeholder="Asal Sekolah">
             <input id="in-wa" type="number" placeholder="Nomor WhatsApp">
             <button class="btn" onclick="simpanData()">Simpan & Masuk</button>
         </div>
-
         <div id="view-biodata" class="card" style="display: none;">
             <h3>Profil Siswa</h3>
             <div style="background: #f8faff; padding: 15px; border-radius: 12px; margin-bottom: 20px;">
@@ -239,22 +161,18 @@
                 <p><strong>Sekolah:</strong> <span id="txt-sekolah">-</span></p>
                 <p><strong>WhatsApp:</strong> <span id="txt-wa">-</span></p>
             </div>
-            <button class="btn btn-outline" onclick="editMode()"><i class="fas fa-edit"></i> Edit Profil</button>
+            <button class="btn btn-outline" onclick="editMode()">Edit Profil</button>
         </div>
     </div>
 
     <!-- SECTION: TRYOUT -->
     <div id="tryout" class="content-section">
-        <!-- View 1: Pilih Paket -->
         <div id="to-package-view">
             <div class="card">
                 <h3>Pilih Paket Tryout</h3>
-                <p style="color: #666; font-size: 14px; margin-bottom: 20px;">Pilih salah satu paket yang tersedia untuk memulai.</p>
                 <div id="package-list">Memuat paket...</div>
             </div>
         </div>
-
-        <!-- View 2: Pilih Subtes -->
         <div id="to-subtest-view" style="display:none;">
             <div class="card" style="max-width: 600px;">
                 <button class="btn-outline" onclick="backToPackage()" style="width: auto; padding: 5px 15px; margin-bottom: 15px; font-size: 13px;">← Kembali</button>
@@ -263,223 +181,73 @@
             </div>
         </div>
 
-<!-- View 3: Box Pengerjaan Ujian -->
-<div id="to-exam-view" style="display:none;">
-    <div class="card" style="max-width: 900px; position: relative; margin: auto;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-            <div style="display: flex; gap: 10px; align-items: center;">
-                <button class="btn-outline" style="width: auto; padding: 5px 10px;" onclick="adjustZoom(0.1)"><i class="fas fa-search-plus"></i></button>
-                <button class="btn-outline" style="width: auto; padding: 5px 10px;" onclick="adjustZoom(-0.1)"><i class="fas fa-search-minus"></i></button>
-                <div id="review-status" style="display:none; color: #1f6feb; font-weight: bold; margin-left: 10px;">MODE REVIEW</div>
-            </div>
-            <div id="exam-timer" style="font-weight: 800; font-size: 1.4rem; color: #ff4757; background: #fff5f5; padding: 5px 15px; border-radius: 10px; border: 1px solid #ffd8d8;">00:00</div>
-        </div>
-
-        <div id="countdown-overlay" style="text-align: center; font-size: 4rem; padding: 60px 0; display: none; color: var(--blue);">3</div>
-
-        <div id="exam-content" style="display: none;">
-            <!-- Box Soal Fix & Dragable -->
-            <div id="soal-container" style="width: 100%; height: 450px; border: 1px solid #f0f0f0; margin-bottom: 20px; border-radius: 10px; background: #fafafa; overflow: hidden; position: relative; cursor: grab;">
-                <img id="img-soal" src="" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; transition: transform 0.1s; transform-origin: center;">
-            </div>
-
-            <div id="nav-no-soal" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 25px; justify-content: center;"></div>
-
-            <div id="answer-section" style="background: #f0f7ff; padding: 20px; border-radius: 15px; border: 1px dashed var(--blue);">
-                <h4 id="label-no-soal" style="margin-top: 0;">Soal No. 1</h4>
-                
-                <!-- Info Kunci (Hanya muncul saat Review) -->
-                <div id="review-info" style="display:none; margin-bottom: 10px; padding: 8px; border-radius: 8px; font-weight: bold;"></div>
-
-                <div style="display: flex; gap: 10px; align-items: center;">
-                    <input id="ans-input" placeholder="A/B/C/D/E" maxlength="1" style="text-transform: uppercase; margin-bottom: 0; font-size: 18px; text-align: center; width: 120px;">
-                    <button id="btn-save-ans" class="btn" style="width: auto; flex: 1;" onclick="saveAnswer()">Simpan Jawaban</button>
+        <div id="to-exam-view" style="display:none;">
+            <div class="card" style="max-width: 900px; position: relative; margin: auto;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn-outline" style="width: auto; padding: 5px 10px;" onclick="adjustZoom(0.1)"><i class="fas fa-search-plus"></i></button>
+                        <button class="btn-outline" style="width: auto; padding: 5px 10px;" onclick="adjustZoom(-0.1)"><i class="fas fa-search-minus"></i></button>
+                        <div id="review-status" style="display:none; color: #1f6feb; font-weight: bold;">MODE REVIEW</div>
+                    </div>
+                    <div id="exam-timer" style="font-weight: 800; font-size: 1.4rem; color: #ff4757; padding: 5px 15px;">00:00</div>
                 </div>
-                <p id="save-notif" style="color: #2ed573; font-size: 13px; margin: 8px 0 0 0; display: none;"><i class="fas fa-check-circle"></i> Jawaban tersimpan</p>
+                <div id="countdown-overlay" style="text-align: center; font-size: 4rem; display: none;">3</div>
+                <div id="exam-content" style="display: none;">
+                    <div id="soal-container">
+                        <img id="img-soal" src="">
+                    </div>
+                    <div id="nav-no-soal" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 25px; justify-content: center;"></div>
+                    <div id="answer-section" style="background: #f0f7ff; padding: 20px; border-radius: 15px;">
+                        <h4 id="label-no-soal">Soal No. 1</h4>
+                        <div id="review-info" style="display:none; margin-bottom: 10px; font-weight: bold;"></div>
+                        <div style="display: flex; gap: 10px;">
+                            <input id="ans-input" placeholder="A/B/C/D/E" maxlength="1" style="text-transform: uppercase; text-align: center; width: 120px; margin:0;">
+                            <button id="btn-save-ans" class="btn" style="flex: 1;" onclick="saveAnswer()">Simpan Jawaban</button>
+                        </div>
+                        <p id="save-notif" style="color: #2ed573; display: none;">Jawaban tersimpan</p>
+                    </div>
+                    <button id="btn-finish" class="btn" style="background: #ff4757; margin-top: 30px;" onclick="finishExam(true)">Selesaikan Subtes</button>
+                    <button id="btn-exit-review" class="btn btn-outline" style="display:none; margin-top: 30px;" onclick="location.reload()">Selesai Review</button>
+                </div>
             </div>
-            
-            <button id="btn-finish" class="btn" style="background: #ff4757; margin-top: 30px;" onclick="finishExam(true)">Selesaikan Subtes Ini</button>
-            <button id="btn-exit-review" class="btn btn-outline" style="display:none; margin-top: 30px;" onclick="location.reload()">Selesai Review</button>
+        </div>
+
+        <div id="to-result-view" style="display:none;">
+            <div class="card" style="text-align: center; margin: auto;">
+                <h3>Subtes Selesai!</h3>
+                <h1 id="res-score">0</h1>
+                <p id="res-detail">Benar: 0 | Salah: 0</p>
+                <button class="btn" onclick="startReview()">Lihat Kunci Jawaban</button>
+                <button class="btn btn-outline" onclick="location.reload()">Ke Dashboard</button>
+            </div>
         </div>
     </div>
-</div>
 
-<!-- View 4: Hasil Skor -->
-<div id="to-result-view" style="display:none;">
-    <div class="card" style="text-align: center; margin: auto;">
-        <i class="fas fa-check-circle" style="font-size: 4rem; color: #2ed573; margin-bottom: 15px;"></i>
-        <h3>Subtes Selesai!</h3>
-        <div style="margin: 20px 0; padding: 20px; background: #f8faff; border-radius: 15px;">
-            <span style="display: block; color: #666; font-size: 14px;">Skor Anda</span>
-            <h1 id="res-score" style="font-size: 4rem; color: var(--blue); margin: 5px 0;">0</h1>
-            <p id="res-detail" style="font-weight: 600;">Benar: 0 | Salah: 0</p>
-        </div>
-        <div style="display: flex; flex-direction: column; gap: 10px;">
-            <button class="btn" onclick="startReview()">Lihat Kunci Jawaban</button>
-            <button class="btn btn-outline" onclick="location.reload()">Kembali ke Dashboard</button>
-        </div>
-    </div>
-</div>
-
-    <!-- SECTION: HASIL -->
     <div id="hasil" class="content-section">
-        <div class="card">
-            <h3>Hasil Tryout</h3>
-            <p style="color: #666;">Riwayat pengerjaan kamu akan tampil di sini setelah kamu menyelesaikan subtes.</p>
-            <div id="history-container"></div>
-        </div>
+        <div class="card"><h3>Hasil Tryout</h3><div id="history-container"></div></div>
     </div>
 </div>
 
 <script>
-// --- KONFIGURASI API ---
 const API = "https://script.google.com/macros/s/AKfycbw3VJTB5lpE4UXhO--7-5_HyVXkN8H1UrrbeF6gr1tDbc0qldoYfMQFG7fDYZIQgELuXg/exec";
-const API_SOAL = "https://script.google.com/macros/s/AKfycbxEHQ7moQYiS3X6NS2bBQSSNjl-6hiA1RDU9yHd6m5CIisIjd15oRrsttecwbAkO_uIVg/exec"; // URL SS 2
+const API_SOAL = "https://script.google.com/macros/s/AKfycbxEHQ7moQYiS3X6NS2bBQSSNjl-6hiA1RDU9yHd6m5CIisIjd15oRrsttecwbAkO_uIVg/exec";
 const userEmail = sessionStorage.getItem("user_email");
 
-// Data Global Ujian
-let userDataHistory = ""; 
-let currentPacket = "";
-let currentSubtest = "";
-let questions = [];
-let userAnswers = {};
-let timer;
-let zoomLevel = 1;
-let currentQIdx = 0;
+let userDataHistory = "", currentPacket = "", currentSubtest = "", questions = [], userAnswers = {}, timer;
+let zoomLevel = 1, currentQIdx = 0, isReviewMode = false;
+let isDragging = false, startPos = { x: 0, y: 0 }, scrollPos = { x: 0, y: 0 };
 
-// 1. Variabel Baru
-let isReviewMode = false;
-let isDragging = false;
-let startPos = { x: 0, y: 0 };
-let scrollPos = { x: 0, y: 0 };
+const subtestInfo = { "PU": 30, "PPU": 15, "PBM": 25, "PK": 20, "LBI": 45, "LBE": 30, "PM": 45 };
 
-// 2. Fungsi Zoom (Revisi Range 50% - 300%)
-function adjustZoom(val) {
-    zoomLevel += val;
-    if(zoomLevel < 0.5) zoomLevel = 0.5; // Minimal 50%
-    if(zoomLevel > 3.0) zoomLevel = 3.0; // Maksimal 300%
-    document.getElementById("img-soal").style.transform = `scale(${zoomLevel})`;
-}
+// INITIAL LOAD
+if (!userEmail) window.location.replace("/toutbk/");
+document.addEventListener("DOMContentLoaded", () => { if (userEmail) loadUser(); });
 
-// 3. Fungsi Geser Gambar (Drag and Drop)
-const dragContainer = document.getElementById("drag-container");
-dragContainer.onmousedown = (e) => {
-    isDragging = true;
-    startPos = { x: e.clientX, y: e.clientY };
-    scrollPos = { x: dragContainer.scrollLeft, y: dragContainer.scrollTop };
-};
-window.onmouseup = () => isDragging = false;
-window.onmousemove = (e) => {
-    if (!isDragging) return;
-    const dx = e.clientX - startPos.x;
-    const dy = e.clientY - startPos.y;
-    dragContainer.scrollLeft = scrollPos.x - dx;
-    dragContainer.scrollTop = scrollPos.y - dy;
-};
-
-// 4. Fungsi Review Jawaban
-function startReview() {
-    isReviewMode = true;
-    document.getElementById("to-result-view").style.display = "none";
-    document.getElementById("to-exam-view").style.display = "block";
-    document.getElementById("exam-timer").style.display = "none";
-    document.getElementById("review-status").style.display = "block";
-    document.getElementById("review-info").style.display = "block";
-    document.getElementById("btn-finish").style.display = "none";
-    document.getElementById("btn-exit-review").style.display = "block";
-    
-    // Disable input
-    document.getElementById("ans-input").disabled = true;
-    document.getElementById("btn-save-ans").style.display = "none";
-    
-    showQuestion(0);
-}
-
-// 5. Update Fungsi showQuestion (Tambahkan logika review)
-function showQuestion(idx) {
-    currentQIdx = idx;
-    const q = questions[idx];
-    document.getElementById("label-no-soal").innerText = "Soal No. " + (idx + 1);
-    document.getElementById("img-soal").src = q.soal;
-    
-    const userAns = userAnswers[idx] || "-";
-    document.getElementById("ans-input").value = userAns;
-
-    if (isReviewMode) {
-        const infoBox = document.getElementById("review-info");
-        const isCorrect = userAns === q.kunci;
-        infoBox.innerHTML = `
-            <span style="color:${isCorrect ? '#2ed573' : '#ff4757'}">
-                Jawaban Anda: ${userAns} | Kunci: ${q.kunci} 
-                (${isCorrect ? 'BENAR' : 'SALAH'})
-            </span>`;
-    }
-    renderNav();
-}
-
-// Tambahkan variabel pendukung di bagian atas script
-let isDragging = false;
-let startPos = { x: 0, y: 0 };
-let scrollPos = { x: 0, y: 0 };
-
-// Logika Geser Gambar
-const container = document.getElementById("soal-container");
-container.onmousedown = (e) => {
-    isDragging = true;
-    container.style.cursor = "grabbing";
-    startPos = { x: e.clientX, y: e.clientY };
-    scrollPos = { x: container.scrollLeft, y: container.scrollTop };
-};
-window.onmouseup = () => {
-    isDragging = false;
-    container.style.cursor = "grab";
-};
-window.onmousemove = (e) => {
-    if (!isDragging) return;
-    const dx = e.clientX - startPos.x;
-    const dy = e.clientY - startPos.y;
-    container.scrollLeft = scrollPos.x - dx;
-    container.scrollTop = scrollPos.y - dy;
-};
-
-// Fungsi Masuk Mode Review
-function startReview() {
-    isReviewMode = true;
-    document.getElementById("to-result-view").style.display = "none";
-    document.getElementById("to-exam-view").style.display = "block";
-    document.getElementById("exam-timer").style.display = "none";
-    document.getElementById("review-status").style.display = "block";
-    document.getElementById("review-info").style.display = "block";
-    document.getElementById("btn-finish").style.display = "none";
-    document.getElementById("btn-exit-review").style.display = "block";
-    document.getElementById("ans-input").disabled = true;
-    document.getElementById("btn-save-ans").style.display = "none";
-    showQuestion(0);
-}
-    
-const subtestInfo = {
-    "PU": 30, "PPU": 15, "PBM": 25, "PK": 20, "LBI": 45, "LBE": 30, "PM": 45
-};
-
-// --- PROTEKSI & INITIAL LOAD ---
-if (!userEmail || userEmail === "null" || userEmail === "") {
-    window.location.replace("/toutbk/"); 
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-    if (userEmail) loadUser();
-});
-
-// --- FUNGSI CORE DASHBOARD ---
 function toggleMenu() {
     const sidebar = document.getElementById("sidebar");
     const main = document.getElementById("main");
-    if (window.innerWidth <= 768) {
-        sidebar.classList.toggle("open");
-    } else {
-        sidebar.classList.toggle("hidden");
-        main.classList.toggle("full-width");
-    }
+    if (window.innerWidth <= 768) sidebar.classList.toggle("open");
+    else { sidebar.classList.toggle("hidden"); main.classList.toggle("full-width"); }
 }
 
 function showSection(id, el) {
@@ -487,165 +255,69 @@ function showSection(id, el) {
     document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
     document.getElementById(id).classList.add('active');
     el.classList.add('active');
-    document.getElementById("section-title").innerText = id.charAt(0).toUpperCase() + id.slice(1);
-    if (window.innerWidth <= 768) document.getElementById("sidebar").classList.remove("open");
 }
 
 async function loadUser() {
     try {
         const response = await fetch(`${API}?action=get_user&email=${encodeURIComponent(userEmail)}`);
         const d = await response.json();
-        if (d.status === "force_logout") { logout(); return; }
-
         document.getElementById("loading-home").style.display = "none";
         if (d.data_lengkap) {
             userDataHistory = d.history || "";
             document.getElementById("view-biodata").style.display = "block";
-            document.getElementById("form-biodata").style.display = "none";
             document.getElementById("txt-nama").innerText = d.nama;
             document.getElementById("txt-sekolah").innerText = d.sekolah;
             document.getElementById("txt-wa").innerText = d.wa;
             loadPackages();
-        } else {
-            document.getElementById("form-biodata").style.display = "block";
-        }
-    } catch (err) {
-        document.getElementById("loading-home").innerText = "Gagal memuat data.";
-    }
+        } else document.getElementById("form-biodata").style.display = "block";
+    } catch (err) { console.error(err); }
 }
-
-function simpanData() {
-    const nama = document.getElementById("in-nama").value;
-    const sekolah = document.getElementById("in-sekolah").value;
-    const wa = document.getElementById("in-wa").value;
-    if(!nama || !sekolah || !wa) return alert("Lengkapi data!");
-
-    const btn = document.querySelector("#form-biodata .btn");
-    btn.innerText = "Menyimpan...";
-    btn.disabled = true;
-
-    fetch(API, {
-        method: "POST",
-        body: JSON.stringify({ action: "update_biodata", email: userEmail, nama: nama, sekolah: sekolah, wa: wa })
-    })
-    .then(r => r.json())
-    .then(d => { if(d.status === "ok") location.reload(); })
-    .catch(() => alert("Error Simpan"))
-    .finally(() => btn.disabled = false);
-}
-
-function editMode() {
-    document.getElementById("view-biodata").style.display = "none";
-    document.getElementById("form-biodata").style.display = "block";
-    document.getElementById("in-nama").value = document.getElementById("txt-nama").innerText;
-    document.getElementById("in-sekolah").value = document.getElementById("txt-sekolah").innerText;
-    document.getElementById("in-wa").value = document.getElementById("txt-wa").innerText;
-}
-
-function logout() {
-    sessionStorage.clear();
-    window.location.replace("/toutbk/");
-}
-
-// --- LOGIKA TRYOUT (INTEGRASI BARU) ---
 
 async function loadPackages() {
     try {
         const resp = await fetch(`${API_SOAL}?action=get_packages`);
         const d = await resp.json();
         let html = "";
-        d.paket.forEach(p => {
-            html += `<button class="btn" style="margin-bottom:12px; text-transform:uppercase;" onclick="openPackage('${p}')"><i class="fas fa-box-open"></i> &nbsp; ${p}</button>`;
-        });
+        d.paket.forEach(p => { html += `<button class="btn" style="margin-bottom:12px;" onclick="openPackage('${p}')">${p.toUpperCase()}</button>`; });
         document.getElementById("package-list").innerHTML = html;
-    } catch (e) {
-        document.getElementById("package-list").innerText = "Gagal memuat paket soal.";
-    }
+    } catch (e) { console.error(e); }
 }
 
 function openPackage(p) {
     currentPacket = p;
     document.getElementById("to-package-view").style.display = "none";
     document.getElementById("to-subtest-view").style.display = "block";
-    document.getElementById("selected-package-title").innerText = "Paket: " + p.toUpperCase();
-    
     let html = "";
     Object.keys(subtestInfo).forEach(s => {
-        const code = (p + s).toLowerCase();
-        const hasDone = userDataHistory.toLowerCase().includes(code);
-        html += `
-            <div class="subtest-card">
-                <strong style="color:var(--blue)">${s}</strong><br>
-                <small style="color:${hasDone ? '#2ed573':'#ff4757'}">${hasDone ? '✅ Selesai' : '❌ Belum'}</small><br>
-                <button class="btn" style="padding: 8px; font-size: 12px; margin-top: 10px;" 
-                    onclick="checkAndStart('${s}', ${hasDone})">${hasDone ? 'Ulang' : 'Mulai'}</button>
-            </div>`;
+        const hasDone = userDataHistory.toLowerCase().includes((p+s).toLowerCase());
+        html += `<div class="subtest-card"><strong>${s}</strong><br><button class="btn" onclick="checkAndStart('${s}', ${hasDone})">${hasDone ? 'Ulang' : 'Mulai'}</button></div>`;
     });
     document.getElementById("subtest-list").innerHTML = html;
 }
 
-function backToPackage() {
-    document.getElementById("to-subtest-view").style.display = "none";
-    document.getElementById("to-package-view").style.display = "block";
-}
-
 async function checkAndStart(sub, isRepeat) {
-    if (!confirm(isRepeat ? "Anda sudah mengerjakan subtes ini. Kerjakan ulang?" : "Mulai subtes " + sub + "?")) return;
-    
+    if (!confirm("Mulai subtes " + sub + "?")) return;
     currentSubtest = sub;
     document.getElementById("to-subtest-view").style.display = "none";
     document.getElementById("to-exam-view").style.display = "block";
-    document.getElementById("exam-content").style.display = "none";
-    
-    // Ambil Soal
     try {
         const resp = await fetch(`${API_SOAL}?action=get_soal&paket=${currentPacket}&subtes=${sub}`);
         const d = await resp.json();
-        questions = d.soal;
-        userAnswers = {};
-        currentQIdx = 0;
-
-        // Countdown
-        const overlay = document.getElementById("countdown-overlay");
-        overlay.style.display = "block";
-        let count = 3;
-        overlay.innerText = count;
-        const cInt = setInterval(() => {
-            count--;
-            overlay.innerText = count;
-            if(count <= 0) {
-                clearInterval(cInt);
-                overlay.style.display = "none";
-                startExam();
-            }
-        }, 1000);
-    } catch (e) { alert("Gagal mengambil soal."); backToPackage(); }
+        questions = d.soal; userAnswers = {}; currentQIdx = 0;
+        startExam();
+    } catch (e) { alert("Gagal ambil soal"); }
 }
 
 function startExam() {
     document.getElementById("exam-content").style.display = "block";
     renderNav();
     showQuestion(0);
-    startTimer(subtestInfo[currentSubtest]);
-    
-    // Anti-Cheat (Opsional)
-    window.onblur = () => { 
-        console.warn("User meninggalkan tab."); 
-    };
-}
-
-function startTimer(minutes) {
-    let seconds = minutes * 60;
+    let seconds = subtestInfo[currentSubtest] * 60;
     timer = setInterval(() => {
         seconds--;
-        let m = Math.floor(seconds / 60);
-        let s = seconds % 60;
-        document.getElementById("exam-timer").innerText = `${m < 10 ? '0'+m : m}:${s < 10 ? '0'+s : s}`;
-        if(seconds <= 0) {
-            clearInterval(timer);
-            alert("Waktu habis!");
-            finishExam(false);
-        }
+        let m = Math.floor(seconds / 60), s = seconds % 60;
+        document.getElementById("exam-timer").innerText = `${m}:${s < 10 ? '0'+s : s}`;
+        if(seconds <= 0) finishExam(false);
     }, 1000);
 }
 
@@ -660,14 +332,20 @@ function renderNav() {
 
 function showQuestion(idx) {
     currentQIdx = idx;
+    const q = questions[idx];
     document.getElementById("label-no-soal").innerText = "Soal No. " + (idx + 1);
-    document.getElementById("img-soal").src = questions[idx].soal;
+    document.getElementById("img-soal").src = q.soal;
     document.getElementById("ans-input").value = userAnswers[idx] || "";
-    document.getElementById("ans-input").focus();
     
-    // Reset Zoom
+    if (isReviewMode) {
+        const info = document.getElementById("review-info");
+        const isCorrect = (userAnswers[idx] || "-") === q.kunci;
+        info.style.display = "block";
+        info.style.color = isCorrect ? "#2ed573" : "#ff4757";
+        info.innerText = `Jawaban Anda: ${userAnswers[idx] || "-"} | Kunci: ${q.kunci}`;
+    }
     zoomLevel = 1;
-    document.getElementById("img-soal").style.transform = `scale(${zoomLevel})`;
+    document.getElementById("img-soal").style.transform = `scale(1)`;
 }
 
 function saveAnswer() {
@@ -675,69 +353,68 @@ function saveAnswer() {
     if(!val) return;
     userAnswers[currentQIdx] = val;
     renderNav();
-    
     document.getElementById("save-notif").style.display = "block";
-    setTimeout(() => { document.getElementById("save-notif").style.display = "none"; }, 1500);
-
-    // Otomatis ke soal berikutnya
-    if(currentQIdx < questions.length - 1) {
-        setTimeout(() => showQuestion(currentQIdx + 1), 500);
-    }
+    setTimeout(() => { document.getElementById("save-notif").style.display = "none"; }, 1000);
 }
 
 function adjustZoom(val) {
     zoomLevel += val;
-    if(zoomLevel < 0.5) zoomLevel = 0.5;
-    if(zoomLevel > 3) zoomLevel = 3;
+    zoomLevel = Math.min(Math.max(zoomLevel, 0.5), 3);
     document.getElementById("img-soal").style.transform = `scale(${zoomLevel})`;
 }
 
+// DRAG LOGIC
+const container = document.getElementById("soal-container");
+container.onmousedown = (e) => {
+    isDragging = true;
+    startPos = { x: e.clientX, y: e.clientY };
+    scrollPos = { x: container.scrollLeft, y: container.scrollTop };
+};
+window.onmouseup = () => isDragging = false;
+window.onmousemove = (e) => {
+    if (!isDragging) return;
+    container.scrollLeft = scrollPos.x - (e.clientX - startPos.x);
+    container.scrollTop = scrollPos.y - (e.clientY - startPos.y);
+};
+
 async function finishExam(isManual) {
-    if(isManual && !confirm("Yakin ingin mengakhiri subtes ini?")) return;
-    
+    if(isManual && !confirm("Akhiri subtes?")) return;
     clearInterval(timer);
-    const btnFinish = document.querySelector("#to-exam-view .btn");
-    btnFinish.innerText = "Mengirim Hasil...";
-    btnFinish.disabled = true;
-
-    let benar = 0;
-    let salah = 0;
-    let skorTotal = 0;
-    let ansString = [];
-
+    let benar = 0, skorTotal = 0;
     questions.forEach((q, i) => {
-        const uA = userAnswers[i] || "-";
-        ansString.push(uA);
-        if(uA === q.kunci) {
-            benar++;
-            skorTotal += q.skor;
-        } else {
-            salah++;
-        }
+        if((userAnswers[i] || "-") === q.kunci) { benar++; skorTotal += q.skor; }
     });
-
-    const payload = {
-        action: "submit_score",
-        email: userEmail,
-        code: (currentPacket + currentSubtest).toLowerCase(),
-        jawabanUser: ansString.join(","),
-        benar: benar,
-        salah: salah,
-        skor: skorTotal
-    };
-
-    try {
-        await fetch(API, { method: "POST", body: JSON.stringify(payload) });
-        
-        document.getElementById("to-exam-view").style.display = "none";
-        document.getElementById("to-result-view").style.display = "block";
-        document.getElementById("res-score").innerText = skorTotal;
-        document.getElementById("res-detail").innerText = `Benar: ${benar} | Salah: ${salah}`;
-    } catch (e) {
-        alert("Gagal mengirim hasil, tapi skor Anda: " + skorTotal);
-    }
+    
+    document.getElementById("to-exam-view").style.display = "none";
+    document.getElementById("to-result-view").style.display = "block";
+    document.getElementById("res-score").innerText = skorTotal;
+    document.getElementById("res-detail").innerText = `Benar: ${benar} | Salah: ${questions.length - benar}`;
+    
+    fetch(API, { method: "POST", body: JSON.stringify({
+        action: "submit_score", email: userEmail, skor: skorTotal,
+        code: (currentPacket + currentSubtest).toLowerCase()
+    })});
 }
 
+function startReview() {
+    isReviewMode = true;
+    document.getElementById("to-result-view").style.display = "none";
+    document.getElementById("to-exam-view").style.display = "block";
+    document.getElementById("exam-timer").style.display = "none";
+    document.getElementById("review-status").style.display = "block";
+    document.getElementById("btn-finish").style.display = "none";
+    document.getElementById("btn-exit-review").style.display = "block";
+    document.getElementById("ans-input").disabled = true;
+    document.getElementById("btn-save-ans").style.display = "none";
+    showQuestion(0);
+}
+
+function backToPackage() {
+    document.getElementById("to-subtest-view").style.display = "none";
+    document.getElementById("to-package-view").style.display = "block";
+}
+
+function logout() { sessionStorage.clear(); window.location.replace("/toutbk/"); }
 </script>
 </body>
 </html>
