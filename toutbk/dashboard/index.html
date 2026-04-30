@@ -126,17 +126,20 @@
         cursor: grab;
     }
         #soal-container:active { cursor: grabbing; }
-        #img-soal {
-            position: absolute; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 100%; 
-            object-fit: contain; 
-            transition: transform 0.1s ease; 
-            transform-origin: center;
-            pointer-events: none; /* Mencegah gangguan saat drag */
-        }
+#img-soal {
+    position: absolute; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%; 
+    object-fit: contain; 
+    transition: transform 0.1s ease; 
+    transform-origin: center;
+    /* UBAH INI dari 'none' menjadi 'auto' */
+    pointer-events: auto; 
+    user-select: none;
+    -webkit-user-drag: none; /* Mencegah drag bawaan browser */
+}
 
         @media (max-width: 768px) {
             #sidebar { transform: translateX(-100%); }
@@ -507,24 +510,69 @@ function adjustZoom(val) {
     document.getElementById("img-soal").style.transform = `scale(${zoomLevel})`;
 }
 
-// LOGIKA DRAG/PAN
+// REVISI LOGIKA DRAG/PAN
 const container = document.getElementById("soal-container");
+const imgSoal = document.getElementById("img-soal");
+
+let isDragging = false;
+let startX, startY, scrollLeft, scrollTop;
 container.addEventListener('mousedown', (e) => {
+    // Hanya aktifkan drag jika sedang di-zoom (zoomLevel > 1)
+    // Atau jika Anda ingin tetap bisa drag di zoom normal, hapus kondisi if ini
     isDragging = true;
+    container.style.cursor = 'grabbing';
+    
     startX = e.pageX - container.offsetLeft;
     startY = e.pageY - container.offsetTop;
     scrollLeft = container.scrollLeft;
     scrollTop = container.scrollTop;
 });
-window.addEventListener('mouseup', () => isDragging = false);
+window.addEventListener('mouseup', () => {
+    isDragging = false;
+    container.style.cursor = 'grab';
+});
 window.addEventListener('mousemove', (e) => {
     if (!isDragging) return;
     e.preventDefault();
+    
     const x = e.pageX - container.offsetLeft;
     const y = e.pageY - container.offsetTop;
-    container.scrollLeft = scrollLeft - (x - startX);
-    container.scrollTop = scrollTop - (y - startY);
+    
+    // Kecepatan geser (walk) bisa disesuaikan. 
+    // Mengalikan dengan zoomLevel membuat drag lebih responsif saat gambar besar.
+    const walkX = (x - startX) * 1.5; 
+    const walkY = (y - startY) * 1.5;
+    
+    container.scrollLeft = scrollLeft - walkX;
+    container.scrollTop = scrollTop - walkY;
 });
+
+function showQuestion(idx) {
+    currentQIdx = idx;
+    const q = questions[idx];
+    document.getElementById("label-no-soal").innerText = "Soal No. " + (idx + 1);
+    document.getElementById("img-soal").src = q.soal;
+    document.getElementById("ans-input").value = userAnswers[idx] || "";
+    
+    // Reset Zoom dan Posisi Scroll saat ganti soal
+    zoomLevel = 1;
+    imgSoal.style.transform = `scale(1)`;
+    container.scrollLeft = 0;
+    container.scrollTop = 0;
+
+    // Logika Review (tetap seperti kode Anda sebelumnya)
+    const feedback = document.getElementById("feedback-review");
+    if (isReview) {
+        const userAns = userAnswers[idx] || "-";
+        const isCorrect = userAns.toUpperCase() === q.kunci.toUpperCase();
+        feedback.style.display = "block";
+        feedback.style.background = isCorrect ? "#e8fdf0" : "#fff2f2";
+        feedback.style.color = isCorrect ? "#2ed573" : "#ff4757";
+        feedback.innerHTML = `Jawaban Anda: ${userAns} | Kunci: ${q.kunci}`;
+    } else {
+        feedback.style.display = "none";
+    }
+}
 
 async function finishExam(manual) {
     if(manual && !confirm("Akhiri subtes?")) return;
