@@ -349,15 +349,13 @@ function toggleMenu() {
     const isMobile = window.innerWidth <= 768;
 
     if (isMobile) {
-        // Logika untuk HP
         sidebar.classList.toggle("open");
         const isOpen = sidebar.classList.contains("open");
         overlay.style.display = isOpen ? "block" : "none";
     } else {
-        // Logika untuk Laptop/Desktop
         sidebar.classList.toggle("hidden");
         main.classList.toggle("full-width");
-        overlay.style.display = "none"; // Overlay tidak diperlukan di desktop
+        overlay.style.display = "none";
     }
 }
 
@@ -368,7 +366,6 @@ function showSection(id, el) {
     el.classList.add('active');
     document.getElementById("section-title").innerText = id.charAt(0).toUpperCase() + id.slice(1);
 
-    // Tambahkan ini: Tutup menu otomatis setelah klik menu di HP
     if (window.innerWidth <= 768 && document.getElementById("sidebar").classList.contains("open")) {
         toggleMenu();
     }
@@ -408,21 +405,15 @@ function openPackage(p) {
     
     let html = "";
     Object.keys(subtestInfo).forEach(s => {
-        // Cek apakah kode paket+subtes ada di history user
-        // Contoh: "TPS1PU" atau "TPS1PK"
         const examCode = (p + s).toLowerCase();
         const hasDone = userDataHistory.toLowerCase().includes(examCode);
-        
-        // Tentukan kelas warna dan teks tombol
         const btnClass = hasDone ? "btn-selesai" : "btn-belum";
         const btnText = hasDone ? '<i class="fas fa-check-circle"></i> Selesai' : 'Mulai Sekarang';
 
         html += `
             <div class="subtest-card">
                 <div style="font-weight: 800; color: #4b6584; margin-bottom: 8px;">${s}</div>
-                <button class="btn ${btnClass}" 
-                        style="padding:10px; font-size:12px; border-radius: 8px;" 
-                        onclick="checkAndStart('${s}', ${hasDone})">
+                <button class="btn ${btnClass}" style="padding:10px; font-size:12px; border-radius: 8px;" onclick="checkAndStart('${s}', ${hasDone})">
                     ${btnText}
                 </button>
             </div>`;
@@ -435,16 +426,27 @@ async function checkAndStart(sub, repeat) {
     currentSubtest = sub;
     document.getElementById("to-subtest-view").style.display = "none";
     document.getElementById("to-exam-view").style.display = "block";
+    
+    const overlay = document.getElementById("countdown-overlay");
+    const numDisplay = document.getElementById("countdown-number");
+    
+    overlay.style.display = "block";
+    
     try {
         const resp = await fetch(`${API_SOAL}?action=get_soal&paket=${currentPacket}&subtes=${sub}`);
         const d = await resp.json();
         questions = d.soal; userAnswers = {}; currentQIdx = 0; isReview = false;
-        const overlay = document.getElementById("countdown-overlay");
-        overlay.style.display = "block";
-        let c = 3; overlay.innerText = c;
+        
+        let c = 3; 
+        numDisplay.innerText = c;
         const int = setInterval(() => {
-            c--; overlay.innerText = c;
-            if(c <= 0) { clearInterval(int); overlay.style.display = "none"; startExam(); }
+            c--; 
+            numDisplay.innerText = c;
+            if(c <= 0) { 
+                clearInterval(int); 
+                overlay.style.display = "none"; 
+                startExam(); 
+            }
         }, 1000);
     } catch (e) { alert("Gagal ambil soal"); backToPackage(); }
 }
@@ -471,14 +473,23 @@ function renderNav() {
     document.getElementById("nav-no-soal").innerHTML = html;
 }
 
+// SATU FUNGSI showQuestion YANG SUDAH DIPERBAIKI
 function showQuestion(idx) {
     currentQIdx = idx;
     const q = questions[idx];
+    const container = document.getElementById("soal-container");
+    const imgSoal = document.getElementById("img-soal");
+
     document.getElementById("label-no-soal").innerText = "Soal No. " + (idx + 1);
-    document.getElementById("img-soal").src = q.soal;
+    imgSoal.src = q.soal;
     document.getElementById("ans-input").value = userAnswers[idx] || "";
     
-    // Logika Review
+    // Reset Zoom dan Posisi Scroll saat ganti soal
+    zoomLevel = 1;
+    imgSoal.style.transform = `scale(1)`;
+    container.scrollLeft = 0;
+    container.scrollTop = 0;
+
     const feedback = document.getElementById("feedback-review");
     if (isReview) {
         const userAns = userAnswers[idx] || "-";
@@ -490,9 +501,6 @@ function showQuestion(idx) {
     } else {
         feedback.style.display = "none";
     }
-
-    zoomLevel = 1;
-    document.getElementById("img-soal").style.transform = `scale(1)`;
 }
 
 function saveAnswer() {
@@ -510,69 +518,30 @@ function adjustZoom(val) {
     document.getElementById("img-soal").style.transform = `scale(${zoomLevel})`;
 }
 
-// REVISI LOGIKA DRAG/PAN
-const container = document.getElementById("soal-container");
-const imgSoal = document.getElementById("img-soal");
-
-let isDragging = false;
-let startX, startY, scrollLeft, scrollTop;
-container.addEventListener('mousedown', (e) => {
-    // Hanya aktifkan drag jika sedang di-zoom (zoomLevel > 1)
-    // Atau jika Anda ingin tetap bisa drag di zoom normal, hapus kondisi if ini
+// LOGIKA DRAG/PAN
+const examContainer = document.getElementById("soal-container");
+examContainer.addEventListener('mousedown', (e) => {
     isDragging = true;
-    container.style.cursor = 'grabbing';
-    
-    startX = e.pageX - container.offsetLeft;
-    startY = e.pageY - container.offsetTop;
-    scrollLeft = container.scrollLeft;
-    scrollTop = container.scrollTop;
+    examContainer.style.cursor = 'grabbing';
+    startX = e.pageX - examContainer.offsetLeft;
+    startY = e.pageY - examContainer.offsetTop;
+    scrollLeft = examContainer.scrollLeft;
+    scrollTop = examContainer.scrollTop;
 });
 window.addEventListener('mouseup', () => {
     isDragging = false;
-    container.style.cursor = 'grab';
+    examContainer.style.cursor = 'grab';
 });
 window.addEventListener('mousemove', (e) => {
     if (!isDragging) return;
     e.preventDefault();
-    
-    const x = e.pageX - container.offsetLeft;
-    const y = e.pageY - container.offsetTop;
-    
-    // Kecepatan geser (walk) bisa disesuaikan. 
-    // Mengalikan dengan zoomLevel membuat drag lebih responsif saat gambar besar.
+    const x = e.pageX - examContainer.offsetLeft;
+    const y = e.pageY - examContainer.offsetTop;
     const walkX = (x - startX) * 1.5; 
     const walkY = (y - startY) * 1.5;
-    
-    container.scrollLeft = scrollLeft - walkX;
-    container.scrollTop = scrollTop - walkY;
+    examContainer.scrollLeft = scrollLeft - walkX;
+    examContainer.scrollTop = scrollTop - walkY;
 });
-
-function showQuestion(idx) {
-    currentQIdx = idx;
-    const q = questions[idx];
-    document.getElementById("label-no-soal").innerText = "Soal No. " + (idx + 1);
-    document.getElementById("img-soal").src = q.soal;
-    document.getElementById("ans-input").value = userAnswers[idx] || "";
-    
-    // Reset Zoom dan Posisi Scroll saat ganti soal
-    zoomLevel = 1;
-    imgSoal.style.transform = `scale(1)`;
-    container.scrollLeft = 0;
-    container.scrollTop = 0;
-
-    // Logika Review (tetap seperti kode Anda sebelumnya)
-    const feedback = document.getElementById("feedback-review");
-    if (isReview) {
-        const userAns = userAnswers[idx] || "-";
-        const isCorrect = userAns.toUpperCase() === q.kunci.toUpperCase();
-        feedback.style.display = "block";
-        feedback.style.background = isCorrect ? "#e8fdf0" : "#fff2f2";
-        feedback.style.color = isCorrect ? "#2ed573" : "#ff4757";
-        feedback.innerHTML = `Jawaban Anda: ${userAns} | Kunci: ${q.kunci}`;
-    } else {
-        feedback.style.display = "none";
-    }
-}
 
 async function finishExam(manual) {
     if(manual && !confirm("Akhiri subtes?")) return;
