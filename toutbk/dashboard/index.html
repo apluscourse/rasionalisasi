@@ -296,9 +296,9 @@
                     <i class="fas fa-flag-checkered"></i> Selesaikan Subtes
                 </button>
                 
-                <button id="btn-close-review" class="btn btn-outline" style="display:none;" onclick="location.reload()">
-                    <i class="fas fa-times-circle"></i> Tutup Review
-                </button>
+<button id="btn-close-review" class="btn btn-outline" style="display:none;" onclick="closeReview()">
+    <i class="fas fa-arrow-left"></i> Kembali ke Hasil Skor
+</button>
             </div>
         </div>
     </div>
@@ -590,6 +590,22 @@ function activateReview() {
     showQuestion(0);
 }
 
+function closeReview() {
+    // 1. Sembunyikan tampilan ujian
+    document.getElementById("to-exam-view").style.display = "none";
+    
+    // 2. Tampilkan kembali tampilan hasil skor
+    document.getElementById("to-result-view").style.display = "block";
+    
+    // 3. Reset status review agar jika mulai subtes lain, sistem kembali normal
+    isReview = false;
+    
+    // 4. Kembalikan kontrol input menjadi aktif (untuk subtes berikutnya)
+    document.getElementById("ans-input").disabled = false;
+    document.getElementById("btn-save").style.display = "block";
+    document.getElementById("exam-timer").style.display = "block";
+}
+    
 function backToPackage() {
     document.getElementById("to-subtest-view").style.display = "none";
     document.getElementById("to-package-view").style.display = "block";
