@@ -170,6 +170,11 @@
     transform: translateY(-3px);
     box-shadow: 0 5px 15px rgba(0,0,0,0.05);
 }
+
+.q-nav-btn {
+    transition: all 0.2s ease;
+    font-weight: 600;
+}
         
     </style>
 </head>
@@ -637,9 +642,25 @@ function startExam() {
 
 function renderNav() {
     let html = "";
-    questions.forEach((_, i) => {
-        const status = userAnswers[i] ? 'filled' : '';
-        html += `<button class="q-nav-btn ${status}" onclick="showQuestion(${i})">${i+1}</button>`;
+    questions.forEach((q, i) => {
+        let statusClass = userAnswers[i] ? 'filled' : '';
+        let styleWarna = "";
+
+        // Logika warna khusus saat Mode Review
+        if (isReview) {
+            const userAns = (userAnswers[i] || "-").toUpperCase();
+            const correctAns = q.kunci.toUpperCase();
+            
+            if (userAns === "-") {
+                styleWarna = "background: #dfe6e9; color: #636e72; border-color: #b2bec3;"; // Abu-abu jika kosong
+            } else if (userAns === correctAns) {
+                styleWarna = "background: #2ed573; color: white; border-color: #26af5a;"; // Hijau jika benar
+            } else {
+                styleWarna = "background: #ff4757; color: white; border-color: #e04050;"; // Merah jika salah
+            }
+        }
+
+        html += `<button class="q-nav-btn ${statusClass}" style="${styleWarna}" onclick="showQuestion(${i})">${i+1}</button>`;
     });
     document.getElementById("nav-no-soal").innerHTML = html;
 }
