@@ -443,9 +443,16 @@ async function bukaReviewTerpisah(subtes, rawAnswers) {
     currentSubtest = subtes;
     
     // Konversi string jawaban "A,B,C" menjadi object
-    const cleanAnswers = rawAnswers.replace("Jawaban: ", "").split(",");
-    userAnswers = {};
-    cleanAnswers.forEach((ans, i) => { userAnswers[i] = ans.trim(); });
+const cleanAnswers = rawAnswers.replace("Jawaban: ", "").split(",");
+userAnswers = {};
+cleanAnswers.forEach((ans, i) => { 
+    // PERBAIKAN: Ambil hanya karakter terakhir atau bersihkan dari titik dua (:)
+    let formattedAns = ans.trim();
+    if (formattedAns.includes(":")) {
+        formattedAns = formattedAns.split(":").pop().trim();
+    }
+    userAnswers[i] = formattedAns; 
+});
 
     // Siapkan UI Review
     document.getElementById("to-subtest-view").style.display = "none";
@@ -455,6 +462,7 @@ async function bukaReviewTerpisah(subtes, rawAnswers) {
     document.getElementById("review-label").style.display = "block";
     document.getElementById("btn-finish-exam").style.display = "none";
     document.getElementById("btn-close-review").style.display = "block";
+    document.getElementById("btn-close-review").onclick = tutupReviewDariSubtest;
     document.getElementById("ans-input").disabled = true;
     document.getElementById("btn-save").style.display = "none";
 
@@ -571,6 +579,17 @@ function tutupReviewKhusus() {
     document.getElementById("review-label").style.display = "none";
     document.getElementById("btn-close-review").style.display = "none";
     document.getElementById("feedback-review").style.display = "none";
+}
+
+function tutupReviewDariSubtest() {
+    isReview = false;
+    document.getElementById("to-exam-view").style.display = "none";
+    document.getElementById("to-subtest-view").style.display = "block"; // Kembali ke list subtes
+    
+    // Reset state input
+    document.getElementById("ans-input").disabled = false;
+    document.getElementById("btn-save").style.display = "block";
+    document.getElementById("exam-timer").style.display = "block";
 }
     
 async function checkAndStart(sub, repeat) {
@@ -769,6 +788,7 @@ function activateReview() {
     document.getElementById("review-label").style.display = "block";
     document.getElementById("btn-finish-exam").style.display = "none";
     document.getElementById("btn-close-review").style.display = "block";
+    document.getElementById("btn-close-review").onclick = closeReview;
     document.getElementById("ans-input").disabled = true;
     document.getElementById("btn-save").style.display = "none";
     showQuestion(0);
