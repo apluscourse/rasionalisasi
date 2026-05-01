@@ -867,6 +867,36 @@ function backToPackage() {
     document.getElementById("to-package-view").style.display = "block";
 }
 
+// Fungsi untuk memantau aktivitas mencurigakan
+function proteksiUjian() {
+    // 1. Deteksi Pindah Tab atau Minimize Browser
+    document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === 'hidden' && !isReview && questions.length > 0) {
+            alert("Kecurangan Terdeteksi! Anda meninggalkan tab ujian. Ujian dihentikan paksa.");
+            finishExam(false); // Selesaikan otomatis tanpa konfirmasi
+        }
+    });
+
+    // 2. Deteksi Keluar Jendela Browser (Opsional tapi disarankan)
+    window.addEventListener("blur", () => {
+        if (!isReview && questions.length > 0) {
+            // Kita beri toleransi sedikit jika hanya blur tidak sengaja
+            console.warn("User meninggalkan jendela ujian.");
+        }
+    });
+
+    // 3. Deteksi Offline (Kehilangan Koneksi)
+    window.addEventListener("offline", () => {
+        if (!isReview && questions.length > 0) {
+            alert("Koneksi Terputus! Ujian disimpan dan diselesaikan untuk menjaga integritas data.");
+            finishExam(false);
+        }
+    });
+}
+
+// Jalankan proteksi saat script dimuat
+proteksiUjian();
+    
 function logout() { sessionStorage.clear(); window.location.replace("/toutbk/"); }
 </script>
 </body>
