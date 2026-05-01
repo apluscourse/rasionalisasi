@@ -403,23 +403,86 @@ function openPackage(p) {
     document.getElementById("selected-package-title").innerText = "Subtes: " + p.toUpperCase();
     
     let html = "";
+    // Pecah history menjadi array agar mudah mencari data kolom 2 (jawaban)
+    const historyArray = userDataHistory.split("|");
+
     Object.keys(subtestInfo).forEach(s => {
         const examCode = (p + s).toLowerCase();
-        const hasDone = userDataHistory.toLowerCase().includes(examCode);
-        const btnClass = hasDone ? "btn-selesai" : "btn-belum";
-        const btnText = hasDone ? '<i class="fas fa-check-circle"></i> Selesai' : 'Mulai Sekarang';
+        // Cari apakah examCode ada di history
+        const startIndex = historyArray.findIndex(item => item.toLowerCase() === examCode);
+        const hasDone = startIndex !== -1;
+
+        let btnText = 'Mulai Sekarang';
+        let btnClass = 'btn-belum';
+        let reviewBtnHtml = "";
+
+        if (hasDone) {
+            btnText = '<i class="fas fa-redo"></i> Ulang';
+            btnClass = 'btn-selesai';
+            
+            // Ambil data jawaban dari kolom ke-2 setelah kode (indeks startIndex + 1)
+            // Format: "to1pu: A,B,C,D"
+            const fullAnswerString = historyArray[startIndex + 1] || "";
+            const answerOnly = fullAnswerString.split(": ")[1] || ""; 
+
+            reviewBtnHtml = `
+                <button class="btn btn-review" 
+                        style="margin-top:8px; background:#6c5ce7; color:white; font-size:12px;" 
+                        onclick="startReviewDirectly('${s}', '${answerOnly}')">
+                    <i class="fas fa-search"></i> Review Jawaban
+                </button>`;
+        }
 
         html += `
             <div class="subtest-card">
                 <div style="font-weight: 800; color: #4b6584; margin-bottom: 8px;">${s}</div>
-                <button class="btn ${btnClass}" style="padding:10px; font-size:12px; border-radius: 8px;" onclick="checkAndStart('${s}', ${hasDone})">
+                <button class="btn ${btnClass}" 
+                        style="padding:10px; font-size:12px; border-radius: 8px;" 
+                        onclick="checkAndStart('${s}', ${hasDone})">
                     ${btnText}
                 </button>
+                ${reviewBtnHtml}
             </div>`;
     });
     document.getElementById("subtest-list").innerHTML = html;
 }
 
+async function startReviewDirectly(sub, savedAnswersText) {
+    currentSubtest = sub;
+    isReview = true; // Aktifkan mode review
+    
+    // Ubah string "A,B,C" menjadi objek {0: "A", 1: "B", 2: "C"}
+    const answersArray = savedAnswersText.split(",");
+    userAnswers = {};
+    answersArray.forEach((ans, index) => {
+        userAnswers[index] = ans;
+    });
+
+    document.getElementById("to-subtest-view").style.display = "none";
+    document.getElementById("to-exam-view").style.display = "block";
+    
+    // Tampilkan UI Review
+    document.getElementById("exam-timer").style.display = "none";
+    document.getElementById("review-label").style.display = "block";
+    document.getElementById("btn-finish-exam").style.display = "none";
+    document.getElementById("btn-close-review").style.display = "block";
+    document.getElementById("ans-input").disabled = true;
+    document.getElementById("btn-save").style.display = "none";
+
+    try {
+        // Ambil soal seperti biasa
+        const resp = await fetch(`${API_SOAL}?action=get_soal&paket=${currentPacket}&subtes=${sub}`);
+        const d = await resp.json();
+        questions = d.soal;
+        
+        renderNav();
+        showQuestion(0);
+    } catch (e) {
+        alert("Gagal memuat soal untuk review");
+        closeReview();
+    }
+}
+    
 async function checkAndStart(sub, repeat) {
     if (!confirm("Mulai subtes " + sub + "?")) return;
     currentSubtest = sub;
@@ -622,19 +685,21 @@ function activateReview() {
 }
 
 function closeReview() {
-    // 1. Sembunyikan tampilan ujian
+    // Sembunyikan tampilan ujian
     document.getElementById("to-exam-view").style.display = "none";
     
-    // 2. Tampilkan kembali tampilan hasil skor
-    document.getElementById("to-result-view").style.display = "block";
+    // Kembali ke menu daftar subtes
+    document.getElementById("to-subtest-view").style.display = "block";
     
-    // 3. Reset status review agar jika mulai subtes lain, sistem kembali normal
+    // Reset state aplikasi
     isReview = false;
-    
-    // 4. Kembalikan kontrol input menjadi aktif (untuk subtes berikutnya)
+    userAnswers = {};
     document.getElementById("ans-input").disabled = false;
     document.getElementById("btn-save").style.display = "block";
     document.getElementById("exam-timer").style.display = "block";
+    document.getElementById("review-label").style.display = "none";
+    document.getElementById("btn-finish-exam").style.display = "block";
+    document.getElementById("btn-close-review").style.display = "none";
 }
     
 function backToPackage() {
