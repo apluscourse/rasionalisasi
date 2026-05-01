@@ -948,74 +948,78 @@ async function loadHasilPackages() {
 function showHasilDetail(paket) {
     document.getElementById("hasil-package-view").style.display = "none";
     document.getElementById("hasil-detail-view").style.display = "block";
-    document.getElementById("hasil-title").innerText = "Hasil Paket " + paket.replace('to', '').toUpperCase();
+    
+    const namaPaket = paket.replace(/to/i, '').toUpperCase();
+    document.getElementById("hasil-title").innerText = "Hasil Paket Tryout " + namaPaket;
 
     const donutContainer = document.getElementById("donut-container");
     donutContainer.innerHTML = ""; 
     
-    // Parsing history data dari string
+    // Pecah data history berdasarkan pemisah antar subtes (|)
     const historyArray = userDataHistory.split("|");
     let allScores = [];
-    const labels = ["PU", "PPU", "PBM", "PK", "LBI", "LBE", "PM"];
+    const subtests = ["PU", "PPU", "PBM", "PK", "LBI", "LBE", "PM"];
 
-    labels.forEach(sub => {
+    subtests.forEach(sub => {
         const examCode = (paket + sub).toLowerCase();
-        const index = historyArray.findIndex(item => item.toLowerCase() === examCode);
+        // Cari baris data yang mengandung kode tersebut
+        const rowData = historyArray.find(item => item.toLowerCase().includes(examCode));
         
         let benar = 0, salah = 0, skor = 0;
         
-        // Ambil data jika ditemukan di history
-        if (index !== -1) {
-            benar = parseInt(historyArray[index + 2]) || 0;
-            salah = parseInt(historyArray[index + 3]) || 0;
-            skor = parseInt(historyArray[index + 4]) || 0;
+        if (rowData) {
+            // Pecah kolom berdasarkan titik koma (;)
+            const columns = rowData.split(";");
+            
+            // Kolom 3: "to1pu: 10 Benar 5 Salah" -> ambil angkanya saja
+            const benarSalahText = columns[2] || "";
+            const matchBenar = benarSalahText.match(/(\d+)\s+Benar/i);
+            const matchSalah = benarSalahText.match(/(\d+)\s+Salah/i);
+            
+            benar = matchBenar ? parseInt(matchBenar[1]) : 0;
+            salah = matchSalah ? parseInt(matchSalah[1]) : 0;
+            
+            // Kolom 4: "to1pu: 324" -> ambil angka setelah titik dua[cite: 4]
+            const skorText = columns[3] || "";
+            skor = parseInt(skorText.split(":").pop()) || 0;
         }
+        
         allScores.push(skor);
 
-        // Buat elemen chart donut
+        // Render UI Donut[cite: 4]
         const div = document.createElement("div");
-        div.className = "subtest-result-card";
         div.style.textAlign = "center";
-        div.style.padding = "15px";
-        div.style.background = "#fcfdff";
-        div.style.borderRadius = "15px";
-        div.style.border = "1px solid #edf2f7";
-        
+        div.style.padding = "10px";
         div.innerHTML = `
-            <div style="font-weight: 800; font-size: 13px; color: #4b6584; margin-bottom: 10px;">${sub}</div>
-            <div style="width:120px; height:120px; margin:auto; position:relative;">
+            <h4 style="margin-bottom:5px; font-size:14px; color:#4b6584;">${sub}</h4>
+            <div style="width:130px; height:130px; margin:auto; position:relative;">
                 <canvas id="donut-${sub}"></canvas>
                 <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center;">
-                    <div style="font-weight:900; font-size:22px; color:#2d3436; line-height:1;">${benar}</div>
-                    <div style="font-size:10px; color:#636e72;">BENAR</div>
+                    <div style="font-weight:900; font-size:20px; color:#2d3436;">${benar}</div>
                 </div>
             </div>
-            <div style="font-weight:800; color:var(--blue); margin-top:12px; font-size:16px;">${skor}</div>
+            <p style="font-weight:bold; color:var(--blue); margin-top:5px; font-size:14px;">Skor: ${skor}</p>
         `;
         donutContainer.appendChild(div);
 
-        // Render Donut Chart (Benar Hijau, Salah Merah)
         new Chart(document.getElementById(`donut-${sub}`), {
             type: 'doughnut',
             data: {
                 labels: ['Benar', 'Salah'],
                 datasets: [{
-                    data: [benar, (benar === 0 && salah === 0) ? 1 : salah], // Placeholder 1 jika kosong
+                    data: [benar, (benar === 0 && salah === 0) ? 1 : salah],
                     backgroundColor: [(benar === 0 && salah === 0) ? '#dfe6e9' : '#2ed573', '#ff4757'],
-                    borderWidth: 0,
-                    hoverOffset: 4
+                    borderWidth: 0
                 }]
             },
             options: { 
                 cutout: '75%', 
-                responsive: true,
-                maintainAspectRatio: true,
-                plugins: { legend: { display: false }, tooltip: { enabled: (benar !== 0 || salah !== 0) } } 
+                plugins: { legend: { display: false } } 
             }
         });
     });
 
-    renderBarChart(labels, allScores);
+    renderBarChart(subtests, allScores);
 }
 
 // 3. Render Bar Chart dengan warna dinamis (Hijau Tertinggi, Merah Terendah)
