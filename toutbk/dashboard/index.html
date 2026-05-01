@@ -226,7 +226,64 @@
     font-weight: 600;
 }
 
+/* Container Utama */
+.results-grid-container {
+    display: grid;
+    gap: 15px;
+    padding: 10px;
+    justify-content: center;
+}
 
+/* Card Subtes */
+.subtest-card {
+    background: #fff;
+    padding: 12px;
+    border-radius: 15px;
+    border: 1px solid #f0f4f8;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.subtest-card h4 { margin: 0 0 8px 0; font-size: 13px; color: #555; }
+.subtest-card p { margin-top: 8px; margin-bottom: 0; font-size: 12px; color: #636e72; }
+
+.donut-wrapper {
+    width: 100px;
+    height: 100px;
+    margin: auto;
+    position: relative;
+}
+
+.donut-center-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+/* Tampilan LAPTOP (Layar Lebar) */
+@media (min-width: 769px) {
+    .results-grid-container {
+        grid-template-columns: repeat(4, 1fr); /* 4 kolom di laptop */
+        max-width: 1000px;
+        margin: auto;
+    }
+}
+
+/* Tampilan HP (Layar Kecil) */
+@media (max-width: 768px) {
+    .results-grid-container {
+        grid-template-columns: repeat(2, 1fr); /* 2 kolom di HP */
+    }
+    .subtest-card {
+        padding: 8px; /* Lebih hemat ruang di HP */
+    }
+    .donut-wrapper {
+        width: 85px; /* Box diperkecil paksa agar tidak geser */
+        height: 85px;
+    }
+}
         
     </style>
 </head>
@@ -997,23 +1054,17 @@ async function loadHasilPackages() {
 
 // 2. Menampilkan detail hasil saat paket diklik
 function showHasilDetail(paket) {
-    // Sembunyikan daftar paket dan tampilkan detail
     document.getElementById("hasil-package-view").style.display = "none";
     document.getElementById("hasil-detail-view").style.display = "block";
     
-    // Set judul paket (misal: TO 1)
     const namaPaket = paket.replace(/to/i, '').toUpperCase();
     document.getElementById("hasil-title").innerText = "Hasil Paket Tryout " + namaPaket;
 
     const donutContainer = document.getElementById("donut-container");
     donutContainer.innerHTML = ""; 
     
-    // Set container agar rapi ke bawah (1 baris 1 diagram) dan hemat ruang
-    donutContainer.style.display = "flex";
-    donutContainer.style.flexDirection = "column";
-    donutContainer.style.alignItems = "center";
-    donutContainer.style.gap = "15px"; // Jarak antar box subtes
-    donutContainer.style.padding = "0 10px";
+    // Gunakan class CSS agar lebih fleksibel dibanding inline style
+    donutContainer.className = "results-grid-container";
 
     const historyArray = userDataHistory.split("|").map(item => item.trim());
     let allScores = [];
@@ -1024,12 +1075,10 @@ function showHasilDetail(paket) {
         const codeIndex = historyArray.findIndex(item => item.toLowerCase() === examCode);
         
         let benar = 0, salah = 0, skor = 0;
-        
         if (codeIndex !== -1) {
             const statText = historyArray[codeIndex + 2] || "";
             const matchBenar = statText.match(/(\d+)\s*Benar/i);
             const matchSalah = statText.match(/(\d+)\s*Salah/i);
-            
             benar = matchBenar ? parseInt(matchBenar[1]) : 0;
             salah = matchSalah ? parseInt(matchSalah[1]) : 0;
             
@@ -1037,36 +1086,27 @@ function showHasilDetail(paket) {
             const matchSkor = skorText.match(/:\s*(\d+)/);
             skor = matchSkor ? parseInt(matchSkor[1]) : 0;
         }
-        
         allScores.push(skor);
 
-        // Render elemen box subtes (Dikecilkan lebarnya agar tidak "gemuk")
         const div = document.createElement("div");
-        div.style.width = "100%";
-        div.style.maxWidth = "280px"; // Membatasi lebar box agar ramping di HP
-        div.style.textAlign = "center";
-        div.style.background = "#fff";
-        div.style.padding = "12px";
-        div.style.borderRadius = "15px";
-        div.style.border = "1px solid #f0f4f8";
-        div.style.boxShadow = "0 2px 8px rgba(0,0,0,0.05)";
+        div.className = "subtest-card"; // Menggunakan class CSS
         
         div.innerHTML = `
-            <h4 style="margin: 0 0 8px 0; font-size: 13px; color: #555;">${sub}</h4>
-            <div class="donut-wrapper" style="width:100px; height:100px; margin:auto; position:relative;">
+            <h4>${sub}</h4>
+            <div class="donut-wrapper">
                 <canvas id="donut-${sub}"></canvas>
-                <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center;">
-                    <b style="font-size:16px; color: #2d3436;">${benar}</b>
+                <div class="donut-center-text">
+                    <b>${benar}</b>
                 </div>
             </div>
-            <p style="margin-top:8px; margin-bottom:0; font-size:12px; color: #636e72;">Skor: <b style="color:#2d3436;">${skor}</b></p>
+            <p>Skor: <b>${skor}</b></p>
         `;
         donutContainer.appendChild(div);
 
-        // Render Grafik Donut
         new Chart(document.getElementById(`donut-${sub}`), {
             type: 'doughnut',
             data: {
+                labels: ['Benar', 'Salah'], // Label saat di-klik (tooltip)
                 datasets: [{
                     data: [benar, (benar === 0 && salah === 0) ? 1 : salah],
                     backgroundColor: [(benar === 0 && salah === 0) ? '#dfe6e9' : '#2ed573', '#ff4757'],
@@ -1074,8 +1114,20 @@ function showHasilDetail(paket) {
                 }]
             },
             options: { 
-                cutout: '78%', // Lebih tipis agar terlihat modern
-                plugins: { legend: { display: false } },
+                cutout: '75%', 
+                plugins: { 
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                // Menampilkan keterangan "Benar: 12" atau "Salah: 10" saat diklik
+                                let label = context.label || '';
+                                let value = context.raw || 0;
+                                return label + ": " + value;
+                            }
+                        }
+                    }
+                },
                 responsive: true,
                 maintainAspectRatio: true
             }
@@ -1089,16 +1141,15 @@ function showHasilDetail(paket) {
 function renderBarChart(labels, scores) {
     const ctx = document.getElementById('barChartSkor').getContext('2d');
     
-    // Cari nilai max dan min (abaikan skor 0 agar tidak merah terus jika belum dikerjakan)
     const validScores = scores.filter(s => s > 0);
     const maxScore = validScores.length ? Math.max(...validScores) : -1;
     const minScore = validScores.length ? Math.min(...validScores) : -1;
 
     const barColors = scores.map(s => {
-        if (s === 0) return '#dfe6e9'; // Abu-abu jika belum ada skor
-        if (s === maxScore) return '#2ed573'; // Hijau jika tertinggi
-        if (s === minScore) return '#ff4757'; // Merah jika terendah
-        return '#4fa3ff'; // Biru default
+        if (s === 0) return '#dfe6e9'; 
+        if (s === maxScore) return '#2ed573'; 
+        if (s === minScore) return '#ff4757'; 
+        return '#4fa3ff'; 
     });
 
     if (window.myBarChart) window.myBarChart.destroy();
@@ -1111,7 +1162,7 @@ function renderBarChart(labels, scores) {
                 data: scores,
                 backgroundColor: barColors,
                 borderRadius: 8,
-                barThickness: 30
+                barThickness: 25 // Dikecilkan sedikit agar proporsional di HP
             }]
         },
         options: {
@@ -1119,11 +1170,54 @@ function renderBarChart(labels, scores) {
             maintainAspectRatio: false,
             plugins: { 
                 legend: { display: false },
-                tooltip: { backgroundColor: '#2d3436' }
+                tooltip: { 
+                    backgroundColor: '#2d3436',
+                    callbacks: {
+                        label: function(context) {
+                            // Menambahkan teks "Skor: " pada tooltip
+                            return " Skor: " + context.raw;
+                        }
+                    }
+                },
+                // Menambahkan angka skor di atas batang chart
+                datalabels: {
+                    anchor: 'end',
+                    align: 'top',
+                    formatter: Math.round,
+                    font: { weight: 'bold', size: 11 }
+                }
             },
             scales: {
-                y: { beginAtZero: true, grid: { display: false } },
-                x: { grid: { display: false } }
+                y: { 
+                    beginAtZero: true, 
+                    grid: { display: false },
+                    ticks: { display: false } // Sembunyikan angka di kiri agar bersih
+                },
+                x: { 
+                    grid: { display: false },
+                    ticks: { font: { size: 10 } }
+                }
+            },
+            // Jika tidak menggunakan plugin datalabels eksternal, gunakan animasi ini untuk label manual
+            animation: {
+                onComplete: function() {
+                    const chartInstance = this;
+                    const ctx = chartInstance.ctx;
+                    ctx.font = Chart.helpers.fontString(11, 'bold', Chart.defaults.font.family);
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'bottom';
+                    ctx.fillStyle = '#2d3436';
+
+                    this.data.datasets.forEach(function(dataset, i) {
+                        const meta = chartInstance.getDatasetMeta(i);
+                        meta.data.forEach(function(bar, index) {
+                            const data = dataset.data[index];
+                            if(data > 0) {
+                                ctx.fillText(data, bar.x, bar.y - 5);
+                            }
+                        });
+                    });
+                }
             }
         }
     });
