@@ -776,6 +776,7 @@ async function checkAndStart(sub, repeat) {
 }
 
 function startExam() {
+    isExamActive = true; // AKTIFKAN PROTEKSI
     document.getElementById("exam-content").style.display = "block";
     renderNav();
     showQuestion(0);
@@ -901,6 +902,7 @@ window.addEventListener('mousemove', (e) => {
 
 async function finishExam(manual) {
     if(manual && !confirm("Akhiri subtes?")) return;
+    isExamActive = false; // MATIKAN PROTEKSI
     clearInterval(timer);
 
     let benar = 0, skor = 0, ansArr = [];
@@ -966,6 +968,7 @@ function activateReview() {
 
 function resetReviewElements() {
     isReview = false; // Matikan mode review
+    isExamActive = false; // PASTIKAN MATI
     
     // Kembalikan UI ke kondisi ujian
     document.getElementById("ans-input").disabled = false;
@@ -1010,27 +1013,22 @@ function backToPackage() {
 }
 
 // Fungsi untuk memantau aktivitas mencurigakan
+// Variabel kontrol status ujian
+let isExamActive = false; 
+
 function proteksiUjian() {
     // 1. Deteksi Pindah Tab atau Minimize Browser
     document.addEventListener("visibilitychange", () => {
-        if (document.visibilityState === 'hidden' && !isReview && questions.length > 0) {
+        if (document.visibilityState === 'hidden' && isExamActive && !isReview) {
             alert("Kecurangan Terdeteksi! Anda meninggalkan tab ujian. Ujian dihentikan paksa.");
-            finishExam(false); // Selesaikan otomatis tanpa konfirmasi
+            finishExam(false); 
         }
     });
 
-    // 2. Deteksi Keluar Jendela Browser (Opsional tapi disarankan)
-    window.addEventListener("blur", () => {
-        if (!isReview && questions.length > 0) {
-            // Kita beri toleransi sedikit jika hanya blur tidak sengaja
-            console.warn("User meninggalkan jendela ujian.");
-        }
-    });
-
-    // 3. Deteksi Offline (Kehilangan Koneksi)
+    // 2. Deteksi Offline (Kehilangan Koneksi)
     window.addEventListener("offline", () => {
-        if (!isReview && questions.length > 0) {
-            alert("Koneksi Terputus! Ujian disimpan dan diselesaikan untuk menjaga integritas data.");
+        if (isExamActive && !isReview) {
+            alert("Koneksi Terputus! Ujian diselesaikan otomatis untuk mengamankan data.");
             finishExam(false);
         }
     });
