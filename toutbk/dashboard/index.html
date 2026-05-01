@@ -955,67 +955,60 @@ function showHasilDetail(paket) {
     const donutContainer = document.getElementById("donut-container");
     donutContainer.innerHTML = ""; 
     
-    // Pecah data history berdasarkan pemisah antar subtes (|)
-    const historyArray = userDataHistory.split("|");
+    // Pecah per subtes (|)
+    const historyArray = userDataHistory.split("|").map(item => item.trim());
     let allScores = [];
     const subtests = ["PU", "PPU", "PBM", "PK", "LBI", "LBE", "PM"];
 
     subtests.forEach(sub => {
         const examCode = (paket + sub).toLowerCase();
-        // Cari baris data yang mengandung kode tersebut
-        const rowData = historyArray.find(item => item.toLowerCase().includes(examCode));
+        const rowData = historyArray.find(item => item.toLowerCase().startsWith(examCode));
         
         let benar = 0, salah = 0, skor = 0;
         
         if (rowData) {
-            // Pecah kolom berdasarkan titik koma (;)
-            const columns = rowData.split(";");
+            // Pecah kolom berdasarkan (;)
+            const cols = rowData.split(";");
             
-            // Kolom 3: "to1pu: 10 Benar 5 Salah" -> ambil angkanya saja
-            const benarSalahText = columns[2] || "";
-            const matchBenar = benarSalahText.match(/(\d+)\s+Benar/i);
-            const matchSalah = benarSalahText.match(/(\d+)\s+Salah/i);
+            // Ambil Kolom 3 -> "to1pu: 12 Benar, 18 Salah"
+            const col3 = cols[2] ? cols[2].split(":")[1] : ""; // Ambil setelah titik dua
+            if (col3) {
+                benar = parseInt(col3.split(",")[0]) || 0; // Ambil sebelum koma
+                salah = parseInt(col3.split(",")[1]) || 0; // Ambil setelah koma
+            }
             
-            benar = matchBenar ? parseInt(matchBenar[1]) : 0;
-            salah = matchSalah ? parseInt(matchSalah[1]) : 0;
-            
-            // Kolom 4: "to1pu: 324" -> ambil angka setelah titik dua[cite: 4]
-            const skorText = columns[3] || "";
-            skor = parseInt(skorText.split(":").pop()) || 0;
+            // Ambil Kolom 4 -> "to1pu: 360"
+            const col4 = cols[3] ? cols[3].split(":")[1] : "";
+            skor = parseInt(col4) || 0; // Langsung jadi angka
         }
         
         allScores.push(skor);
 
-        // Render UI Donut[cite: 4]
+        // Langsung Render ke HTML
         const div = document.createElement("div");
         div.style.textAlign = "center";
-        div.style.padding = "10px";
         div.innerHTML = `
-            <h4 style="margin-bottom:5px; font-size:14px; color:#4b6584;">${sub}</h4>
+            <h4 style="margin-bottom:10px;">${sub}</h4>
             <div style="width:130px; height:130px; margin:auto; position:relative;">
                 <canvas id="donut-${sub}"></canvas>
-                <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center;">
-                    <div style="font-weight:900; font-size:20px; color:#2d3436;">${benar}</div>
+                <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);">
+                    <b style="font-size:20px;">${benar}</b>
                 </div>
             </div>
-            <p style="font-weight:bold; color:var(--blue); margin-top:5px; font-size:14px;">Skor: ${skor}</p>
+            <p>Skor: <b>${skor}</b></p>
         `;
         donutContainer.appendChild(div);
 
         new Chart(document.getElementById(`donut-${sub}`), {
             type: 'doughnut',
             data: {
-                labels: ['Benar', 'Salah'],
                 datasets: [{
                     data: [benar, (benar === 0 && salah === 0) ? 1 : salah],
                     backgroundColor: [(benar === 0 && salah === 0) ? '#dfe6e9' : '#2ed573', '#ff4757'],
                     borderWidth: 0
                 }]
             },
-            options: { 
-                cutout: '75%', 
-                plugins: { legend: { display: false } } 
-            }
+            options: { cutout: '75%', plugins: { legend: { display: false } } }
         });
     });
 
