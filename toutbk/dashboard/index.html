@@ -335,20 +335,20 @@
     </div>
 
     <div id="hasil-detail-view" style="display:none;">
-        <div class="card" style="max-width: 800px;">
+        <div class="card" style="max-width: 850px;">
             <button class="btn-outline" onclick="backToHasilPackage()" style="width: auto; padding: 5px 15px; margin-bottom: 15px; font-size: 13px;">← Kembali</button>
-            <h2 id="hasil-title" style="text-align: center; color: var(--blue);">Hasil Paket</h2>
+            <h2 id="hasil-title" style="text-align: center; color: var(--blue); margin-bottom: 30px;">Hasil Paket</h2>
             
-            <!-- Grid untuk Donut Charts -->
-            <div id="donut-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 20px;">
-                <!-- Chart per subtes akan di-render di sini -->
+            <!-- Grid untuk Donut Charts Subtes -->
+            <div id="donut-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; margin-top: 20px;">
+                <!-- Render otomatis via JS -->
             </div>
 
-            <hr style="margin: 40px 0; border: 0; border-top: 1px solid #eee;">
+            <hr style="margin: 40px 0; border: 0; border-top: 2px dashed #eee;">
             
-            <!-- Bar Chart untuk Perbandingan Skor -->
-            <h3 style="text-align: center;">Perbandingan Skor Subtes</h3>
-            <div style="height: 300px; position: relative;">
+            <!-- Bar Chart Perbandingan Skor -->
+            <h3 style="text-align: center; margin-bottom: 20px;">Grafik Perbandingan Skor Subtes</h3>
+            <div style="height: 350px; position: relative; background: #fff; padding: 15px; border-radius: 15px; border: 1px solid #f0f0f0;">
                 <canvas id="barChartSkor"></canvas>
             </div>
         </div>
@@ -931,31 +931,32 @@ function proteksiUjian() {
 // Jalankan proteksi saat script dimuat
 proteksiUjian();
 
-// Fungsi untuk memuat daftar paket di menu Hasil
+// 1. Memuat daftar paket hasil
 async function loadHasilPackages() {
     try {
         const resp = await fetch(`${API_SOAL}?action=get_packages`);
         const d = await resp.json();
         let html = "";
         d.paket.forEach(p => { 
-            html += `<button class="btn btn-outline" style="margin-bottom:12px; text-transform:uppercase;" onclick="showHasilDetail('${p}')"><i class="fas fa-chart-pie"></i> &nbsp; Hasil ${p}</button>`; 
+            html += `<button class="btn btn-outline" style="margin-bottom:12px; text-transform:uppercase;" onclick="showHasilDetail('${p}')"><i class="fas fa-poll"></i> &nbsp; HASIL ${p}</button>`; 
         });
         document.getElementById("hasil-package-list").innerHTML = html;
-    } catch (e) { console.error(e); }
+    } catch (e) { console.error("Gagal load paket hasil:", e); }
 }
 
-// Fungsi untuk parsing data history dan menampilkan detail hasil
+// 2. Menampilkan detail hasil saat paket diklik
 function showHasilDetail(paket) {
     document.getElementById("hasil-package-view").style.display = "none";
     document.getElementById("hasil-detail-view").style.display = "block";
-    document.getElementById("hasil-title").innerText = "Hasil " + paket.toUpperCase();
+    document.getElementById("hasil-title").innerText = "Hasil Paket " + paket.replace('to', '').toUpperCase();
 
     const donutContainer = document.getElementById("donut-container");
-    donutContainer.innerHTML = ""; // Reset isi
+    donutContainer.innerHTML = ""; 
     
+    // Parsing history data dari string
     const historyArray = userDataHistory.split("|");
     let allScores = [];
-    let labels = Object.keys(subtestInfo);
+    const labels = ["PU", "PPU", "PBM", "PK", "LBI", "LBE", "PM"];
 
     labels.forEach(sub => {
         const examCode = (paket + sub).toLowerCase();
@@ -963,77 +964,100 @@ function showHasilDetail(paket) {
         
         let benar = 0, salah = 0, skor = 0;
         
+        // Ambil data jika ditemukan di history
         if (index !== -1) {
-            // Asumsi format history: |kode|jawaban|benar|salah|skor|
             benar = parseInt(historyArray[index + 2]) || 0;
             salah = parseInt(historyArray[index + 3]) || 0;
             skor = parseInt(historyArray[index + 4]) || 0;
         }
-        
         allScores.push(skor);
 
-        // Buat elemen pembungkus chart
+        // Buat elemen chart donut
         const div = document.createElement("div");
+        div.className = "subtest-result-card";
         div.style.textAlign = "center";
+        div.style.padding = "15px";
+        div.style.background = "#fcfdff";
+        div.style.borderRadius = "15px";
+        div.style.border = "1px solid #edf2f7";
+        
         div.innerHTML = `
-            <h4 style="margin-bottom:5px; font-size:14px;">${sub}</h4>
-            <div style="width:150px; height:150px; margin:auto; position:relative;">
+            <div style="font-weight: 800; font-size: 13px; color: #4b6584; margin-bottom: 10px;">${sub}</div>
+            <div style="width:120px; height:120px; margin:auto; position:relative;">
                 <canvas id="donut-${sub}"></canvas>
-                <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-weight:800; font-size:18px; color:#2ed573;">${benar}</div>
+                <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center;">
+                    <div style="font-weight:900; font-size:22px; color:#2d3436; line-height:1;">${benar}</div>
+                    <div style="font-size:10px; color:#636e72;">BENAR</div>
+                </div>
             </div>
-            <p style="font-weight:bold; color:var(--blue); margin-top:5px;">Skor: ${skor}</p>
+            <div style="font-weight:800; color:var(--blue); margin-top:12px; font-size:16px;">${skor}</div>
         `;
         donutContainer.appendChild(div);
 
-        // Render Donut Chart
+        // Render Donut Chart (Benar Hijau, Salah Merah)
         new Chart(document.getElementById(`donut-${sub}`), {
             type: 'doughnut',
             data: {
                 labels: ['Benar', 'Salah'],
                 datasets: [{
-                    data: [benar, salah === 0 && benar === 0 ? 1 : salah], // Jika kosong tampilkan placeholder
-                    backgroundColor: ['#2ed573', '#ff4757'],
-                    borderWidth: 0
+                    data: [benar, (benar === 0 && salah === 0) ? 1 : salah], // Placeholder 1 jika kosong
+                    backgroundColor: [(benar === 0 && salah === 0) ? '#dfe6e9' : '#2ed573', '#ff4757'],
+                    borderWidth: 0,
+                    hoverOffset: 4
                 }]
             },
-            options: { cutout: '70%', plugins: { legend: { display: false } } }
+            options: { 
+                cutout: '75%', 
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: { legend: { display: false }, tooltip: { enabled: (benar !== 0 || salah !== 0) } } 
+            }
         });
     });
 
     renderBarChart(labels, allScores);
 }
 
+// 3. Render Bar Chart dengan warna dinamis (Hijau Tertinggi, Merah Terendah)
 function renderBarChart(labels, scores) {
     const ctx = document.getElementById('barChartSkor').getContext('2d');
     
-    // Cari skor tertinggi dan terendah untuk warna
-    const maxScore = Math.max(...scores);
-    const minScore = Math.min(...scores.filter(s => s >= 0)); // Hindari skor 0 jika belum ujian
+    // Cari nilai max dan min (abaikan skor 0 agar tidak merah terus jika belum dikerjakan)
+    const validScores = scores.filter(s => s > 0);
+    const maxScore = validScores.length ? Math.max(...validScores) : -1;
+    const minScore = validScores.length ? Math.min(...validScores) : -1;
 
-    const colors = scores.map(s => {
-        if (s === maxScore && s !== 0) return '#2ed573'; // Hijau jika tertinggi
-        if (s === minScore && s !== 0) return '#ff4757'; // Merah jika terendah
-        return '#1f6feb'; // Biru default
+    const barColors = scores.map(s => {
+        if (s === 0) return '#dfe6e9'; // Abu-abu jika belum ada skor
+        if (s === maxScore) return '#2ed573'; // Hijau jika tertinggi
+        if (s === minScore) return '#ff4757'; // Merah jika terendah
+        return '#4fa3ff'; // Biru default
     });
 
-    if (window.myBarChart) window.myBarChart.destroy(); // Hancurkan chart lama jika ada
+    if (window.myBarChart) window.myBarChart.destroy();
 
     window.myBarChart = new Chart(ctx, {
         type: 'bar',
         data: {
             labels: labels,
             datasets: [{
-                label: 'Skor Subtes',
                 data: scores,
-                backgroundColor: colors,
-                borderRadius: 8
+                backgroundColor: barColors,
+                borderRadius: 8,
+                barThickness: 30
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            scales: { y: { beginAtZero: true } },
-            plugins: { legend: { display: false } }
+            plugins: { 
+                legend: { display: false },
+                tooltip: { backgroundColor: '#2d3436' }
+            },
+            scales: {
+                y: { beginAtZero: true, grid: { display: false } },
+                x: { grid: { display: false } }
+            }
         }
     });
 }
