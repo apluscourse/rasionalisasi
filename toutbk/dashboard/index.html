@@ -955,43 +955,50 @@ function showHasilDetail(paket) {
     const donutContainer = document.getElementById("donut-container");
     donutContainer.innerHTML = ""; 
     
-    // Pecah per subtes (|)
+    // 1. Pecah data berdasarkan pemisah "|" dari GS
     const historyArray = userDataHistory.split("|").map(item => item.trim());
     let allScores = [];
     const subtests = ["PU", "PPU", "PBM", "PK", "LBI", "LBE", "PM"];
 
     subtests.forEach(sub => {
         const examCode = (paket + sub).toLowerCase();
-        const rowData = historyArray.find(item => item.toLowerCase().startsWith(examCode));
+        
+        // 2. Cari indeks kolom di mana kode subtes (misal: 'to1pu') berada
+        const codeIndex = historyArray.findIndex(item => item.toLowerCase() === examCode);
         
         let benar = 0, salah = 0, skor = 0;
         
-        if (rowData) {
-            // Pecah kolom berdasarkan (;)
-            const cols = rowData.split(";");
+        if (codeIndex !== -1) {
+            // Berdasarkan payload di GS:
+            // index (0) = code (to1pu)
+            // index (1) = jawaban (to1pu: A,B,C)
+            // index (2) = statistik (to1pu: 12 Benar, 18 Salah)
+            // index (3) = skor (to1pu: 360)
+
+            // Ambil kolom ke-3 (Statistik Benar/Salah)
+            const statText = historyArray[codeIndex + 2] || "";
+            const matchBenar = statText.match(/(\d+)\s*Benar/i);
+            const matchSalah = statText.match(/(\d+)\s*Salah/i);
             
-            // Ambil Kolom 3 -> "to1pu: 12 Benar, 18 Salah"
-            const col3 = cols[2] ? cols[2].split(":")[1] : ""; // Ambil setelah titik dua
-            if (col3) {
-                benar = parseInt(col3.split(",")[0]) || 0; // Ambil sebelum koma
-                salah = parseInt(col3.split(",")[1]) || 0; // Ambil setelah koma
-            }
+            benar = matchBenar ? parseInt(matchBenar[1]) : 0;
+            salah = matchSalah ? parseInt(matchSalah[1]) : 0;
             
-            // Ambil Kolom 4 -> "to1pu: 360"
-            const col4 = cols[3] ? cols[3].split(":")[1] : "";
-            skor = parseInt(col4) || 0; // Langsung jadi angka
+            // Ambil kolom ke-4 (Skor)[cite: 4]
+            const skorText = historyArray[codeIndex + 3] || "";
+            const matchSkor = skorText.match(/:\s*(\d+)/);
+            skor = matchSkor ? parseInt(matchSkor[1]) : 0;
         }
         
         allScores.push(skor);
 
-        // Langsung Render ke HTML
+        // Render Donut Chart[cite: 4]
         const div = document.createElement("div");
         div.style.textAlign = "center";
         div.innerHTML = `
             <h4 style="margin-bottom:10px;">${sub}</h4>
             <div style="width:130px; height:130px; margin:auto; position:relative;">
                 <canvas id="donut-${sub}"></canvas>
-                <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);">
+                <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center;">
                     <b style="font-size:20px;">${benar}</b>
                 </div>
             </div>
@@ -1002,6 +1009,7 @@ function showHasilDetail(paket) {
         new Chart(document.getElementById(`donut-${sub}`), {
             type: 'doughnut',
             data: {
+                labels: ['Benar', 'Salah'],
                 datasets: [{
                     data: [benar, (benar === 0 && salah === 0) ? 1 : salah],
                     backgroundColor: [(benar === 0 && salah === 0) ? '#dfe6e9' : '#2ed573', '#ff4757'],
