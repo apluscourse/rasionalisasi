@@ -183,32 +183,50 @@
     #main { margin-left: 0 !important; padding: 15px; } /* Padding diperkecil */
 
     /* Card Utama di HP dibuat lebih rapat */
-    .card {
-        padding: 15px;
-        width: 95%;
-        border-radius: 15px;
-    }
-
-    /* Grid Hasil (Menu Hasil) di HP jadi 2 kolom agar tidak makan tempat */
-    #donut-container {
-        grid-template-columns: repeat(2, 1fr) !important; 
-        gap: 10px !important;
-    }
-
-    /* Ukuran Donut Chart diperkecil di HP */
-    .donut-wrapper {
-        width: 100px !important;
-        height: 100px !important;
-    }
-
-    /* Ukuran teks di HP diperkecil */
-    .donut-wrapper b {
-        font-size: 16px !important;
-    }
-    
-    h4 { font-size: 13px !important; }
-    p { font-size: 12px !important; }
+.card {
+    background: var(--card);
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+    max-width: 800px; /* Standar ukuran box profil */
+    width: 90%;
+    margin: 0 auto 20px auto;
+    border: 1px solid rgba(0,0,0,0.02);
 }
+
+/* Box utama dibuat pas dengan lebar layar HP */
+#hasil-detail-view .card {
+    max-width: 100%; 
+    padding: 15px; /* Padding lebih kecil agar hemat ruang */
+    margin: 10px auto;
+}
+
+/* Mengatur container diagram agar 1 baris isi 1 diagram */
+#donut-container {
+    display: flex;
+    flex-direction: column; /* Memaksa elemen berjejer ke bawah */
+    align-items: center;    /* Posisi di tengah */
+    gap: 20px;
+}
+
+/* Ukuran wrapper diagram donut agar kecil dan proporsional */
+.donut-wrapper {
+    width: 150px !important; 
+    height: 150px !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+/* Menyesuaikan label teks di bawah donut agar tidak terlalu besar */
+.donut-label {
+    font-size: 14px;
+    margin-top: 8px;
+    font-weight: 600;
+}
+
+
         
     </style>
 </head>
@@ -979,32 +997,35 @@ async function loadHasilPackages() {
 
 // 2. Menampilkan detail hasil saat paket diklik
 function showHasilDetail(paket) {
-    // Sembunyikan daftar paket dan tampilkan detail[cite: 4]
+    // Sembunyikan daftar paket dan tampilkan detail
     document.getElementById("hasil-package-view").style.display = "none";
     document.getElementById("hasil-detail-view").style.display = "block";
     
-    // Set judul paket (misal: TO 1)[cite: 4]
+    // Set judul paket (misal: TO 1)
     const namaPaket = paket.replace(/to/i, '').toUpperCase();
     document.getElementById("hasil-title").innerText = "Hasil Paket Tryout " + namaPaket;
 
     const donutContainer = document.getElementById("donut-container");
     donutContainer.innerHTML = ""; 
     
-    // Pecah data history berdasarkan pemisah "|" dari GS[cite: 4]
+    // Set container agar rapi ke bawah (1 baris 1 diagram) dan hemat ruang
+    donutContainer.style.display = "flex";
+    donutContainer.style.flexDirection = "column";
+    donutContainer.style.alignItems = "center";
+    donutContainer.style.gap = "15px"; // Jarak antar box subtes
+    donutContainer.style.padding = "0 10px";
+
     const historyArray = userDataHistory.split("|").map(item => item.trim());
     let allScores = [];
     const subtests = ["PU", "PPU", "PBM", "PK", "LBI", "LBE", "PM"];
 
     subtests.forEach(sub => {
         const examCode = (paket + sub).toLowerCase();
-        
-        // Cari indeks kolom di mana kode subtes berada[cite: 4]
         const codeIndex = historyArray.findIndex(item => item.toLowerCase() === examCode);
         
         let benar = 0, salah = 0, skor = 0;
         
         if (codeIndex !== -1) {
-            // Ambil statistik benar/salah (Kolom ke-3 dari paket data)[cite: 4]
             const statText = historyArray[codeIndex + 2] || "";
             const matchBenar = statText.match(/(\d+)\s*Benar/i);
             const matchSalah = statText.match(/(\d+)\s*Salah/i);
@@ -1012,7 +1033,6 @@ function showHasilDetail(paket) {
             benar = matchBenar ? parseInt(matchBenar[1]) : 0;
             salah = matchSalah ? parseInt(matchSalah[1]) : 0;
             
-            // Ambil skor (Kolom ke-4 dari paket data)[cite: 4]
             const skorText = historyArray[codeIndex + 3] || "";
             const matchSkor = skorText.match(/:\s*(\d+)/);
             skor = matchSkor ? parseInt(matchSkor[1]) : 0;
@@ -1020,27 +1040,30 @@ function showHasilDetail(paket) {
         
         allScores.push(skor);
 
-        // Render elemen box subtes (Minimalis untuk HP)[cite: 4]
+        // Render elemen box subtes (Dikecilkan lebarnya agar tidak "gemuk")
         const div = document.createElement("div");
+        div.style.width = "100%";
+        div.style.maxWidth = "280px"; // Membatasi lebar box agar ramping di HP
         div.style.textAlign = "center";
         div.style.background = "#fff";
-        div.style.padding = "10px";
+        div.style.padding = "12px";
         div.style.borderRadius = "15px";
         div.style.border = "1px solid #f0f4f8";
+        div.style.boxShadow = "0 2px 8px rgba(0,0,0,0.05)";
         
         div.innerHTML = `
-            <h4 style="margin-bottom:8px; font-size:14px;">${sub}</h4>
-            <div class="donut-wrapper" style="width:130px; height:130px; margin:auto; position:relative;">
+            <h4 style="margin: 0 0 8px 0; font-size: 13px; color: #555;">${sub}</h4>
+            <div class="donut-wrapper" style="width:100px; height:100px; margin:auto; position:relative;">
                 <canvas id="donut-${sub}"></canvas>
                 <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center;">
-                    <b style="font-size:18px;">${benar}</b>
+                    <b style="font-size:16px; color: #2d3436;">${benar}</b>
                 </div>
             </div>
-            <p style="margin-top:8px; margin-bottom:0; font-size:13px;">Skor: <b>${skor}</b></p>
+            <p style="margin-top:8px; margin-bottom:0; font-size:12px; color: #636e72;">Skor: <b style="color:#2d3436;">${skor}</b></p>
         `;
         donutContainer.appendChild(div);
 
-        // Render Grafik Donut[cite: 4]
+        // Render Grafik Donut
         new Chart(document.getElementById(`donut-${sub}`), {
             type: 'doughnut',
             data: {
@@ -1051,7 +1074,7 @@ function showHasilDetail(paket) {
                 }]
             },
             options: { 
-                cutout: '75%', 
+                cutout: '78%', // Lebih tipis agar terlihat modern
                 plugins: { legend: { display: false } },
                 responsive: true,
                 maintainAspectRatio: true
@@ -1059,7 +1082,6 @@ function showHasilDetail(paket) {
         });
     });
 
-    // Render grafik batang perbandingan[cite: 4]
     renderBarChart(subtests, allScores);
 }
 
