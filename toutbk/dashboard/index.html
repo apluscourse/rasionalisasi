@@ -575,6 +575,7 @@ function tutupReviewKhusus() {
     // Kembalikan UI ke default
     document.getElementById("to-exam-view").style.display = "none";
     document.getElementById("to-subtest-view").style.display = "block";
+    resetReviewElements();
     
     // Reset elemen-elemen input agar bisa digunakan ujian lagi
     document.getElementById("ans-input").disabled = false;
@@ -599,6 +600,11 @@ function tutupReviewDariSubtest() {
     
 async function checkAndStart(sub, repeat) {
     if (!confirm("Mulai subtes " + sub + "?")) return;
+
+    resetReviewElements(); 
+    userAnswers = {}; // Kosongkan jawaban lama
+    currentQIdx = 0;
+    
     currentSubtest = sub;
     document.getElementById("to-subtest-view").style.display = "none";
     document.getElementById("to-exam-view").style.display = "block";
@@ -694,6 +700,7 @@ function showQuestion(idx) {
         feedback.innerHTML = `Jawaban Anda: ${userAns} | Kunci: ${q.kunci}`;
     } else {
         feedback.style.display = "none";
+        feedback.innerHTML = "";
     }
 }
 
@@ -815,12 +822,36 @@ function activateReview() {
     showQuestion(0);
 }
 
+function resetReviewElements() {
+    isReview = false; // Matikan mode review
+    
+    // Kembalikan UI ke kondisi ujian
+    document.getElementById("ans-input").disabled = false;
+    document.getElementById("ans-input").value = "";
+    document.getElementById("btn-save").style.display = "block";
+    document.getElementById("exam-timer").style.display = "block";
+    document.getElementById("btn-finish-exam").style.display = "block";
+    
+    // Sembunyikan label dan feedback review
+    document.getElementById("review-label").style.display = "none";
+    document.getElementById("btn-close-review").style.display = "none";
+    document.getElementById("feedback-review").style.display = "none";
+    
+    // BERSIHKAN NAVIGASI (Penting agar warna merah/hijau hilang)
+    document.getElementById("nav-no-soal").innerHTML = "";
+    
+    // Reset Zoom dan Gambar
+    zoomLevel = 1;
+    document.getElementById("img-soal").style.transform = `scale(1)`;
+}
+    
 function closeReview() {
     // 1. Sembunyikan tampilan ujian
     document.getElementById("to-exam-view").style.display = "none";
     
     // 2. Tampilkan kembali tampilan hasil skor
     document.getElementById("to-result-view").style.display = "block";
+    resetReviewElements();
     
     // 3. Reset status review agar jika mulai subtes lain, sistem kembali normal
     isReview = false;
