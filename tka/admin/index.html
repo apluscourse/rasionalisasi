@@ -1,275 +1,282 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Timer Jawaban</title>
-
+<title>Admin Dashboard - Rasionalisasi TKA</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <style>
- 
-*{
-box-sizing:border-box;
-font-family:Segoe UI,Arial;
+:root {
+  --blue: #1f6feb;
+  --blue2: #4fa3ff;
+  --bg: #f4f8ff;
+  --card: #ffffff;
+  --text: #1f2d3d;
+  --muted: #6b7a90;
+  --red: #ff4d4d;
+  --shadow: 0 4px 15px rgba(0,0,0,.05);
 }
 
-body{
-margin:0;
-background:#eaf4ff;
-display:flex;
-justify-content:center;
-align-items:center;
-min-height:100vh;
-padding:20px;
+* { box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); min-height: 100vh; padding-top: 60px; overflow-x: hidden; }
+
+/* HEADER */
+header {
+  position: fixed; top: 0; left: 0; width: 100%; height: 60px;
+  background: linear-gradient(135deg, var(--blue), var(--blue2));
+  color: white; display: flex; align-items: center; justify-content: space-between;
+  padding: 0 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); z-index: 1000;
+}
+header h1 { font-size: 18px; font-weight: 700; letter-spacing: 0.5px; }
+
+/* MENU BUTTON */
+.menu-btn {
+  background: rgba(255, 255, 255, 0.2); border: none; color: white;
+  padding: 10px 15px; border-radius: 8px; cursor: pointer; font-weight: 600;
+  display: flex; align-items: center; gap: 8px; transition: 0.3s;
+}
+.menu-btn:hover { background: rgba(255, 255, 255, 0.3); }
+
+/* SIDEBAR / SUBMENU MODERN */
+.sidebar {
+  position: fixed; top: 60px; left: -280px; width: 280px; height: calc(100vh - 60px);
+  background: var(--card); box-shadow: 2px 0 15px rgba(0,0,0,0.05);
+  transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 999; padding: 20px 15px;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.sidebar.active { left: 0; }
+
+.sidebar a {
+  display: flex; align-items: center; gap: 12px; padding: 12px 15px;
+  color: var(--text); text-decoration: none; font-weight: 600; font-size: 15px;
+  border-radius: 10px; transition: 0.2s;
+}
+.sidebar a:hover { background: var(--bg); color: var(--blue); }
+.sidebar a.active-menu { background: #e8f2ff; color: var(--blue); }
+.sidebar a.logout-link { color: var(--red); margin-top: auto; }
+.sidebar a.logout-link:hover { background: #fff5f5; }
+
+/* OVERLAY BACKGROUND */
+.overlay {
+  position: fixed; top: 60px; left: 0; width: 100%; height: calc(100vh - 60px);
+  background: rgba(0,0,0,0.3); display: none; z-index: 998; backdrop-filter: blur(2px);
+}
+.overlay.active { display: block; }
+
+/* MAIN CONTENT */
+.main-content { padding: 40px 20px; max-width: 600px; margin: 0 auto; display: none; }
+
+/* CARD PROFILE */
+.profile-card {
+  background: var(--card); border-radius: 20px; padding: 30px;
+  box-shadow: var(--shadow); text-align: center;
+}
+.profile-card i.user-icon {
+  font-size: 50px; color: var(--blue); background: #e8f2ff;
+  padding: 20px; border-radius: 50%; margin-bottom: 15px;
+}
+.profile-card h2 { font-size: 24px; margin-bottom: 5px; color: var(--text); }
+.profile-card p.paket { font-size: 14px; color: var(--muted); font-weight: 600; margin-bottom: 20px; }
+.info-box {
+  background: var(--bg); padding: 15px; border-radius: 12px;
+  font-weight: 600; color: var(--blue); font-size: 15px; margin-bottom: 20px;
+}
+.hint-text { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+/* SCREEN FULLSCREEN BLOKIR */
+#blocked-screen {
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+  background: #7a0000; color: white; display: none; flex-direction: column;
+  justify-content: center; align-items: center; z-index: 2000; text-align: center; padding: 20px;
+}
+#blocked-screen h1 { font-size: 48px; margin-bottom: 10px; }
+#blocked-screen p { font-size: 18px; margin-bottom: 30px; max-width: 500px; }
+#blocked-screen button {
+  background: white; color: #7a0000; border: none; padding: 15px 40px;
+  font-size: 16px; font-weight: 700; border-radius: 12px; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
 }
 
-.card{
-background:white;
-padding:30px;
-border-radius:14px;
-box-shadow:0 8px 25px rgba(0,0,0,0.08);
-width:100%;
-max-width:420px;
-text-align:center;
+/* LOADING INITIAL SCREEN */
+#initial-loading {
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+  background: var(--bg); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1500;
 }
-
-h1{
-color:#1e88ff;
-margin-bottom:20px;
-font-size:24px;
-}
-
-.nama{
-font-size:22px;
-font-weight:600;
-margin-bottom:10px;
-}
-
-.timer{
-font-size:56px;
-font-weight:700;
-color:#1e88ff;
-margin:20px 0;
-letter-spacing:2px;
-}
-
-input{
-width:100%;
-padding:12px;
-border-radius:8px;
-border:1px solid #d5e6ff;
-margin-top:10px;
-font-size:16px;
-}
-
-button{
-width:100%;
-padding:14px;
-border:none;
-border-radius:8px;
-font-size:16px;
-cursor:pointer;
-margin-top:10px;
-}
-
-.btn-main{
-background:#1e88ff;
-color:white;
-}
-
-.btn-main:hover{
-background:#0d6efd;
-}
-
-.btn-reset{
-background:#e8f2ff;
-}
-
-.controls{
-display:flex;
-gap:10px;
-}
-
-.controls button{
-flex:1;
-}
-
-@media(min-width:600px){
-
-.timer{
-font-size:70px;
-}
-
-}
-
+.spinner { width: 40px; height: 40px; border: 4px solid #dbe7ff; border-top: 4px solid var(--blue); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px; }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 </style>
-
 </head>
-
 <body>
 
-<div class="card">
-
-<h1>Timer Jawaban</h1>
-
-<div id="awal">
-
-<input id="namaInput" placeholder="Masukkan nama siswa">
-
-<button class="btn-main" onclick="buat()">Mulai</button>
-
+<div id="initial-loading">
+  <div class="spinner"></div>
+  <p style="font-weight:600; color:var(--text)">Memverifikasi Sesi Aman...</p>
 </div>
 
-<div id="area"></div>
+<div id="blocked-screen">
+  <i class="fas fa-ban" style="font-size: 80px; margin-bottom: 20px;"></i>
+  <h1>AKUN ANDA DIBLOKIR</h1>
+  <p>Terdeteksi pelanggaran sistem atau akun Anda telah dihapus oleh Admin dari pusat database data.</p>
+  <button onclick="forceLogout()">KELUAR SEKARANG</button>
+</div>
 
+<header>
+  <button class="menu-btn" onclick="toggleMenu()"><i class="fas fa-bars"></i> Menu</button>
+  <h1>RASIONALISASI TKA</h1>
+  <div style="width: 75px;"></div> </header>
+
+<div class="overlay" onclick="toggleMenu()"></div>
+
+<div class="sidebar" id="sidebarMenu">
+  <a href="#" class="active-menu" onclick="toggleMenu()"><i class="fas fa-user"></i> Profil</a>
+  <a href="#" onclick="alert('Fitur segera hadir!')"><i class="fas fa-graduation-cap"></i> Rasionalisasi Prodi</a>
+  <a href="#" onclick="alert('Fitur segera hadir!')"><i class="fas fa-heart"></i> Peminatan Prodi</a>
+  <a href="#" onclick="alert('Fitur segera hadir!')"><i class="fas fa-chart-bar"></i> Statistik Nilai TKA 2025</a>
+  <a href="#" onclick="alert('Fitur segera hadir!')"><i class="fas fa-book"></i> Materi TKA</a>
+  <a href="#" onclick="alert('Fitur segera hadir!')"><i class="fas fa-edit"></i> Latihan Soal TKA</a>
+  <a href="#" onclick="alert('Fitur segera hadir!')"><i class="fas fa-laptop-code"></i> Tryout TKA</a>
+  <a href="#" onclick="alert('Fitur segera hadir!')"><i class="fas fa-cog"></i> Pengaturan</a>
+  <a href="#" class="logout-link" onclick="forceLogout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
+</div>
+
+<div class="main-content" id="mainDashboard">
+  <div class="profile-card">
+    <i class="fas fa-user-circle user-icon"></i>
+    <h2 id="view-user">Selamat Datang, -</h2>
+    <p class="paket" id="view-paket">Paket Anda: -</p>
+    <div class="info-box" id="view-masaaktif">
+      Masa Aktif: - Hari Lagi
+    </div>
+    <p class="hint-text">Untuk menggunakan aplikasi silahkan tekan menu diatas kiri</p>
+  </div>
 </div>
 
 <script>
+const API = "https://script.google.com/macros/s/AKfycbwshDnE7gF7CCluDdShnpqnV7sRktmlvAJkDxXDfrTL-ja4XSbUPegCVLAQOKWlMj85NQ/exec";
 
-const API="https://script.google.com/macros/s/AKfycbzAe3LX2rf7Q6B-OzGd5sFGmCfa-SFTMC50Wb5s_KSp3fXVL-XDpUsN1tluUy-ZanxPZA/exec";
+let lastPingTime = 0;
+let pingInterval = null;
 
-let nama="";
-let timer=0;
-let interval=null;
-let startTime=0;
-
-let sisaWaktu=0; // <-- simpan sisa waktu realtime
-
-function buat(){
-
-nama=document.getElementById("namaInput").value;
-
-document.getElementById("awal").style.display="none";
-
-document.getElementById("area").innerHTML=`
-
-<div class="nama">${nama}</div>
-
-<div id="timer" class="timer">00:00.00</div>
-
-<div class="controls">
-<button class="btn-reset" onclick="resetTimer()">Reset</button>
-<button class="btn-main" onclick="mulai()">Mulai<br>(+2 Menit)</button>
-</div>
-
-<input id="soalInput" placeholder="Nomor Soal" disabled>
-
-<input id="jawaban" placeholder="Masukkan jawaban" disabled>
-
-<button class="btn-main" onclick="kirim()">Input Jawaban</button>
-
-`;
-
+// Fungsi Buka/Tutup Menu
+function toggleMenu() {
+  document.getElementById('sidebarMenu').classList.toggle('active');
+  document.getElementById('overlay').classList.toggle('active');
 }
 
-function resetTimer(){
-
-timer=0;
-sisaWaktu=0;
-
-updateDisplay(0);
-
-document.getElementById("soalInput").disabled=true;
-document.getElementById("jawaban").disabled=true;
-
-}
-
-function mulai(){
-
-timer+=120;
-
-/* aktifkan input setelah mulai */
-document.getElementById("soalInput").disabled=false;
-document.getElementById("jawaban").disabled=false;
-
-/* kosongkan jawaban */
-document.getElementById("soalInput").value="";
-document.getElementById("jawaban").value="";
-
-startTime=Date.now();
-
-if(interval) clearInterval(interval);
-
-interval=setInterval(updateTimer,50);
-
-}
-
-function updateTimer(){
-
-let elapsed=(Date.now()-startTime)/1000;
-
-let sisa=timer-elapsed;
-
-if(sisa<=0){
-
-sisaWaktu=0;
-
-clearInterval(interval);
-updateDisplay(0);
-kirim();
-return;
-
-}
-
-sisaWaktu=sisa; // <-- simpan waktu aktual
-
-updateDisplay(sisa);
-
-}
-
-function updateDisplay(waktu){
-
-let detik=Math.floor(waktu);
-let mili=Math.floor((waktu-detik)*100);
-
-let m=Math.floor(detik/60);
-let d=detik%60;
-
-document.getElementById("timer").innerText=
-String(m).padStart(2,'0')+
-":"+
-String(d).padStart(2,'0')+
-"."+
-String(mili).padStart(2,'0');
-
-}
-
-function kirim(){
-
-clearInterval(interval);
-
-let jawabanInput = document.getElementById("jawaban");
-let soalInput = document.getElementById("soalInput");
-
-let jawaban = jawabanInput.value;
-let noSoal = soalInput.value;
-
-/* ambil sisa waktu */
-let waktuKirim = Math.floor(sisaWaktu);
-
-/* kunci kembali input */
-soalInput.disabled = true;
-jawabanInput.disabled = true;
-
-/* kirim ke database */
-fetch(API,{
-method:"POST",
-body:JSON.stringify({
-
-action:"input",
-nama:nama,
-no:noSoal,
-jawaban:jawaban,
-waktu:waktuKirim
-
-})
+// Deteksi Status Internet Browser secara real-time
+window.addEventListener('offline', function() {
+  alert("❌ Anda tidak terhubung internet! Sistem mendeteksi status offline.");
+  forceLogout();
 });
 
+// Jalankan Fungsi Verifikasi Sesi Tepat Saat Halaman Dimuat/Diberi Penyegaran (Refresh)
+window.onload = function() {
+  verifySession(true); // true menandakan verifikasi awal saat refresh halaman
+};
 
-alert("Jawaban terkirim");
+function verifySession(isFirstLoad = false) {
+  let email = localStorage.getItem("email");
+  let pass = localStorage.getItem("password");
 
+  if (!email || !pass) {
+    alert("Sesi tidak valid atau telah berakhir. Silakan login kembali.");
+    forceLogout();
+    return;
+  }
+
+  // Jika Browser Offline sejak awal
+  if (!navigator.onLine) {
+    alert("❌ Anda tidak terhubung internet!");
+    forceLogout();
+    return;
+  }
+
+  let url = `${API}?action=verify_session&email=${encodeURIComponent(email)}&pass=${encodeURIComponent(pass)}`;
+  
+  fetch(url)
+    .then(r => r.json())
+    .then(d => {
+      if (d.status === "ok") {
+        let remainingDays = parseInt(d.masaAktif);
+        if (remainingDays < 0 || isNaN(remainingDays)) {
+          alert("⚠️ Masa aktif akun anda sudah habis!");
+          forceLogout();
+          return;
+        }
+
+        // Tampilkan data ke dashboard profil halaman tengah
+        document.getElementById("view-user").innerText = `Selamat Datang, ${email}`;
+        document.getElementById("view-paket").innerText = `Paket Anda: ${d.paket}`;
+        document.getElementById("view-masaaktif").innerText = `Masa Aktif: ${remainingDays} Hari Lagi`;
+        
+        // Hilangkan loading screen, tampilkan dashboard utama
+        document.getElementById("initial-loading").style.display = "none";
+        document.getElementById("mainDashboard").style.display = "block";
+
+        // Hidupkan Scheduler Ping 10 Detik Sekali Jika ini Pemuatan Pertama
+        if (isFirstLoad) {
+          lastPingTime = Date.now();
+          startPingScheduler();
+        }
+      } 
+      else if (d.status === "blocked") {
+        document.getElementById("initial-loading").style.display = "none";
+        document.getElementById("blocked-screen").style.display = "flex";
+      } 
+      else {
+        alert("⚠️ Sesi ditolak server atau password diubah di perangkat lain.");
+        forceLogout();
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      alert("Gagal mengautentikasi ke server. Silakan muat ulang halaman.");
+    });
 }
 
-</script>
+function startPingScheduler() {
+  if (pingInterval) clearInterval(pingInterval);
+  
+  pingInterval = setInterval(() => {
+    let currentTime = Date.now();
+    let timeDiff = (currentTime - lastPingTime) / 1000;
 
+    // Proteksi Anomali: Jika interval berjalan < 9 detik dari instruksi asli (10s)
+    if (timeDiff < 9) {
+      clearInterval(pingInterval);
+      alert("❌ Keamanan mendeteksi login lebih dari 1 perangkat (Anomali Manipulasi Timer Ping)!");
+      forceLogout();
+      return;
+    }
+
+    lastPingTime = currentTime; // update benchmark waktu terakhir
+
+    let email = localStorage.getItem("email");
+    if (!email) return;
+
+    fetch(`${API}?action=ping_online&email=${encodeURIComponent(email)}`)
+      .then(r => r.json())
+      .then(d => {
+        if (d.status === "blocked") {
+          clearInterval(pingInterval);
+          document.getElementById("mainDashboard").style.display = "none";
+          document.getElementById("blocked-screen").style.display = "flex";
+        } else if (d.status !== "ok") {
+          forceLogout();
+        }
+      })
+      .catch(() => {
+        // Toleransi jika gangguan jaringan intermiten sesaat, namun jika permanen memicu window offline handler
+        console.log("Ping gagal terkirim (kendala jaringan).");
+      });
+
+  }, 10000); // Tepat Kirim Tiap 10 Detik Sekali
+}
+
+function forceLogout() {
+  localStorage.clear();
+  if (pingInterval) clearInterval(pingInterval);
+  location.href = "/login.html"; // Berubah kembali mengarah penuh ke login.html
+}
+</script>
 </body>
 </html>
