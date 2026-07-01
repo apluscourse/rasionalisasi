@@ -258,11 +258,11 @@ function login() {
         
         // Pengalihan halaman ditambahkan ekstensi .html sesuai instruksi
         if (d.role == "admin") {
-            location.href = "/admin.html";
+            location.href = "/admin/";
         } else if (d.role == "trial") {
-            location.href = "/trial.html";
+            location.href = "/trial/";
         } else if (d.role == "publik") {
-            location.href = "/publik.html";
+            location.href = "/publik/";
         } else {
             alert("Role tidak dikenali!");
             resetUI();
