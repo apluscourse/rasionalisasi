@@ -151,7 +151,7 @@ header h1 { font-size: 18px; font-weight: 700; letter-spacing: 0.5px; }
 </div>
 
 <script>
-const API = "https://script.google.com/macros/s/AKfycbypInJ6anPyhqN1s0gjpkNgOxqlWPk1dg8PE4z31cfM93mdgA1JtlFhHqRibe53RdJz/exec";
+const API = "https://script.google.com/macros/s/AKfycbxzMw_ExEpGIJwnx8HNazzsPqUk6rbJRwgeC3F6VN_Qcr6eWMlzK80Qi_pEZyEAg5nu/exec";
 
 let lastPingTime = 0;
 let pingInterval = null;
@@ -240,15 +240,15 @@ function startPingScheduler() {
     let currentTime = Date.now();
     let timeDiff = (currentTime - lastPingTime) / 1000;
 
-    // Proteksi Anomali: Jika interval berjalan < 9 detik dari instruksi asli (10s)
+    // Proteksi Manipulasi Timer dari sisi Inspect Element Client
     if (timeDiff < 9) {
       clearInterval(pingInterval);
-      alert("❌ Keamanan mendeteksi login lebih dari 1 perangkat (Anomali Manipulasi Timer Ping)!");
+      alert("❌ Keamanan mendeteksi anomali pada perangkat Anda!");
       forceLogout();
       return;
     }
 
-    lastPingTime = currentTime; // update benchmark waktu terakhir
+    lastPingTime = currentTime; 
 
     let email = localStorage.getItem("email");
     if (!email) return;
@@ -256,7 +256,11 @@ function startPingScheduler() {
     fetch(`${API}?action=ping_online&email=${encodeURIComponent(email)}`)
       .then(r => r.json())
       .then(d => {
-        if (d.status === "blocked") {
+        if (d.status === "multi_device") {
+          clearInterval(pingInterval);
+          alert("❌ Login Terdeteksi di Perangkat Lain! Akun pada perangkat ini otomatis dikeluarkan.");
+          forceLogout();
+        } else if (d.status === "blocked") {
           clearInterval(pingInterval);
           document.getElementById("mainDashboard").style.display = "none";
           document.getElementById("blocked-screen").style.display = "flex";
@@ -265,11 +269,10 @@ function startPingScheduler() {
         }
       })
       .catch(() => {
-        // Toleransi jika gangguan jaringan intermiten sesaat, namun jika permanen memicu window offline handler
-        console.log("Ping gagal terkirim (kendala jaringan).");
+        console.log("Ping terganggu kendala sinyal.");
       });
 
-  }, 10000); // Tepat Kirim Tiap 10 Detik Sekali
+  }, 10000); // Kirim ping periodik setiap 10 detik
 }
 
 function forceLogout() {
