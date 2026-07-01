@@ -258,11 +258,11 @@ function login() {
         
         // Pengalihan halaman ditambahkan ekstensi .html sesuai instruksi
         if (d.role == "admin") {
-            location.href = "/tka/admin";
+            location.href = "/tka/admin/";
         } else if (d.role == "trial") {
-            location.href = "/tka/trial";
+            location.href = "/tka/trial/";
         } else if (d.role == "publik") {
-            location.href = "/tka/publik";
+            location.href = "/tka/publik/";
         } else {
             alert("Role tidak dikenali!");
             resetUI();
