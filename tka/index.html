@@ -226,7 +226,8 @@ button:disabled {
 </div>
 
 <script>
-const API="https://script.google.com/macros/s/AKfycbwshDnE7gF7CCluDdShnpqnV7sRktmlvAJkDxXDfrTL-ja4XSbUPegCVLAQOKWlMj85NQ/exec";
+// Pastikan URL API ini sudah sesuai dengan Web App hasil Deploy baru Anda
+const API="https://script.google.com/macros/s/AKfycbz8iQUuATvKlQvFADqaxm_obj_5iuOu1iqVaPsGJYzHCTDtk9wdw9lNoQdckLlWaMRZ/exec";
 
 function login() {
   let email = document.getElementById("email").value;
@@ -247,20 +248,25 @@ function login() {
     .then(r => r.json())
     .then(d => {
       if (d.status == "ok") {
+        // Menyimpan semua variabel yang diminta ke localStorage
         localStorage.setItem("email", email); 
+        localStorage.setItem("password", pass); // Menyimpan password sesuai instruksi
         localStorage.setItem("role", d.role);
-        localStorage.setItem("lastOpen", d.lastOpen); 
         localStorage.setItem("masaAktif", d.masaAktif);
         localStorage.setItem("paket", d.paket);
-        localStorage.setItem("user_api_key", d.apiKey || "");
+        localStorage.setItem("lastOpen", d.lastOpen); 
         
-if (d.role == "admin") {
-    location.href = "/admin";
-} else if (d.role == "trial") {
-    location.href = "/trial";
-} else {
-    location.href = "/publik";
-}
+        // Pengalihan halaman ditambahkan ekstensi .html sesuai instruksi
+        if (d.role == "admin") {
+            location.href = "/admin.html";
+        } else if (d.role == "trial") {
+            location.href = "/trial.html";
+        } else if (d.role == "publik") {
+            location.href = "/publik.html";
+        } else {
+            alert("Role tidak dikenali!");
+            resetUI();
+        }
       } 
       else if (d.status == "expired") {
         alert("⚠️ Masa aktif akun anda sudah habis, silahkan hubungi admin");
@@ -281,6 +287,7 @@ function resetUI() {
   document.getElementById("loginBtn").disabled = false;
   document.getElementById("loading-text").style.display = "none";
 }
+
 document.addEventListener("keypress", function(e) {
   if (e.key === "Enter") {
     login();
