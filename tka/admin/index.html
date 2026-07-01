@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Timer Jawaban</title>
+
+<style>
+
+*{
+box-sizing:border-box;
+font-family:Segoe UI,Arial;
+}
+
+body{
+margin:0;
+background:#eaf4ff;
+display:flex;
+justify-content:center;
+align-items:center;
+min-height:100vh;
+padding:20px;
+}
+
+.card{
+background:white;
+padding:30px;
+border-radius:14px;
+box-shadow:0 8px 25px rgba(0,0,0,0.08);
+width:100%;
+max-width:420px;
+text-align:center;
+}
+
+h1{
+color:#1e88ff;
+margin-bottom:20px;
+font-size:24px;
+}
+
+.nama{
+font-size:22px;
+font-weight:600;
+margin-bottom:10px;
+}
+
+.timer{
+font-size:56px;
+font-weight:700;
+color:#1e88ff;
+margin:20px 0;
+letter-spacing:2px;
+}
+
+input{
+width:100%;
+padding:12px;
+border-radius:8px;
+border:1px solid #d5e6ff;
+margin-top:10px;
+font-size:16px;
+}
+
+button{
+width:100%;
+padding:14px;
+border:none;
+border-radius:8px;
+font-size:16px;
+cursor:pointer;
+margin-top:10px;
+}
+
+.btn-main{
+background:#1e88ff;
+color:white;
+}
+
+.btn-main:hover{
+background:#0d6efd;
+}
+
+.btn-reset{
+background:#e8f2ff;
+}
+
+.controls{
+display:flex;
+gap:10px;
+}
+
+.controls button{
+flex:1;
+}
+
+@media(min-width:600px){
+
+.timer{
+font-size:70px;
+}
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="card">
+
+<h1>Timer Jawaban</h1>
+
+<div id="awal">
+
+<input id="namaInput" placeholder="Masukkan nama siswa">
+
+<button class="btn-main" onclick="buat()">Mulai</button>
+
+</div>
+
+<div id="area"></div>
+
+</div>
+
+<script>
+
+const API="https://script.google.com/macros/s/AKfycbzAe3LX2rf7Q6B-OzGd5sFGmCfa-SFTMC50Wb5s_KSp3fXVL-XDpUsN1tluUy-ZanxPZA/exec";
+
+let nama="";
+let timer=0;
+let interval=null;
+let startTime=0;
+
+let sisaWaktu=0; // <-- simpan sisa waktu realtime
+
+function buat(){
+
+nama=document.getElementById("namaInput").value;
+
+document.getElementById("awal").style.display="none";
+
+document.getElementById("area").innerHTML=`
+
+<div class="nama">${nama}</div>
+
+<div id="timer" class="timer">00:00.00</div>
+
+<div class="controls">
+<button class="btn-reset" onclick="resetTimer()">Reset</button>
+<button class="btn-main" onclick="mulai()">Mulai<br>(+2 Menit)</button>
+</div>
+
+<input id="soalInput" placeholder="Nomor Soal" disabled>
+
+<input id="jawaban" placeholder="Masukkan jawaban" disabled>
+
+<button class="btn-main" onclick="kirim()">Input Jawaban</button>
+
+`;
+
+}
+
+function resetTimer(){
+
+timer=0;
+sisaWaktu=0;
+
+updateDisplay(0);
+
+document.getElementById("soalInput").disabled=true;
+document.getElementById("jawaban").disabled=true;
+
+}
+
+function mulai(){
+
+timer+=120;
+
+/* aktifkan input setelah mulai */
+document.getElementById("soalInput").disabled=false;
+document.getElementById("jawaban").disabled=false;
+
+/* kosongkan jawaban */
+document.getElementById("soalInput").value="";
+document.getElementById("jawaban").value="";
+
+startTime=Date.now();
+
+if(interval) clearInterval(interval);
+
+interval=setInterval(updateTimer,50);
+
+}
+
+function updateTimer(){
+
+let elapsed=(Date.now()-startTime)/1000;
+
+let sisa=timer-elapsed;
+
+if(sisa<=0){
+
+sisaWaktu=0;
+
+clearInterval(interval);
+updateDisplay(0);
+kirim();
+return;
+
+}
+
+sisaWaktu=sisa; // <-- simpan waktu aktual
+
+updateDisplay(sisa);
+
+}
+
+function updateDisplay(waktu){
+
+let detik=Math.floor(waktu);
+let mili=Math.floor((waktu-detik)*100);
+
+let m=Math.floor(detik/60);
+let d=detik%60;
+
+document.getElementById("timer").innerText=
+String(m).padStart(2,'0')+
+":"+
+String(d).padStart(2,'0')+
+"."+
+String(mili).padStart(2,'0');
+
+}
+
+function kirim(){
+
+clearInterval(interval);
+
+let jawabanInput = document.getElementById("jawaban");
+let soalInput = document.getElementById("soalInput");
+
+let jawaban = jawabanInput.value;
+let noSoal = soalInput.value;
+
+/* ambil sisa waktu */
+let waktuKirim = Math.floor(sisaWaktu);
+
+/* kunci kembali input */
+soalInput.disabled = true;
+jawabanInput.disabled = true;
+
+/* kirim ke database */
+fetch(API,{
+method:"POST",
+body:JSON.stringify({
+
+action:"input",
+nama:nama,
+no:noSoal,
+jawaban:jawaban,
+waktu:waktuKirim
+
+})
+});
+
+
+alert("Jawaban terkirim");
+
+}
+
+</script>
+
+</body>
+</html>
