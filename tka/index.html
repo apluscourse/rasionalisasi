@@ -60,8 +60,11 @@ nav {
 
 /* LOGO LOGIN */
 .main-logo {
-  width: 180px; 
-  height: auto;
+  width: 100%;             /* Membuat gambar memenuhi lebar container */
+  max-width: 360px;        /* Disamakan dengan max-width .login-card agar seimbang */
+  height: auto;            /* Menjaga proporsi tinggi gambar agar tidak gepeng */
+  object-fit: cover;       /* Memastikan gambar terisi dengan baik jika proporsinya beda */
+  border-radius: 22px;     /* Opsional: beri lengkungan sudut jika ingin senada dengan card */
   margin-bottom: 25px;
   filter: drop-shadow(0 4px 10px rgba(0,0,0,0.12));
 }
