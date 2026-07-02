@@ -698,6 +698,224 @@ header h1 {
   }
 }
 
+
+/* --- CSS MENU MATERI TKA --- */
+.accordion-item {
+  background: #ffffff;
+  border-radius: 12px;
+  margin-bottom: 15px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.04), 0 4px 0px #e2e8f0; /* Efek Tebal/3D alas bawah */
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+.accordion-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(31, 111, 235, 0.08), 0 4px 0px var(--blue2);
+}
+
+/* Tombol Header Materi */
+.accordion-header {
+  padding: 18px 20px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  background: #ffffff;
+  user-select: none;
+  transition: background 0.2s ease;
+}
+.accordion-header:hover {
+  background: #fdfeff;
+}
+.accordion-header i.fa-chevron-down {
+  transition: transform 0.3s ease;
+  color: var(--blue);
+  font-size: 14px;
+}
+
+/* Status Item Saat Terbuka */
+.accordion-item.active {
+  border-color: var(--blue2);
+}
+.accordion-item.active .accordion-header {
+  background: #f4f8ff;
+  color: var(--blue);
+}
+.accordion-item.active .accordion-header i.fa-chevron-down {
+  transform: rotate(-180deg);
+}
+
+/* Panel Konten Submateri */
+.accordion-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+  background: #ffffff;
+  border-top: 0 solid #f1f5f9;
+}
+.accordion-item.active .accordion-content {
+  border-top-width: 1px;
+}
+
+/* List Item Di Dalam Submateri */
+.submateri-list {
+  list-style: none;
+  padding: 10px 20px 20px 20px;
+}
+.submateri-item {
+  padding: 12px 15px;
+  margin-top: 8px;
+  background: #f8fafc;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #334155;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: inset 0 -2px 0px #e2e8f0; /* Efek kedalaman 3D tipis */
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+.submateri-item:hover {
+  background: #f1f5f9;
+  transform: translateX(3px);
+  color: var(--text);
+}
+.submateri-item i {
+  color: #a0aec0;
+  font-size: 12px;
+}
+
+/* --- CSS BARU: LOGOUT MERAH & MODAL POPUP --- */
+
+.sidebar a.logout-menu {
+  color: #ef4444 !important;
+  border-left-color: #ef4444 !important;
+  margin-top: 5px; /* Memberi jarak sedikit dari menu pengaturan di atasnya */
+}
+.sidebar a.logout-menu:hover {
+  background: #fef2f2 !important;
+}
+
+/* Overlay / Latar Belakang Gelap Pop-up */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+.modal-box {
+  background: white;
+  padding: 25px;
+  border-radius: 16px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15), 0 4px 0px #e2e8f0;
+  max-width: 340px;
+  width: 90%;
+  animation: popupAnim 0.2s ease-out;
+}
+@keyframes popupAnim {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+.modal-box h3 {
+  font-size: 18px;
+  margin-bottom: 15px;
+  color: var(--text);
+}
+.modal-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 20px;
+}
+.btn-modal {
+  padding: 10px 24px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-yes { background: #ef4444; color: white; box-shadow: 0 3px 0 #b91c1c; }
+.btn-yes:hover { background: #dc2626; }
+.btn-no { background: #e2e8f0; color: #475569; box-shadow: 0 3px 0 #cbd5e1; }
+.btn-no:hover { background: #cbd5e1; }
+
+/* --- CSS BARU: HALAMAN GANTI KATA SANDI --- */
+.password-card {
+  background: white;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  max-width: 450px;
+  margin: 30px auto 0 auto;
+  border: 1px solid #e2e8f0;
+}
+.form-group {
+  margin-bottom: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.form-group label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+.form-control {
+  padding: 12px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 15px;
+  transition: all 0.2s;
+  background: #f8fafc;
+}
+.form-control:focus {
+  border-color: var(--blue);
+  background: white;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(31, 111, 235, 0.15);
+}
+.form-control:disabled {
+  background: #e2e8f0;
+  color: #64748b;
+  cursor: not-allowed;
+}
+.btn-save-pass {
+  background: var(--blue);
+  color: white;
+  border: none;
+  padding: 14px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 10px;
+  box-shadow: 0 4px 0 #1251b6;
+  transition: all 0.1s;
+}
+.btn-save-pass:hover { background: #1a62d6; }
+.btn-save-pass:active { transform: translateY(2px); box-shadow: 0 2px 0 #1251b6; }
+.toast-msg {
+  color: #22c55e;
+  font-weight: 700;
+  text-align: center;
+  margin-top: 12px;
+  font-size: 14px;
+  display: none;
+}
+
 </style>
 </head>
 <body>
@@ -733,11 +951,10 @@ header h1 {
   <a href="#" id="menuLinkRasionalisasi" onclick="switchMenu('rasionalisasi')"><i class="fas fa-graduation-cap"></i> Rasionalisasi Prodi</a>
   <a href="#" id="menuLinkPeminatan" onclick="switchMenu('peminatan')"><i class="fas fa-graduation-cap"></i> Peminatan Prodi</a>
   <a href="#" id="menuLinkStatistik" onclick="switchMenu('statistik')"><i class="fas fa-chart-line"></i> Statistik TKA</a>
-  <a href="#" onclick="alert('Fitur segera hadir!')"><i class="fas fa-book"></i> Materi TKA</a>
-  <a href="#" onclick="alert('Fitur segera hadir!')"><i class="fas fa-edit"></i> Latihan Soal TKA</a>
+  <a href="#" id="menuLinkMateri" onclick="switchMenu('materi')"><i class="fas fa-book-open"></i> Materi TKA</a>
   <a href="#" onclick="alert('Fitur segera hadir!')"><i class="fas fa-laptop-code"></i> Tryout TKA</a>
-  <a href="#" onclick="alert('Fitur segera hadir!')"><i class="fas fa-cog"></i> Pengaturan</a>
-  <a href="#" class="logout-link" onclick="forceLogout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
+<a href="#" id="menuLinkPengaturan" onclick="switchMenu('pengaturan')"><i class="fas fa-cog"></i> Pengaturan</a>
+<a href="#" class="logout-menu" onclick="openLogoutModal()"><i class="fas fa-sign-out-alt"></i> Keluar Aplikasi</a>
 </div>
 
 <div class="main-content" id="mainDashboard">
@@ -886,7 +1103,7 @@ header h1 {
   </div>
 </div>
 
-<!-- KONTEN PEMINATAN PRODI --> 
+<!-- KONTEN STATISTIK TKA --> 
 
 <div class="main-content menu-content-section" id="statistikMenuContent" style="max-width: 1100px; display: none;">
   
@@ -946,21 +1163,95 @@ header h1 {
 
 </div>
 
+<!-- KONTEN MATERI TKA --> 
+
+<div class="main-content menu-content-section" id="materiMenuContent" style="max-width: 1100px; display: none;">
+  
+  <h1 class="menu-title-main">MATERI TKA</h1>
+
+  <div class="filter-container" style="flex-direction: column; gap: 5px; margin-bottom: 25px;">
+    <label style="font-size: 15px; font-weight: 800; color: var(--text); text-transform: uppercase; margin-bottom: 10px;">
+      <i class="fas fa-layer-group"></i> Silahkan Pilih Mata Pelajaran
+    </label>
+    <select id="materiMapelSelect" class="peminatan-select" onchange="onMateriMapelChanged()">
+      <option value="">-- Mohon Tunggu / Pilih Mapel --</option>
+    </select>
+  </div>
+
+  <div class="peminatan-result-box" style="padding: 25px;">
+    <div id="materiPlaceholder" class="info-placeholder">
+      <i class="fas fa-graduation-cap" style="font-size: 24px; margin-bottom: 10px; display: block; color: var(--blue);"></i>
+      Silahkan Pilih Mata Pelajaran terlebih dahulu untuk melihat materi.
+    </div>
+
+    <div id="materiAccordionContainer" style="display: none;">
+      </div>
+  </div>
+
+</div>
+
+<!-- KONTEN PENGATURAN --> 
+
+<div class="main-content menu-content-section" id="pengaturanMenuContent" style="max-width: 1100px; display: none;">
+  <h1 class="menu-title-main">PENGATURAN AKUN</h1>
+  
+  <div class="password-card">
+    <h2 style="font-size: 16px; font-weight: 800; margin-bottom: 20px; text-align: center; color: var(--text);">
+      <i class="fas fa-lock" style="color: var(--blue); margin-right: 8px;"></i> GANTI KATA SANDI
+    </h2>
+    
+    <div class="form-group">
+      <label>Email User</label>
+      <input type="text" id="chgEmail" class="form-control" disabled>
+    </div>
+    
+    <div class="form-group">
+      <label>Kata Sandi Lama</label>
+      <input type="password" id="chgOldPass" class="form-control" placeholder="Masukkan kata sandi lama">
+    </div>
+    
+    <div class="form-group">
+      <label>Kata Sandi Baru</label>
+      <input type="password" id="chgNewPass" class="form-control" placeholder="Masukkan kata sandi baru">
+    </div>
+    
+    <div class="form-group">
+      <label>Masukkan Kembali Kata Sandi Baru</label>
+      <input type="password" id="chgConfirmPass" class="form-control" placeholder="Ulangi kata sandi baru">
+    </div>
+    
+    <button class="btn-save-pass" onclick="prosesGantiKataSandi()">Simpan Kata Sandi</button>
+    
+    <div id="chgToast" class="toast-msg"><i class="fas fa-circle-check"></i> Kata sandi baru berhasil disimpan</div>
+  </div>
+</div>
+
+<div id="logoutModal" class="modal-overlay" style="display: none;">
+  <div class="modal-box">
+    <i class="fas fa-circle-question" style="font-size: 42px; color: #ef4444; margin-bottom: 12px; display: block;"></i>
+    <h3>Konfirmasi Keluar</h3>
+    <p style="color: var(--muted); font-size: 14px;">Apakah anda yakin untuk logout dari aplikasi?</p>
+    <div class="modal-buttons">
+      <button class="btn-modal btn-yes" onclick="confirmLogout()">Ya</button>
+      <button class="btn-modal btn-no" onclick="closeLogoutModal()">Tidak</button>
+    </div>
+  </div>
+</div>
+
 <script>
-const API = "https://script.google.com/macros/s/AKfycbzKo0Kzbeu4BYQmYX-qIr0PMwXNFTx7WQDP5LmlkWthDND6-X8KCmj9rMnVh9e5Uig0/exec";
+const API = "https://script.google.com/macros/s/AKfycbwgz_Djx3srNJRvJhQaGAmbuvkBWK4mXPXWrAMMaONVgljBEapbZKmvV_H5FlzYsNhq/exec";
 
 //FUNGSI RASIONALISASI PRODI
 
 let masterProdiData = []; // Penyimpanan cache lokal data program studi secara aman
 
-// Fungsi Navigasi Tab Sub-Menu
-// Fungsi Navigasi Tab Sub-Menu (Sudah Diperbaiki untuk Profil)
-// Fungsi Navigasi Tab Sub-Menu (Sesuaikan dengan kode ini)
 function switchMenu(menuName) {
   document.getElementById("mainDashboard").style.display = "none";
   document.getElementById("rasionalisasiMenuContent").style.display = "none";
   document.getElementById("peminatanMenuContent").style.display = "none"; 
-  document.getElementById("statistikMenuContent").style.display = "none"; // Tambahkan ini
+  document.getElementById("statistikMenuContent").style.display = "none"; 
+  document.getElementById("materiMenuContent").style.display = "none"; 
+  document.getElementById("pengaturanMenuContent").style.display = "none"; // Sembunyikan Pengaturan
   
   document.querySelectorAll(".sidebar a").forEach(el => el.classList.remove("active-menu"));
 
@@ -975,14 +1266,19 @@ function switchMenu(menuName) {
     document.getElementById("peminatanMenuContent").style.display = "block";
     document.getElementById("menuLinkPeminatan").classList.add("active-menu");
     if (masterProdiData.length === 0) loadSpreadsheetPTNData(); else initMapelPilihanOptions();
-  } else if (menuName === "statistik") { // <-- TAMBAHKAN BLOK INI
+  } else if (menuName === "statistik") {
     document.getElementById("statistikMenuContent").style.display = "block";
     document.getElementById("menuLinkStatistik").classList.add("active-menu");
-    if (masterStatistikData.length === 0) {
-      loadSpreadsheetStatistikData();
-    } else {
-      populateStatistikMapelSelect();
-    }
+    if (masterStatistikData.length === 0) loadSpreadsheetStatistikData(); else populateStatistikMapelSelect();
+  } else if (menuName === "materi") {
+    document.getElementById("materiMenuContent").style.display = "block";
+    document.getElementById("menuLinkMateri").classList.add("active-menu");
+    if (masterMateriData.length === 0) loadSpreadsheetMateriData(); else populateMateriMapelSelect();
+  } else if (menuName === "pengaturan") { // <-- TAMBAHKAN BLOK INI
+    document.getElementById("pengaturanMenuContent").style.display = "block";
+    document.getElementById("menuLinkPengaturan").classList.add("active-menu");
+    // Masukkan email lokal saat ini langsung ke kotak input ter-disabled
+    document.getElementById("chgEmail").value = localStorage.getItem("email") || "";
   }
   toggleMenu();
 }
@@ -1702,6 +1998,233 @@ function renderStatistikTable(data) {
     `;
     tbody.appendChild(tr);
   });
+}
+
+
+//FUNGSI MENU MATERI TKA
+
+let masterMateriData = []; // Menyimpan data mentah dari sheet MATERI
+
+// Memanggil pangkalan data dari sheet MATERI via API Backend
+function loadSpreadsheetMateriData() {
+  let email = localStorage.getItem("email");
+  let pass = localStorage.getItem("password");
+  
+  let url = `${API}?action=get_materi_data&email=${encodeURIComponent(email)}&pass=${encodeURIComponent(pass)}`;
+  
+  const selectEl = document.getElementById("materiMapelSelect");
+  if (selectEl) selectEl.innerHTML = '<option value="">-- Memuat Data dari Server... --</option>';
+
+  fetch(url)
+    .then(r => r.json())
+    .then(res => {
+      if (res.status === "ok") {
+        masterMateriData = res.data;
+        populateMateriMapelSelect();
+      } else {
+        alert("🚨 Gagal memuat data materi: " + (res.message || "Akses ditolak."));
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      if (selectEl) selectEl.innerHTML = '<option value="">-- Gagal Memuat Data --</option>';
+    });
+}
+
+// Mengisi data pilihan unik Mata Pelajaran ke Dropdown secara urut abjad
+function populateMateriMapelSelect() {
+  const selectEl = document.getElementById("materiMapelSelect");
+  if (!selectEl) return;
+  
+  selectEl.innerHTML = '<option value="">-- Silahkan Pilih Mata Pelajaran --</option>';
+  
+  // Membuat data unique dari kolom mapel menggunakan Set
+  let mapelSet = new Set();
+  masterMateriData.forEach(item => {
+    if (item.mapel) mapelSet.add(item.mapel.trim());
+  });
+  
+  let uniqueMapel = [...mapelSet];
+  uniqueMapel.sort((a, b) => a.localeCompare(b)); // Urutkan sesuai abjad A-Z
+  
+  uniqueMapel.forEach(m => {
+    let opt = document.createElement("option");
+    opt.value = m;
+    opt.innerText = m.toUpperCase();
+    selectEl.appendChild(opt);
+  });
+}
+
+// Dipicu saat dropdown pilihan mapel materi diganti
+function onMateriMapelChanged() {
+  const selectedMapel = document.getElementById("materiMapelSelect").value;
+  const placeholder = document.getElementById("materiPlaceholder");
+  const container = document.getElementById("materiAccordionContainer");
+  
+  container.innerHTML = ""; // Bersihkan list accordion lama
+  
+  if (!selectedMapel) {
+    placeholder.style.display = "block";
+    container.style.display = "none";
+    return;
+  }
+  
+  placeholder.style.display = "none";
+  container.style.display = "block";
+  
+  // Filter baris data yang memiliki mapel sesuai pilihan
+  let filteredData = masterMateriData.filter(item => item.mapel === selectedMapel);
+  
+  // Kelompokkan data submateri berdasarkan judul Materinya
+  // Struktur: { "Materi A": ["Submateri 1", "Submateri 2"], "Materi B": [...] }
+  let groupedMateri = {};
+  filteredData.forEach(item => {
+    let mTitle = item.materi ? item.materi.trim() : "Lainnya";
+    let subTitle = item.submateri ? item.submateri.trim() : "";
+    
+    if (!groupedMateri[mTitle]) {
+      groupedMateri[mTitle] = [];
+    }
+    if (subTitle !== "" && !groupedMateri[mTitle].includes(subTitle)) {
+      groupedMateri[mTitle].push(subTitle);
+    }
+  });
+  
+  // Buat komponen HTML Accordion Menu berdasarkan pengelompokan di atas
+  for (let materiName in groupedMateri) {
+    let accordionItem = document.createElement("div");
+    accordionItem.className = "accordion-item";
+    
+    // Header Materi
+    let headerDiv = document.createElement("div");
+    headerDiv.className = "accordion-header";
+    headerDiv.innerHTML = `<span><i class="fas fa-book" style="margin-right:10px; color:var(--blue2);"></i> ${materiName}</span> <i class="fas fa-chevron-down"></i>`;
+    
+    // Content Wrapper Submateri
+    let contentDiv = document.createElement("div");
+    contentDiv.className = "accordion-content";
+    
+    let ul = document.createElement("ul");
+    ul.className = "submateri-list";
+    
+    let subMateris = groupedMateri[materiName];
+    if (subMateris.length === 0) {
+      ul.innerHTML = `<li style="color:var(--muted); font-size:13px; font-style:italic; padding-left:15px;">Belum ada submateri tersedia.</li>`;
+    } else {
+      subMateris.forEach(sub => {
+        let li = document.createElement("li");
+        li.className = "submateri-item";
+        li.innerHTML = `<i class="fas fa-circle-play"></i> <span>${sub}</span>`;
+        ul.appendChild(li);
+      });
+    }
+    
+    contentDiv.appendChild(ul);
+    accordionItem.appendChild(headerDiv);
+    accordionItem.appendChild(contentDiv);
+    container.appendChild(accordionItem);
+    
+    // Daftarkan event click untuk efek buka-tutup (Slide Toggle Accordion)
+    headerDiv.addEventListener("click", function() {
+      let isActive = accordionItem.classList.contains("active");
+      
+      // Opsional: Tutup semua accordion item lain terlebih dahulu (Mode Tunggal)
+      document.querySelectorAll(".accordion-item").forEach(item => {
+        item.classList.remove("active");
+        item.querySelector(".accordion-content").style.maxHeight = null;
+      });
+      
+      if (!isActive) {
+        accordionItem.classList.add("active");
+        // Berikan max-height sesuai tinggi aslinya agar transisi slide terasa halus
+        contentDiv.style.maxHeight = contentDiv.scrollHeight + "px";
+      } else {
+        accordionItem.classList.remove("active");
+        contentDiv.style.maxHeight = null;
+      }
+    });
+  }
+}
+
+//FUNGSI PENGATURAM
+
+/* --- FUNGSI POPUP MODAL LOGOUT --- */
+function openLogoutModal() {
+  document.getElementById("logoutModal").style.display = "flex";
+}
+
+function closeLogoutModal() {
+  document.getElementById("logoutModal").style.display = "none";
+}
+
+function confirmLogout() {
+  closeLogoutModal();
+  forceLogout(); // Panggil fungsi log-out bawaan aplikasi Anda yang sudah ada
+}
+
+/* --- FUNGSI PROSES SIMPAN GANTI KATA SANDI --- */
+function prosesGantiKataSandi() {
+  let email = localStorage.getItem("email");
+  let oldPass = document.getElementById("chgOldPass").value.trim();
+  let newPass = document.getElementById("chgNewPass").value.trim();
+  let confirmPass = document.getElementById("chgConfirmPass").value.trim();
+  let toast = document.getElementById("chgToast");
+
+  // Validasi Input Dasar
+  if (!oldPass || !newPass || !confirmPass) {
+    alert("Semua kolom kata sandi wajib diisi!");
+    return;
+  }
+  if (newPass !== confirmPass) {
+    alert("Konfirmasi kata sandi baru tidak cocok. Silahkan periksa kembali!");
+    return;
+  }
+  if (newPass.length < 4) {
+    alert("Kata sandi baru minimal terdiri dari 4 karakter!");
+    return;
+  }
+
+  // Tembak data perubahan ke API Apps Script
+  let url = `${API}?action=change_password&email=${encodeURIComponent(email)}&old_pass=${encodeURIComponent(oldPass)}&new_pass=${encodeURIComponent(newPass)}`;
+
+  // Berikan efek loading ringan pada tombol
+  const btn = document.querySelector(".btn-save-pass");
+  btn.disabled = true;
+  btn.innerText = "Memproses...";
+
+  fetch(url)
+    .then(r => r.json())
+    .then(res => {
+      btn.disabled = false;
+      btn.innerText = "Simpan Kata Sandi";
+
+      if (res.status === "ok") {
+        // SUKSES: Ganti variabel local storage lama ke password yang baru
+        localStorage.setItem("password", newPass);
+        
+        // Bersihkan formulir isian kotak input sandi
+        document.getElementById("chgOldPass").value = "";
+        document.getElementById("chgNewPass").value = "";
+        document.getElementById("chgConfirmPass").value = "";
+        
+        // Tampilkan teks info sukses warna hijau
+        toast.style.display = "block";
+        
+        // Hilangkan kembali teks info setelah 3,5 detik berjalan
+        setTimeout(() => {
+          toast.style.display = "none";
+        }, 3500);
+
+      } else {
+        alert("🚨 Gagal: " + (res.message || "Terjadi kesalahan sistem backend."));
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      btn.disabled = false;
+      btn.innerText = "Simpan Kata Sandi";
+      alert("Gagal menghubungi server database.");
+    });
 }
 
 
