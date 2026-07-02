@@ -106,10 +106,21 @@ header h1 {
 /* Responsif untuk Layar HP */
 @media (max-width: 480px) {
   header { height: 60px; border-radius: 0 0 18px 18px; }
-  header h1 { font-size: 18px; text-shadow: 0 2px 3px rgba(0,0,0,0.3); 
+  header h1 { font-size: 18px;
   line-height: 1;}
   .header-center-wrapper img { height: 40px; }
   .header-center-wrapper { margin-right: 65px; gap: 6px; }
+}
+
+/* --- STYLE JUDUL UTAMA MENU (DI BAWAH HEADER) --- */
+.menu-title-main {
+  text-align: center;
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  color: var(--text);
+  margin-bottom: 20px;
+  text-transform: uppercase;
 }
 
 /* FOOTER */
@@ -221,7 +232,7 @@ header h1 {
   .footer-row {
     font-size: 11px;
     gap: 5px;
-    text-shadow: 1px 1px 0px #154da3;
+
   }
   .social-row {
     gap: 10px;
@@ -307,6 +318,226 @@ header h1 {
 }
 .spinner { width: 40px; height: 40px; border: 4px solid #dbe7ff; border-top: 4px solid var(--blue); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px; }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+/* STYLING MENU RASIONALISASI PRODI DAN FILTER DROPDOWN */
+.menu-content-section { display: none; animation: fadeInUp 0.5s ease; }
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.filter-container {
+  background: var(--card); padding: 25px; border-radius: 20px;
+  box-shadow: var(--shadow); margin-bottom: 25px;
+  display: flex; flex-direction: column; gap: 15px;
+}
+/* --- EDIT DROPDOWN JADI SEARCHABLE (KOTAK INPUT STYLE) --- */
+.filter-group {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.filter-group label {
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--text);
+}
+/* Input pencarian text menggantikan select konvensional */
+.search-select-input {
+  padding: 12px 15px;
+  border-radius: 10px;
+  border: 2px solid #e2e8f0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  outline: none;
+  transition: 0.2s;
+  background: #ffffff;
+}
+.search-select-input:focus {
+  border-color: var(--blue);
+}
+/* Dropdown menu melayang untuk list searchable */
+.search-dropdown-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  max-height: 220px;
+  overflow-y: auto;
+  background: white;
+  border: 2px solid #e2e8f0;
+  border-top: none;
+  border-radius: 0 0 12px 12px;
+  z-index: 50;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+  display: none;
+}
+.search-dropdown-item {
+  padding: 10px 15px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--text);
+}
+.search-dropdown-item:hover {
+  background: #e8f2ff;
+  color: var(--blue);
+}
+
+/* --- GRID KOTAK 3D TEGAS SEPERTI HEADER & FOOTER --- */
+.rasionalisasi-results-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+  margin-top: 25px;
+}
+
+/* KOTAK DENGAN STYLE 3D TIMBUL KELUAR */
+.result-card {
+  border-radius: 20px;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  color: white;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  /* Animasi Kemunculan Kotak Timbul Menghalau Transparan */
+  opacity: 0;
+  transform: scale(0.92);
+  animation: cardPopIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+
+  /* Border Kaca Pembatas 3D */
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+/* Animasi Muncul Membesar */
+@keyframes cardPopIn {
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.result-card h3 {
+  font-size: 16px;
+  font-weight: 900;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.25);
+  padding-bottom: 8px;
+  margin-bottom: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.result-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 15px;
+  font-weight: 600;
+  gap: 10px;
+}
+
+/* FONT DOMINAN BESAR PADA DATA AKHIR */
+.result-item span.value {
+  font-size: 22px; /* Diperbesar sangat dominan */
+  font-weight: 900;
+  text-align: right;
+  letter-spacing: -0.5px;
+}
+
+/* --- TEMA WARNA 3D TEGAS (OUTSET HARD SHADOW) --- */
+/* 1. HIJAU (AMAN / PRODI BARU) */
+.bg-aman {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.9), rgba(21, 128, 61, 0.9));
+  box-shadow: 
+    inset 0 3px 4px rgba(255, 255, 255, 0.4),
+    inset 0 -5px 8px rgba(0, 0, 0, 0.2),
+    0 8px 20px rgba(34, 197, 94, 0.3);
+}
+/* 2. KUNING (SEDANG) */
+.bg-sedang {
+  background: linear-gradient(135deg, rgba(234, 179, 8, 0.95), rgba(161, 98, 7, 0.95));
+  color: #ffffff !important; /* Diubah putih agar text-shadow kontras */
+  box-shadow: 
+    inset 0 3px 4px rgba(255, 255, 255, 0.5),
+    inset 0 -5px 8px rgba(0, 0, 0, 0.2),
+    0 8px 20px rgba(234, 179, 8, 0.3);
+}
+/* 3. ORENS (KETAT) */
+.bg-ketat {
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.9), rgba(194, 65, 12, 0.9));
+  box-shadow: 
+    inset 0 3px 4px rgba(255, 255, 255, 0.4),
+    inset 0 -5px 8px rgba(0, 0, 0, 0.2),
+    0 8px 20px rgba(249, 115, 22, 0.3);
+}
+/* 4. MERAH TUA (SANGAT KETAT) */
+.bg-sangat-ketat {
+  background: linear-gradient(135deg, rgba(185, 28, 28, 0.95), rgba(115, 11, 11, 0.95));
+  box-shadow: 
+    inset 0 3px 4px rgba(255, 255, 255, 0.3),
+    inset 0 -5px 8px rgba(0, 0, 0, 0.3),
+    0 8px 20px rgba(185, 28, 28, 0.4);
+}
+/* 5. BIRU CERAH KOTAK 3 & 4 */
+.bg-blue-cerah {
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.9), rgba(3, 105, 161, 0.9));
+  box-shadow: 
+    inset 0 3px 4px rgba(255, 255, 255, 0.4),
+    inset 0 -5px 8px rgba(0, 0, 0, 0.2),
+    0 8px 20px rgba(14, 165, 233, 0.3);
+}
+
+/* EFEK HARD SHADOW TEXT PADA SPAN VALUE AGAR MAKSIMAL 3D */
+
+
+/* LAYOUT RESPONSIVE HP */
+@media (max-width: 768px) {
+  .rasionalisasi-results-grid { grid-template-columns: 1fr; gap: 15px; }
+}
+
+/* ATURAN WARNA DARI KATEGORI KEKETATAN */
+.bg-aman { background: #22c55e !important; color: white !important; }
+.bg-sedang { background: #eab308 !important; color: #1e293b !important; }
+.bg-sedang h3 { border-color: rgba(0,0,0,0.15) !important; }
+.bg-ketat { background: #f97316 !important; color: white !important; }
+.bg-sangat-ketat { background: #990000 !important; color: white !important; }
+.bg-blue-cerah { background: #0ea5e9 !important; color: white !important; }
+
+/* Gradien tambahan untuk kategori Nilai TKA */
+.bg-tka-hijau {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.9), rgba(21, 128, 61, 0.9)) !important;
+  box-shadow: inset 0 3px 4px rgba(255, 255, 255, 0.4), inset 0 -5px 8px rgba(0, 0, 0, 0.2), 0 8px 20px rgba(34, 197, 94, 0.3) !important;
+}
+.bg-tka-kuning {
+  background: linear-gradient(135deg, rgba(234, 179, 8, 0.95), rgba(161, 98, 7, 0.95)) !important;
+  color: #ffffff !important;
+  box-shadow: inset 0 3px 4px rgba(255, 255, 255, 0.5), inset 0 -5px 8px rgba(0, 0, 0, 0.2), 0 8px 20px rgba(234, 179, 8, 0.3) !important;
+}
+.bg-tka-orens {
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.9), rgba(194, 65, 12, 0.9)) !important;
+  box-shadow: inset 0 3px 4px rgba(255, 255, 255, 0.4), inset 0 -5px 8px rgba(0, 0, 0, 0.2), 0 8px 20px rgba(249, 115, 22, 0.3) !important;
+}
+.bg-tka-biru {
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.9), rgba(3, 105, 161, 0.9)) !important;
+  box-shadow: inset 0 3px 4px rgba(255, 255, 255, 0.4), inset 0 -5px 8px rgba(0, 0, 0, 0.2), 0 8px 20px rgba(14, 165, 233, 0.3) !important;
+}
+
+/* Style tambahan untuk menandai item dropdown yang sedang diarahkan oleh tombol panah keyboard */
+.search-dropdown-item.active-keydown {
+  background: #e8f2ff !important;
+  color: var(--blue) !important;
+}
+
+/* LAYOUT RESPONSIVE: MENJADI 1 KOLOM VERTIKAL PADA LAYAR HP */
+@media (max-width: 768px) {
+  .rasionalisasi-results-grid { grid-template-columns: 1fr; gap: 15px; }
+}
+
+
 </style>
 </head>
 <body>
@@ -339,7 +570,7 @@ header h1 {
 
 <div class="sidebar" id="sidebarMenu">
   <a href="#" class="active-menu" onclick="toggleMenu()"><i class="fas fa-user"></i> Profil</a>
-  <a href="#" onclick="alert('Fitur segera hadir!')"><i class="fas fa-graduation-cap"></i> Rasionalisasi Prodi</a>
+<a href="#" id="menuLinkRasionalisasi" onclick="switchMenu('rasionalisasi')"><i class="fas fa-graduation-cap"></i> Rasionalisasi Prodi</a>
   <a href="#" onclick="alert('Fitur segera hadir!')"><i class="fas fa-heart"></i> Peminatan Prodi</a>
   <a href="#" onclick="alert('Fitur segera hadir!')"><i class="fas fa-chart-bar"></i> Statistik Nilai TKA 2025</a>
   <a href="#" onclick="alert('Fitur segera hadir!')"><i class="fas fa-book"></i> Materi TKA</a>
@@ -361,8 +592,447 @@ header h1 {
   </div>
 </div>
 
+<!-- KONTEN RASIONALISASI PRODI --> 
+
+<div class="main-content menu-content-section" id="rasionalisasiMenuContent" style="max-width: 1100px;">
+
+<h1 class="menu-title-main">RASIONALISASI PRODI</h1>
+
+  <div class="filter-container">
+    <div class="filter-group">
+      <label><i class="fas fa-university"></i> Perguruan Tinggi Negeri (PTN)</label>
+      <input type="text" id="searchPTN" class="search-select-input" placeholder="Ketik nama PTN / Kampus..." oninput="filterPTNAction()" onfocus="showPTNDropdown()" onkeydown="handlePTNKeydown(event)">
+      <div id="listPTNDropdown" class="search-dropdown-list"></div>
+    </div>
+    
+    <div class="filter-group">
+      <label><i class="fas fa-book-open"></i> Program Studi (Prodi)</label>
+      <input type="text" id="searchProdi" class="search-select-input" placeholder="-- Pilih PTN Terlebih Dahulu --" oninput="filterProdiAction()" onfocus="showProdiDropdown()" onkeydown="handleProdiKeydown(event)" disabled>
+      <div id="listProdiDropdown" class="search-dropdown-list"></div>
+    </div>
+  </div>
+
+  <div class="rasionalisasi-results-grid" id="rasionalisasiResultGrid" style="display: none;">
+    
+    <div class="result-card" id="cardSNBP">
+      <h3>Jalur SNBP</h3>
+      <div class="result-item"><span>Kuota:</span><span class="value" id="resKuotaSNBP">0</span></div>
+      <div class="result-item"><span>Peminat:</span><span class="value" id="resPeminatSNBP">0</span></div>
+      <div class="result-item"><span>Keketatan:</span><span class="value" id="resRasioSNBP">0%</span></div>
+      <div class="result-item"><span>Kategori:</span><span class="value" id="resKategoriSNBP">-</span></div>
+    </div>
+
+    <div class="result-card" id="cardSNBT">
+      <h3>Jalur SNBT</h3>
+      <div class="result-item"><span>Kuota:</span><span class="value" id="resKuotaSNBT">0</span></div>
+      <div class="result-item"><span>Peminat:</span><span class="value" id="resPeminatSNBT">0</span></div>
+      <div class="result-item"><span>Keketatan:</span><span class="value" id="resRasioSNBT">0%</span></div>
+      <div class="result-item"><span>Kategori:</span><span class="value" id="resKategoriSNBT">-</span></div>
+    </div>
+
+    <div class="result-card bg-blue-cerah">
+      <h3>Rekomendasi Mapel Pilihan</h3>
+      <div class="result-item"><span class="value" id="resMapel1">-</span></div>
+      <div class="result-item"><span class="value" id="resMapel2">-</span></div>
+      <div class="result-item"><span>Alternatif:</span><span class="value" id="resAlternatif">-</span></div>
+    </div>
+
+    <div class="result-card bg-blue-cerah" id="cardTargetNilai">
+      <h3>Target Nilai TKA</h3>
+      <div class="result-item"><span id="lblTka1">Mapel 1:</span><span class="value" id="resNilai1">0</span></div>
+      <div class="result-item"><span id="lblTka2">Mapel 2:</span><span class="value" id="resNilai2">0</span></div>
+      <div class="result-item"><span id="lblPkk">Alternatif:</span><span class="value" id="resNilaiPkk">0</span></div>
+      <div class="result-item"><span>Kategori:</span><span class="value" id="resKategoriNilai">-</span></div>
+    </div>
+
+  </div>
+</div>
+
 <script>
-const API = "https://script.google.com/macros/s/AKfycbxIe9VyUx4Gx5nwfpTgcHkBsEmh7hX0-O0rSDYWXR0oZjxfOaWzewSCSrbCVJPnZXjb/exec";
+const API = "https://script.google.com/macros/s/AKfycbzDeDecfxrHGrJTFY54YxKNIk2mUrkHE4s3C1HrLVKVqg05RgbX4uCQs2y9QTykEBVO/exec";
+
+//FUNGSI RASIONALISASI PRODI
+
+let masterProdiData = []; // Penyimpanan cache lokal data program studi secara aman
+
+// Fungsi Navigasi Tab Sub-Menu
+function switchMenu(menuName) {
+  document.getElementById("mainDashboard").style.display = "none";
+  document.getElementById("rasionalisasiMenuContent").style.display = "none";
+  
+  document.querySelectorAll(".sidebar a").forEach(el => el.classList.remove("active-menu"));
+
+  if (menuName === "profil") {
+    document.getElementById("mainDashboard").style.display = "block";
+    document.querySelectorAll(".sidebar a")[0].classList.add("active-menu");
+  } else if (menuName === "rasionalisasi") {
+    document.getElementById("rasionalisasiMenuContent").style.display = "block";
+    document.getElementById("menuLinkRasionalisasi").classList.add("active-menu");
+    
+    // Tarik data prodi dari database jika data lokal masih kosong
+    if (masterProdiData.length === 0) {
+      loadSpreadsheetPTNData();
+    }
+  }
+  toggleMenu();
+}
+
+let selectedPTNName = "";
+let selectedProdiId = "";
+
+// Tutup list dropdown searchable secara otomatis jika pengguna mengklik di luar area input
+document.addEventListener("click", function(e) {
+  if (!e.target.closest(".filter-group")) {
+    const listPTN = document.getElementById("listPTNDropdown");
+    const listProdi = document.getElementById("listProdiDropdown");
+    if (listPTN) listPTN.style.display = "none";
+    if (listProdi) listProdi.style.display = "none";
+  }
+});
+
+// Request Data PTN dengan autentikasi enkripsi Email dan Password
+function loadSpreadsheetPTNData() {
+  let email = localStorage.getItem("email");
+  let pass = localStorage.getItem("password");
+  
+  let url = `${API}?action=get_prodi_data&email=${encodeURIComponent(email)}&pass=${encodeURIComponent(pass)}`;
+  
+  fetch(url)
+    .then(r => r.json())
+    .then(res => {
+      if (res.status === "ok") {
+        masterProdiData = res.data;
+        populatePTNDropdown();
+      } else {
+        alert("🚨 Akses Ditolak: " + (res.message || "Sesi verifikasi backend gagal."));
+        forceLogout();
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      alert("Gagal memproses pangkalan data PTN dari server.");
+    });
+}
+
+// Inisialisasi daftar nama kampus unik ke Dropdown PTN Searchable
+function populatePTNDropdown() {
+  renderPTNList(masterProdiData);
+}
+
+function renderPTNList(dataArray) {
+  const container = document.getElementById("listPTNDropdown");
+  if (!container) return;
+  container.innerHTML = "";
+  
+  let uniquePTN = [...new Set(dataArray.map(item => item.ptn))];
+  uniquePTN.sort();
+  
+  if (uniquePTN.length === 0) {
+    container.innerHTML = '<div class="search-dropdown-item" style="color:var(--muted)">Tidak ditemukan</div>';
+    return;
+  }
+
+  uniquePTN.forEach(ptn => {
+    let div = document.createElement("div");
+    div.className = "search-dropdown-item";
+    div.innerText = ptn;
+    div.onclick = function() {
+      document.getElementById("searchPTN").value = ptn;
+      selectedPTNName = ptn;
+      container.style.display = "none";
+      onPTNSelectedAction();
+    };
+    container.appendChild(div);
+  });
+}
+
+function showPTNDropdown() {
+  const listPTN = document.getElementById("listPTNDropdown");
+  const listProdi = document.getElementById("listProdiDropdown");
+  if (listPTN) listPTN.style.display = "block";
+  if (listProdi) listProdi.style.display = "none";
+}
+
+function filterPTNAction() {
+  let keyword = document.getElementById("searchPTN").value.toLowerCase();
+  let filtered = masterProdiData.filter(item => item.ptn.toLowerCase().includes(keyword));
+  renderPTNList(filtered);
+  const listPTN = document.getElementById("listPTNDropdown");
+  if (listPTN) listPTN.style.display = "block";
+}
+
+// Aksi berantai saat Pilihan Kampus ditentukan
+function onPTNSelectedAction() {
+  const prodiInput = document.getElementById("searchProdi");
+  const resultGrid = document.getElementById("rasionalisasiResultGrid");
+  
+  if (resultGrid) resultGrid.style.display = "none";
+  if (!prodiInput) return;
+  
+  prodiInput.value = "";
+  prodiInput.placeholder = "Ketik nama prodi...";
+  prodiInput.disabled = false;
+  
+  let filteredProdi = masterProdiData.filter(item => item.ptn === selectedPTNName);
+  filteredProdi.sort((a,b) => a.prodi.localeCompare(b.prodi));
+  renderProdiList(filteredProdi);
+}
+
+function renderProdiList(dataArray) {
+  const container = document.getElementById("listProdiDropdown");
+  if (!container) return;
+  container.innerHTML = "";
+  
+  if (dataArray.length === 0) {
+    container.innerHTML = '<div class="search-dropdown-item" style="color:var(--muted)">Tidak ditemukan</div>';
+    return;
+  }
+
+  dataArray.forEach(p => {
+    let div = document.createElement("div");
+    div.className = "search-dropdown-item";
+    div.innerText = p.prodi;
+    div.onclick = function() {
+      document.getElementById("searchProdi").value = p.prodi;
+      selectedProdiId = p.idProdi;
+      container.style.display = "none";
+      onProdiSelectedAction();
+    };
+    container.appendChild(div);
+  });
+}
+
+function showProdiDropdown() {
+  if (!selectedPTNName) return;
+  const listPTN = document.getElementById("listPTNDropdown");
+  const listProdi = document.getElementById("listProdiDropdown");
+  if (listProdi) listProdi.style.display = "block";
+  if (listPTN) listPTN.style.display = "none";
+}
+
+function filterProdiAction() {
+  let keyword = document.getElementById("searchProdi").value.toLowerCase();
+  let filteredProdi = masterProdiData.filter(item => item.ptn === selectedPTNName && item.prodi.toLowerCase().includes(keyword));
+  renderProdiList(filteredProdi);
+  const listProdi = document.getElementById("listProdiDropdown");
+  if (listProdi) listProdi.style.display = "block";
+}
+
+// Menampilkan data evaluasi akhir prodi (Mendukung Data Non-Angka / Prodi Baru & Nilai Desimal)
+let currentPTNIndex = -1;
+let currentProdiIndex = -1;
+
+// Tambahkan logika perubahan warna Kotak 4 di bagian akhir fungsi ini
+function onProdiSelectedAction() {
+  const resultGrid = document.getElementById("rasionalisasiResultGrid");
+  if (!resultGrid) return;
+  
+  let selectedData = masterProdiData.find(item => item.idProdi.toString() === selectedProdiId.toString());
+  if (!selectedData) return;
+  
+  resultGrid.style.display = "none";
+  void resultGrid.offsetWidth; 
+
+  // --- KOTAK 1: SNBP ---
+  let rawRasioSNBP = parseFloat(selectedData.rasioSnbp);
+  let katSNBP = selectedData.kategoriSnbp ? selectedData.kategoriSnbp.trim() : "";
+  if (isNaN(rawRasioSNBP) || rawRasioSNBP <= 0 || katSNBP === "" || katSNBP === "-") {
+    document.getElementById("resRasioSNBP").innerText = "-";
+    document.getElementById("resKategoriSNBP").innerText = "Aman (Prodi Baru)";
+    applyKategoriColor("cardSNBP", "Aman");
+  } else {
+    document.getElementById("resRasioSNBP").innerText = (rawRasioSNBP * 100).toFixed(2) + "%";
+    document.getElementById("resKategoriSNBP").innerText = selectedData.kategoriSnbp;
+    applyKategoriColor("cardSNBP", selectedData.kategoriSnbp);
+  }
+
+  // --- KOTAK 2: SNBT ---
+  let rawRasioSNBT = parseFloat(selectedData.rasioSnbt);
+  let katSNBT = selectedData.kategoriSnbt ? selectedData.kategoriSnbt.trim() : "";
+  if (isNaN(rawRasioSNBT) || rawRasioSNBT <= 0 || katSNBT === "" || katSNBT === "-") {
+    document.getElementById("resRasioSNBT").innerText = "-";
+    document.getElementById("resKategoriSNBT").innerText = "Aman (Prodi Baru)";
+    applyKategoriColor("cardSNBT", "Aman");
+  } else {
+    document.getElementById("resRasioSNBT").innerText = (rawRasioSNBT * 100).toFixed(2) + "%";
+    document.getElementById("resKategoriSNBT").innerText = selectedData.kategoriSnbt;
+    applyKategoriColor("cardSNBT", selectedData.kategoriSnbt);
+  }
+
+  // --- KOTAK 3: REKOMENDASI MAPEL ---
+  document.getElementById("resMapel1").innerText = selectedData.tka1 || "-";
+  document.getElementById("resMapel2").innerText = selectedData.tka2 || "-";
+  document.getElementById("resAlternatif").innerText = selectedData.pkk || "-";
+
+  // --- KOTAK 4: TARGET NILAI TKA ---
+  document.getElementById("lblTka1").innerText = (selectedData.tka1 || "Mapel 1") + ":";
+  document.getElementById("lblTka2").innerText = (selectedData.tka2 || "Mapel 2") + ":";
+  document.getElementById("lblPkk").innerText = (selectedData.pkk || "Alternatif") + ":";
+  
+  let katNilai = selectedData.kategoriNilai ? selectedData.kategoriNilai.trim() : "";
+  document.getElementById("resKategoriNilai").innerText = katNilai || "-";
+  
+  // MODIFIKASI TERBARU: Ubah warna tema Kotak 4 secara dinamis sesuai kategori nilai
+  applyTargetNilaiColor(katNilai);
+
+  resultGrid.style.display = "grid";
+
+  animateCountUp("resKuotaSNBP", parseInt(selectedData.kuotaSnbp) || 0, false);
+  animateCountUp("resPeminatSNBP", parseInt(selectedData.peminatSnbp) || 0, false);
+  animateCountUp("resKuotaSNBT", parseInt(selectedData.kuotaSnbt) || 0, false);
+  animateCountUp("resPeminatSNBT", parseInt(selectedData.peminatSNBT) || parseInt(selectedData.peminatSnbt) || 0, false);
+  
+  animateCountUp("resNilai1", parseFloat(selectedData.nilai1) || 0, true);
+  animateCountUp("resNilai2", parseFloat(selectedData.nilai2) || 0, true);
+  animateCountUp("resNilaiPkk", parseFloat(selectedData.nilaipkk) || 0, true);
+}
+
+// --- LOGIKA NAVIGASI TOMBOL PANAH KEYBOARD (EXCEL STYLE) ---
+
+function handlePTNKeydown(e) {
+  const container = document.getElementById("listPTNDropdown");
+  if (container.style.display === "none") return;
+  
+  const items = container.getElementsByClassName("search-dropdown-item");
+  if (items.length === 0) return;
+  
+  if (e.key === "ArrowDown") {
+    e.preventDefault();
+    currentPTNIndex = (currentPTNIndex + 1) % items.length;
+    highlightDropdownItem(items, currentPTNIndex, container);
+  } else if (e.key === "ArrowUp") {
+    e.preventDefault();
+    currentPTNIndex = (currentPTNIndex - 1 + items.length) % items.length;
+    highlightDropdownItem(items, currentPTNIndex, container);
+  } else if (e.key === "Enter") {
+    e.preventDefault();
+    if (currentPTNIndex > -1 && items[currentPTNIndex]) {
+      items[currentPTNIndex].click();
+      currentPTNIndex = -1;
+    }
+  }
+}
+
+function handleProdiKeydown(e) {
+  const container = document.getElementById("listProdiDropdown");
+  if (container.style.display === "none") return;
+  
+  const items = container.getElementsByClassName("search-dropdown-item");
+  if (items.length === 0) return;
+  
+  if (e.key === "ArrowDown") {
+    e.preventDefault();
+    currentProdiIndex = (currentProdiIndex + 1) % items.length;
+    highlightDropdownItem(items, currentProdiIndex, container);
+  } else if (e.key === "ArrowUp") {
+    e.preventDefault();
+    currentProdiIndex = (currentProdiIndex - 1 + items.length) % items.length;
+    highlightDropdownItem(items, currentProdiIndex, container);
+  } else if (e.key === "Enter") {
+    e.preventDefault();
+    if (currentProdiIndex > -1 && items[currentProdiIndex]) {
+      items[currentProdiIndex].click();
+      currentProdiIndex = -1;
+    }
+  }
+}
+
+// Fungsi pemberi efek fokus warna biru muda saat elemen dilewati keyboard dan scroll otomatis mengejar jika list terlalu panjang
+function highlightDropdownItem(items, index, container) {
+  for (let i = 0; i < items.length; i++) {
+    items[i].classList.remove("active-keydown");
+  }
+  
+  const activeItem = items[index];
+  if (!activeItem) return;
+  
+  activeItem.classList.add("active-keydown");
+  
+  // Auto scroll agar item yang dipilih tetap terlihat di area pandang
+  if (activeItem.offsetTop + activeItem.clientHeight > container.scrollTop + container.clientHeight) {
+    container.scrollTop = activeItem.offsetTop + activeItem.clientHeight - container.clientHeight;
+  } else if (activeItem.offsetTop < container.scrollTop) {
+    container.scrollTop = activeItem.offsetTop;
+  }
+}
+
+// Reset indeks setiap kali pengguna mengetik ulang pencarian agar tidak lompat
+function filterPTNAction() {
+  currentPTNIndex = -1;
+  let keyword = document.getElementById("searchPTN").value.toLowerCase();
+  let filtered = masterProdiData.filter(item => item.ptn.toLowerCase().includes(keyword));
+  renderPTNList(filtered);
+  document.getElementById("listPTNDropdown").style.display = "block";
+}
+
+function filterProdiAction() {
+  currentProdiIndex = -1;
+  let keyword = document.getElementById("searchProdi").value.toLowerCase();
+  let filteredProdi = masterProdiData.filter(item => item.ptn === selectedPTNName && item.prodi.toLowerCase().includes(keyword));
+  renderProdiList(filteredProdi);
+  document.getElementById("listProdiDropdown").style.display = "block";
+}
+
+function applyTargetNilaiColor(kategoriText) {
+  const cardTka = document.getElementById("cardTargetNilai");
+  if (!cardTka) return;
+  
+  cardTka.className = "result-card"; // Reset style dasar
+  let cleanText = kategoriText.toLowerCase();
+  
+  if (cleanText === "istimewa" || cleanText === "baik") {
+    cardTka.classList.add("bg-tka-hijau");
+  } else if (cleanText === "memadai") {
+    cardTka.classList.add("bg-tka-kuning");
+  } else if (cleanText === "kurang") {
+    cardTka.classList.add("bg-tka-orens");
+  } else {
+    cardTka.classList.add("bg-tka-biru"); // Warna default jika data di luar kategori atau kosong
+  }
+}
+
+// Hubungkan penamaan kategori ke warna CSS 3D
+function applyKategoriColor(elementId, kategoriText) {
+  const card = document.getElementById(elementId);
+  if (!card) return;
+  card.className = "result-card";
+  
+  let textClean = kategoriText ? kategoriText.toLowerCase().trim() : "";
+  if (textClean === "sangat aman" || textClean === "aman" || textClean === "") {
+    card.classList.add("bg-aman");
+  } else if (textClean === "sedang") {
+    card.classList.add("bg-sedang");
+  } else if (textClean === "ketat") {
+    card.classList.add("bg-ketat");
+  } else if (textClean === "sangat ketat") {
+    card.classList.add("bg-sangat-ketat");
+  }
+}
+
+// Logika kalkulator animasi angka berjalan (Mendukung Bilangan Bulat & Pecahan Desimal)
+function animateCountUp(targetId, targetValue, isDecimal = false) {
+  const obj = document.getElementById(targetId);
+  if (!obj || isNaN(targetValue) || targetValue === 0) {
+    if (obj) obj.innerText = isDecimal ? targetValue.toFixed(2) : targetValue;
+    return;
+  }
+  
+  let startTimestamp = null;
+  const duration = 1000; 
+  
+  function step(timestamp) {
+    if (!startTimestamp) startTimestamp = timestamp;
+    const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+    let currentVal = progress * targetValue;
+    
+    obj.innerText = isDecimal ? currentVal.toFixed(2) : Math.floor(currentVal);
+    
+    if (progress < 1) {
+      window.requestAnimationFrame(step);
+    }
+  }
+  window.requestAnimationFrame(step);
+}
 
 let lastPingTime = 0;
 let pingInterval = null;
@@ -454,7 +1124,7 @@ function startPingScheduler() {
     // Proteksi Manipulasi Timer dari sisi Inspect Element Client
     if (timeDiff < 9) {
       clearInterval(pingInterval);
-      alert("❌ Keamanan mendeteksi anomali pada perangkat Anda!");
+      alert("❌ Anda meninggalkan halaman terlalu lama");
       forceLogout();
       return;
     }
