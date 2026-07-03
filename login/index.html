@@ -60,8 +60,11 @@ nav {
 
 /* LOGO LOGIN */
 .main-logo {
-  width: 180px; 
-  height: auto;
+  width: 100%;             
+  max-width: 360px;        
+  height: auto;            
+  object-fit: cover;       
+  border-radius: 22px;     
   margin-bottom: 25px;
   filter: drop-shadow(0 4px 10px rgba(0,0,0,0.12));
 }
@@ -139,46 +142,257 @@ button:disabled {
   66% { content: '...'; }
 }
 
-/* CONTACT SECTION */
-.contact-section {
-  text-align:center;
-  margin: 30px 0;
+/* SECTION PERTANYAAN SUBSKRIPSI */
+.subscription-section {
+  text-align: center;
+  margin: 30px 0 10px;
+  width: 100%;
+  max-width: 360px;
 }
 
-.contact-section p {
+.sub-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--blue);
+  margin: 0 0 4px 0;
+}
+
+.sub-desc {
+  font-size: 14px;
+  color: var(--muted);
+  margin: 0 0 16px 0;
+}
+
+/* TOMBOL LANGGANAN JELLY 3D KUNING */
+.btn-sub {
+  background: linear-gradient(to bottom, #ffe066 0%, #f5b000 100%);
+  color: #5c3a00;
+  border: none;
+  padding: 14px 35px;
+  border-radius: 50px;
+  font-weight: 800;
   font-size: 16px;
-  font-weight: 700;
-  color: var(--text);
-  margin-bottom: 12px;
+  cursor: pointer;
+  width: auto;
+  display: inline-block;
+  position: relative;
+  box-shadow: 0 6px 0 #c28a00, 0 12px 20px rgba(245, 176, 0, 0.35);
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.6);
+  transition: all 0.15s ease;
 }
 
-.wa-link {
+/* Efek Kilauan Jelly Glare */
+.btn-sub::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 15px;
+  right: 15px;
+  height: 6px;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0) 100%);
+  border-radius: 20px;
+}
+
+.btn-sub:hover {
+  background: linear-gradient(to bottom, #ffe57f 0%, #ffbc1a 100%);
+  transform: translateY(2px);
+  box-shadow: 0 4px 0 #c28a00, 0 8px 15px rgba(245, 176, 0, 0.3);
+}
+
+.btn-sub:active {
+  transform: translateY(6px);
+  box-shadow: 0 0 0 #c28a00, 0 4px 10px rgba(245, 176, 0, 0.2);
+}
+
+/* MODAL / POPUP SISTEM PAKET */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
   display: flex;
-  align-items: center;
   justify-content: center;
-  text-decoration: none;
-  color: #000000;
-  font-size: 16px;
-  font-weight: 600;
-  margin-bottom: 8px;
-  transition: 0.2s;
+  align-items: center;
+  z-index: 2000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
 }
 
-.wa-link i {
-  margin-right: 10px;
-  font-size: 20px;
-  color: #25d366;
+.modal-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
 }
+
+.modal-content {
+  background: white;
+  padding: 25px;
+  border-radius: 22px;
+  width: 90%;
+  max-width: 440px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+  transform: scale(0.8);
+  transition: transform 0.3s ease;
+  position: relative;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-overlay.active .modal-content {
+  transform: scale(1);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+}
+
+.modal-header h3 {
+  margin: 0;
+  color: var(--text);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.close-modal {
+  background: none;
+  border: none;
+  font-size: 26px;
+  color: #aaa;
+  cursor: pointer;
+  transition: 0.2s;
+  padding: 0;
+  line-height: 1;
+  width: auto;
+}
+.close-modal:hover { color: #555; }
+
+.package-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px; 
+  padding-bottom: 8px;
+}
+
+/* MODEL DASAR TOMBOL PAKET 3D */
+.package-item {
+  border: none;
+  border-radius: 16px;
+  padding: 16px 20px;
+  text-align: left;
+  cursor: pointer;
+  width: 100%;
+  transition: all 0.1s ease;
+  position: relative;
+}
+
+.package-item:active {
+  transform: translateY(4px) !important;
+}
+
+.package-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.package-name {
+  font-weight: 800;
+  font-size: 16px;
+}
+
+.package-price {
+  font-weight: 800;
+  font-size: 17px;
+}
+
+.package-features {
+  font-size: 12px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.feature-badge {
+  padding: 3px 10px;
+  border-radius: 8px;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.4);
+}
+
+/* WARNA TIAP PAKET (3D STYLE) */
+
+/* 1. Paket Ekonomis (Bronze) */
+.pkg-bronze {
+  background: linear-gradient(to bottom, #ecd0bc 0%, #b88360 100%);
+  color: #4a2711;
+  box-shadow: 0 5px 0 #855333, 0 8px 15px rgba(133, 83, 51, 0.2);
+}
+.pkg-bronze .package-price { color: #4a2711; }
+.pkg-bronze .feature-badge { background: rgba(74, 39, 17, 0.1); color: #4a2711; }
+.pkg-bronze:hover { transform: translateY(-1px); box-shadow: 0 6px 0 #855333, 0 10px 18px rgba(133, 83, 51, 0.3); }
+
+/* 2. Paket Reguler (Silver) */
+.pkg-silver {
+  background: linear-gradient(to bottom, #f0f2f5 0%, #b0b8c4 100%);
+  color: #2d3540;
+  box-shadow: 0 5px 0 #788291, 0 8px 15px rgba(120, 130, 145, 0.2);
+}
+.pkg-silver .package-price { color: #2d3540; }
+.pkg-silver .feature-badge { background: rgba(45, 53, 64, 0.1); color: #2d3540; }
+.pkg-silver:hover { transform: translateY(-1px); box-shadow: 0 6px 0 #788291, 0 10px 18px rgba(120, 130, 145, 0.3); }
+
+/* 3. Paket Eksklusif (Emas Gradien Mewah + Best Seller) */
+.pkg-gold {
+  background: linear-gradient(135deg, #fff3b0 0%, #cca010 50%, #ffd700 100%);
+  color: #4a3600;
+  box-shadow: 0 5px 0 #8c6c00, 0 10px 20px rgba(140, 108, 0, 0.35);
+}
+.pkg-gold .package-price { color: #4a3600; font-size: 19px; }
+.pkg-gold .feature-badge { background: rgba(74, 54, 0, 0.12); color: #4a3600; font-weight: 700; }
+.pkg-gold:hover { transform: translateY(-2px); box-shadow: 0 7px 0 #8c6c00, 0 12px 22px rgba(140, 108, 0, 0.45); }
+
+/* Badge Best Seller */
+.best-seller-badge {
+  position: absolute;
+  top: -10px;
+  right: 15px;
+  background: linear-gradient(135deg, #ff416c, #ff4b2b);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 800;
+  box-shadow: 0 3px 8px rgba(255, 75, 43, 0.4);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  border: 1px solid rgba(255,255,255,0.3);
+}
+
+/* 4. Paket Platinum (Diamond) */
+.pkg-diamond {
+  background: linear-gradient(to bottom, #e3f2fd 0%, #90caf9 100%);
+  color: #0d47a1;
+  box-shadow: 0 5px 0 #42a5f5, 0 8px 15px rgba(13, 71, 161, 0.15);
+}
+.pkg-diamond .package-price { color: #0d47a1; }
+.pkg-diamond .feature-badge { background: rgba(13, 71, 161, 0.1); color: #0d47a1; }
+.pkg-diamond:hover { transform: translateY(-1px); box-shadow: 0 6px 0 #42a5f5, 0 10px 18px rgba(13, 71, 161, 0.25); }
 
 @media (max-width: 480px) {
-    .nav-links { 
-        display: flex; /* Aktifkan kembali menu */
-        gap: 10px;    /* Perkecil jarak antar menu */
-    }
-
-    .nav-links a { 
-        font-size: 12px; /* Perkecil ukuran font agar muat di layar HP */
-    }
+    .nav-links { display: flex; gap: 10px; }
+    .nav-links a { font-size: 12px; }
+    .modal-content { padding: 20px; }
+    .package-name, .package-price { font-size: 15px; }
+    .best-seller-badge { right: 10px; font-size: 10px; }
 }
 </style>
 </head>
@@ -186,7 +400,7 @@ button:disabled {
 
 <nav>
     <a href="/" class="logo-nav">
-        <img src="https://i.imgur.com/zyRxiIM.png" alt="Logo" style="height: 100%;">
+        <img src="/logo.png" alt="Logo" style="height: 100%;">
     </a>
     <div class="nav-links">
         <a href="/#about">Tentang</a>
@@ -196,7 +410,7 @@ button:disabled {
 </nav>
 
 <div class="main-container">
-    <img src="https://i.imgur.com/zyRxiIM.png" alt="Logo" class="main-logo">
+    <img src="/login/utbk.png" alt="Logo" class="main-logo">
 
     <div class="login-card">
       <div class="login-header">
@@ -212,15 +426,76 @@ button:disabled {
       <div id="loading-text">Sedang mencoba login<span class="dots"></span></div>
     </div>
 
-    <div class="contact-section">
-      <p>Untuk Pembelian Aplikasi Hubungi Admin <br> Klik Nomor Whatsapp dibawah ini</p>
-      <a href="https://wa.me/6285815023510" class="wa-link" target="_blank">
-        <i class="fab fa-whatsapp"></i> Admin 1 : 085815023510
-      </a>
-      <a href="https://wa.me/62895423024582" class="wa-link" target="_blank">
-        <i class="fab fa-whatsapp"></i> Admin 2 : 0895423024582
-      </a>
+    <!-- BOX BAWAH: SUBSKRIPSI JELLY 3D KUNING -->
+    <div class="subscription-section">
+      <p class="sub-title">Tidak Bisa Login?</p>
+      <p class="sub-desc">Sudah langganan belum?</p>
+      <button class="btn-sub" onclick="openPackageModal()">Langganan Sekarang</button>
     </div>
+</div>
+
+<!-- MODAL POPUP: PILIHAN PAKET SUBSKRIPSI SNBT -->
+<div class="modal-overlay" id="packageModal" onclick="closeModalOutside(event)">
+  <div class="modal-content">
+      <div class="modal-header">
+          <h3>Pilih Paket Rasionalisasi SNBT</h3>
+          <button class="close-modal" onclick="closePackageModal()">&times;</button>
+      </div>
+      <div class="package-list">
+          
+          <!-- Paket 1: Bronze -->
+          <button class="package-item pkg-bronze" onclick="orderPackage('Ekonomis')">
+              <div class="package-top">
+                  <span class="package-name">Paket 1 - Ekonomis</span>
+                  <span class="package-price">Rp 25.000</span>
+              </div>
+              <div class="package-features">
+                  <span class="feature-badge"><i class="fas fa-check"></i> Akses Semua Fitur</span>
+                  <span class="feature-badge"><i class="fas fa-clock"></i> 1 Minggu</span>
+              </div>
+          </button>
+
+          <!-- Paket 2: Silver -->
+          <button class="package-item pkg-silver" onclick="orderPackage('Reguler')">
+              <div class="package-top">
+                  <span class="package-name">Paket 2 - Reguler</span>
+                  <span class="package-price">Rp 50.000</span>
+              </div>
+              <div class="package-features">
+                  <span class="feature-badge"><i class="fas fa-check"></i> Akses Semua Fitur</span>
+                  <span class="feature-badge"><i class="fas fa-clock"></i> 1 Bulan</span>
+              </div>
+          </button>
+
+          <!-- Paket 3: Emas Gradien Mewah + Best Seller -->
+          <button class="package-item pkg-gold" onclick="orderPackage('Ekslusif')">
+              <div class="best-seller-badge"><i class="fas fa-fire"></i> Best Seller</div>
+              <div class="package-top">
+                  <span class="package-name">Paket 3 - Ekslusif</span>
+                  <span class="package-price">Rp 100.000</span>
+              </div>
+              <div class="package-features">
+                  <span class="feature-badge"><i class="fas fa-check"></i> Akses Semua Fitur</span>
+                  <span class="feature-badge"><i class="fas fa-clock"></i> 3 Bulan</span>
+                  <span class="feature-badge"><i class="fas fa-star"></i> Tryout SNBT</span>
+              </div>
+          </button>
+
+          <!-- Paket 4: Diamond -->
+          <button class="package-item pkg-diamond" onclick="orderPackage('Platinum')">
+              <div class="package-top">
+                  <span class="package-name">Paket 4 - Platinum</span>
+                  <span class="package-price">Rp 200.000</span>
+              </div>
+              <div class="package-features">
+                  <span class="feature-badge"><i class="fas fa-check"></i> Akses Semua Fitur</span>
+                  <span class="feature-badge"><i class="fas fa-clock"></i> 1 Tahun</span>
+                  <span class="feature-badge"><i class="fas fa-star"></i> Tryout SNBT</span>
+              </div>
+          </button>
+
+      </div>
+  </div>
 </div>
 
 <script>
@@ -252,13 +527,13 @@ function login() {
         localStorage.setItem("paket", d.paket);
         localStorage.setItem("user_api_key", d.apiKey || "");
         
-if (d.role == "admin") {
-    location.href = "/admin";
-} else if (d.role == "trial") {
-    location.href = "/trial";
-} else {
-    location.href = "/publik";
-}
+        if (d.role == "admin") {
+            location.href = "/admin";
+        } else if (d.role == "trial") {
+            location.href = "/trial";
+        } else {
+            location.href = "/publik";
+        }
       } 
       else if (d.status == "expired") {
         alert("⚠️ Masa aktif akun anda sudah habis, silahkan hubungi admin");
@@ -279,11 +554,37 @@ function resetUI() {
   document.getElementById("loginBtn").disabled = false;
   document.getElementById("loading-text").style.display = "none";
 }
+
 document.addEventListener("keypress", function(e) {
   if (e.key === "Enter") {
     login();
   }
 });
+
+/* JAVASCRIPT LOGIC MODAL & WA REDIRECT */
+const pkmModal = document.getElementById('packageModal');
+
+function openPackageModal() {
+  pkmModal.classList.add('active');
+}
+
+function closePackageModal() {
+  pkmModal.classList.remove('active');
+}
+
+function closeModalOutside(event) {
+  if (event.target === pkmModal) {
+    closePackageModal();
+  }
+}
+
+function orderPackage(packageName) {
+  const adminWA = "62895423024582";
+  const baseMessage = `Beli Aplikasi Rasionalisasi SNBT paket ${packageName}`;
+  const encodedMessage = encodeURIComponent(baseMessage);
+  
+  window.open(`https://wa.me/${adminWA}?text=${encodedMessage}`, '_blank');
+}
 </script>
 
 </body>
