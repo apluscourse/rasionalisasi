@@ -956,7 +956,7 @@ header h1 {
 <div id="blocked-screen">
   <i class="fas fa-ban" style="font-size: 80px; margin-bottom: 20px;"></i>
   <h1>AKUN ANDA DIBLOKIR</h1>
-  <p>Terdeteksi pelanggaran sistem atau akun Anda telah dihapus oleh Admin dari pusat database data.</p>
+  <p>Terdeteksi pelanggaran sistem.</p>
   <button onclick="forceLogout()">KELUAR SEKARANG</button>
 </div>
 
@@ -1267,7 +1267,7 @@ header h1 {
 </div>
 
 <script>
-const API = "https://script.google.com/macros/s/AKfycbwgz_Djx3srNJRvJhQaGAmbuvkBWK4mXPXWrAMMaONVgljBEapbZKmvV_H5FlzYsNhq/exec";
+const API = "https://script.google.com/macros/s/AKfycbxQj4llNOlzINB59yuZQv-33mq-Eq359SrDzBmy4L5yH-WSsQSYkWzqs6_rjrJDDK0s/exec";
 
 //FUNGSI RASIONALISASI PRODI
 
@@ -2343,7 +2343,7 @@ function startPingScheduler() {
     let currentTime = Date.now();
     let timeDiff = (currentTime - lastPingTime) / 1000;
 
-    // Proteksi Manipulasi Timer dari sisi Inspect Element Client
+    // Proteksi Manipulasi Timer dari sisi Inspect Element Client (Pertahankan Logika Anda)
     if (timeDiff < 9) {
       clearInterval(pingInterval);
       alert("❌ Anda meninggalkan halaman terlalu lama");
@@ -2356,7 +2356,19 @@ function startPingScheduler() {
     let email = localStorage.getItem("email");
     if (!email) return;
 
-    fetch(`${API}?action=ping_online&email=${encodeURIComponent(email)}`)
+    // 1. Cek local storage terlebih dahulu sebelum menembak server demi keamanan awal
+    let localMasaAktif = parseInt(localStorage.getItem("masaAktif")) || 0;
+    if (localMasaAktif < 0) {
+      clearInterval(pingInterval);
+      alert("🚨 Masa aktif Anda telah habis! Silahkan hubungi admin untuk memperpanjang.");
+      forceLogout();
+      return;
+    }
+
+    // Tambahkan timestamp anti-cache agar browser selalu mengambil data real-time terbaru dari database
+    let url = `${API}?action=ping_online&email=${encodeURIComponent(email)}&_cb=${new Date().getTime()}`;
+
+    fetch(url)
       .then(r => r.json())
       .then(d => {
         if (d.status === "multi_device") {
@@ -2367,6 +2379,27 @@ function startPingScheduler() {
           clearInterval(pingInterval);
           document.getElementById("mainDashboard").style.display = "none";
           document.getElementById("blocked-screen").style.display = "flex";
+        } else if (d.status === "ok") {
+          
+          // 2. KROSCEK DATABASE: Ambil sisa masa aktif terbaru hasil kiriman kode.gs
+          let dbMasaAktif = parseInt(d.masaAktif);
+          
+          // Sinkronisasi data ke Local Storage
+          localStorage.setItem("masaAktif", dbMasaAktif);
+          
+          // Perbarui teks tampilan badge hari secara otomatis tanpa refresh halaman
+          const badge = document.getElementById("badgeMasaAktif");
+          if (badge) {
+            badge.innerText = "Masa aktif " + dbMasaAktif + " hari lagi";
+          }
+
+          // 3. Eksekusi Kunci Akun: Jika di database ternyata sudah habis (< 0), langsung tendang keluar
+          if (dbMasaAktif < 0) {
+            clearInterval(pingInterval);
+            alert("🚨 Masa aktif Anda telah habis! Silahkan hubungi admin.");
+            forceLogout();
+          }
+
         } else if (d.status !== "ok") {
           forceLogout();
         }
@@ -2426,7 +2459,6 @@ if (localStorage.getItem("email")) {
   <div class="footer-part"></div>
 </div>
 
-  
 </body>
 
 </body>
