@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rasionalisasi SNBT 2026 | Analisis Peluang PTN Akurat</title>
+    <title>Rasionalisasi Aplus Course</title>
+    <link rel="icon" type="image/png" href="/tka/icon.png">
     <meta name="description" content="Platform analisis skor UTBK SNBT 2026 menggunakan teknologi AI Gemini untuk membantu menentukan peluang kelulusan di PTN impian.">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
@@ -49,6 +50,8 @@
             text-decoration: none; font-weight: 700; font-size: 18px;
             display: inline-block; box-shadow: 0 4px 15px rgba(31,111,235,0.3);
             transition: 0.3s;
+            cursor: pointer;
+            border: none;
         }
         .btn-main:hover { transform: scale(1.05); }
 
@@ -65,85 +68,208 @@
         .footer-col a { color: #ccc; text-decoration: none; display: block; margin-bottom: 8px; font-size: 13px; }
         .footer-bottom { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #333; font-size: 12px; color: #777; }
 
-/* Penyesuaian Logo di Navigasi */
-.logo-nav {
-    height: 30px; /* Tinggi ideal agar nav tetap ramping */
-    width: auto;
-    display: flex;
-    align-items: center;
-}
-
-/* Penyesuaian Logo di Hero Section */
-.logo-hero {
-    width: 300px; /* Ukuran logo kotak di tengah */
-    height: auto;
-    transform: scale(2);
-    margin-bottom: 10px;
-}
-
-/* Memastikan Navigasi tetap rapi */
-nav {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 5%;
-}
-
-        
-        @media (max-width: 480px) {
-.hero h1 { font-size: 28px; }
-    
-    /* GANTI BAGIAN INI */
-    .nav-links { 
-        display: flex; /* Aktifkan kembali menu */
-        gap: 10px;    /* Perkecil jarak antar menu */
-    }
-
-    .nav-links a { 
-        font-size: 12px; /* Perkecil ukuran font agar muat di layar HP */
-    }
-       .logo-hero { 
-        transform: scale(1.5); 
-        width: 230px; /* Kita kecilkan width dasarnya sedikit agar scale 1.5 tidak off-screen */
-        margin-bottom: 15px; /* Beri sedikit ruang bawah agar tidak menempel ke judul */
-    }
+        /* Penyesuaian Logo di Navigasi */
+        .logo-nav {
+            height: 30px; 
+            width: auto;
+            display: flex;
+            align-items: center;
         }
 
-        
+        /* Penyesuaian Logo di Hero Section */
+        .logo-hero {
+            width: 300px; 
+            height: auto;
+            transform: scale(2);
+            margin-bottom: 10px;
+        }
+
+        /* Memastikan Navigasi tetap rapi */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 5%;
+        }
+
+        /* MODAL / POPUP SYSTEM */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            transform: scale(0.8);
+            transition: transform 0.3s ease;
+            position: relative;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: var(--blue);
+            font-size: 20px;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #aaa;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .close-modal:hover { color: #555; }
+
+        .modal-options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .menu-option {
+            display: block;
+            text-decoration: none;
+            background: #f8faff;
+            border: 2px solid #e1ecfe;
+            padding: 15px 20px;
+            border-radius: 12px;
+            text-align: left;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .menu-option:hover {
+            background: #eef4ff;
+            border-color: var(--blue);
+            transform: translateY(-2px);
+        }
+
+        .menu-title {
+            display: block;
+            font-weight: 700;
+            color: var(--text);
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+
+        .menu-desc {
+            display: block;
+            font-size: 12px;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        @media (max-width: 480px) {
+            .hero h1 { font-size: 28px; }
+            .nav-links { display: flex; gap: 10px; }
+            .nav-links a { font-size: 12px; }
+            .logo-hero { 
+                transform: scale(1.5); 
+                width: 230px; 
+                margin-bottom: 15px; 
+            }
+            .modal-content {
+                padding: 20px;
+            }
+            .menu-title { font-size: 15px; }
+            .menu-desc { font-size: 11px; }
+        }
     </style>
 </head>
 <body>
 
 <nav>
     <a href="#" class="logo-nav">
-        <img src="https://i.imgur.com/zyRxiIM.png" alt="Rasionalisasi Aplus Logo" style="height: 100%;">
+        <img src="/logo.png" alt="Rasionalisasi Aplus Logo" style="height: 100%;">
     </a>
     <div class="nav-links">
         <a href="#about">Tentang</a>
         <a href="#contact">Kontak</a>
-        <a href="/login" style="color: var(--blue);">Login</a>
     </div>
 </nav>
 
 <div class="hero">
-    <img src="https://i.imgur.com/z92rA0C.png" alt="Aplus Logo" class="logo-hero">
+    <img src="bannerptn.png" alt="Aplus Logo" class="logo-hero">
     <h1>Wujudkan Mimpi Tembus PTN Impian</h1>
-    <p>Analisis peluang lolos SNBT 2026 secara akurat dengan integrasi teknologi AI Gemini dan Data Keketatan Terupdate.</p>
-    <a href="/login" class="btn-main">Mulai Analisis Sekarang <i class="fas fa-arrow-right"></i></a>
+    <p>Analisis peluang lolos SNBP dan SNBT secara akurat dengan Data Keketatan dan Aturan SNPMB Terupdate.</p>
+    <button onclick="openModal()" class="btn-main">Mulai Analisis Sekarang <i class="fas fa-arrow-right"></i></button>
+</div>
+
+<div class="modal-overlay" id="analysisModal" onclick="closeModalOutside(event)">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Pilih Aplikasi Rasionalisasi</h3>
+            <button class="close-modal" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-options">
+            
+            <a href="/tka/" class="menu-option">
+                <span class="menu-title"><i class="fas fa-graduation-cap" style="color: var(--blue); margin-right: 8px;"></i> Rasionalisasi TKA</span>
+                <span class="menu-desc">Ketahui target nilai TKAmu untuk lolos SNBP</span>
+            </a>
+
+            <div class="menu-option" onclick="handleSnbpClick()">
+                <span class="menu-title"><i class="fas fa-file-invoice" style="color: #ff9f43; margin-right: 8px;"></i> Rasionalisasi SNBP</span>
+                <span class="menu-desc">Simulasikan Nilai Raportmu, ketahui seberapa besar peluang lolosnya</span>
+            </div>
+
+            <a href="/login" class="menu-option">
+                <span class="menu-title"><i class="fas fa-pen-alt" style="color: #2db7f5; margin-right: 8px;"></i> Rasionalisasi SNBT</span>
+                <span class="menu-desc">Ketahui target skor SNBT dan latihan soal disini</span>
+            </a>
+
+        </div>
+    </div>
 </div>
 
 <section id="about">
-    <h2>Mengapa Rasionalisasi Aplus?</h2>
+    <h2>Mengapa Rasionalisasi Aplus Course?</h2>
     <div class="card-grid">
         <div class="info-card">
-            <i class="fas fa-microchip" style="font-size: 30px; color: var(--blue);"></i>
-            <h4>Teknologi AI Terbaru</h4>
-            <p>Kami menggunakan model AI terbaru untuk memberikan rekomendasi jurusan paling logis berdasarkan skor Anda.</p>
+            <i class="fas fa-book" style="font-size: 30px; color: var(--blue);"></i>
+            <h4>Sesuai Regulasi SNPMB</h4>
+            <p>Kami menggunakan aturan perhitungan sesuai regulasi panitia SNPMB yang paling update dan mudah dipahami</p>
         </div>
         <div class="info-card">
             <i class="fas fa-database" style="font-size: 30px; color: var(--blue);"></i>
-            <h4>Data SNBT Terpercaya</h4>
-            <p>Data keketatan dan daya tampung diambil langsung dari data resmi untuk hasil yang lebih presisi.</p>
+            <h4>Data TKA, SNBP & SNBT Akurat</h4>
+            <p>Data keketatan dan daya tampung diambil langsung dari data resmi SNPMB untuk hasil yang lebih presisi.</p>
         </div>
         <div class="info-card">
             <i class="fas fa-user-shield" style="font-size: 30px; color: var(--blue);"></i>
@@ -175,24 +301,50 @@ nav {
     <div class="footer-grid">
         <div class="footer-col">
             <h4>Tentang Kami</h4>
-            <p style="font-size: 13px; color: #ccc;">Aplus Course adalah penyedia solusi bimbingan belajar digital yang fokus pada persiapan SNBT dan seleksi PTN.</p>
+            <p style="font-size: 13px; color: #ccc;">Aplus Course adalah penyedia solusi bimbingan belajar offline maupun online yang fokus pada persiapan masuk PTN.<br>
+            Alamat Kami : Jalan Mawar no.2 RT06 Rw04<br>
+          Kel. Nongkosawit, Kec. Gunungpati, Semarang</p>
         </div>
         <div class="footer-col">
             <h4>Bantuan</h4>
-            <a href="#about">Tentang Aplikasi</a>
-            <a href="#contact">Kontak Kami</a>
-            <a href="/login">Panduan Login</a>
+            <a href="https://wa.me/62895423024582">Kontak Kami <br> WhatsApp Admin 0895423024582</a>
         </div>
         <div class="footer-col">
             <h4>Legalitas</h4>
             <a href="#" onclick="alert('Kami berkomitmen menjaga data skor Anda.')">Kebijakan Privasi</a>
-            <a href="#" onclick="alert('Aplikasi ini adalah alat simulasi, hasil akhir ada pada panitia SNBT.')">Syarat & Ketentuan</a>
+            <a href="#" onclick="alert('Aplikasi ini adalah alat simulasi, hasil akhir ada pada panitia SNPMB.')">Syarat & Ketentuan</a>
         </div>
     </div>
     <div class="footer-bottom">
-        &copy; 2026 Rasionalisasi Aplus. Seluruh Hak Cipta Dilindungi.
+        &copy; 2026 Rasionalisasi Aplus Course. Seluruh Hak Cipta Dilindungi.
     </div>
 </footer>
+
+<script>
+    const modal = document.getElementById('analysisModal');
+
+    // Fungsi membuka popup
+    function openModal() {
+        modal.classList.add('active');
+    }
+
+    // Fungsi menutup popup
+    function closeModal() {
+        modal.classList.remove('active');
+    }
+
+    // Fungsi menutup popup jika user mengklik area luar modal
+    function closeModalOutside(event) {
+        if (event.target === modal) {
+            closeModal();
+        }
+    }
+
+    // Aksi ketika Rasionalisasi SNBP diklik
+    function handleSnbpClick() {
+        alert("Rasionalisasi SNBP akan segera hadir");
+    }
+</script>
 
 </body>
 </html>
