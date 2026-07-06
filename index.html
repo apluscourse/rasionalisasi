@@ -68,145 +68,40 @@
         .footer-col a { color: #ccc; text-decoration: none; display: block; margin-bottom: 8px; font-size: 13px; }
         .footer-bottom { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #333; font-size: 12px; color: #777; }
 
-        /* Penyesuaian Logo di Navigasi */
-        .logo-nav {
-            height: 30px; 
-            width: auto;
-            display: flex;
-            align-items: center;
-        }
-
-        /* Penyesuaian Logo di Hero Section */
-        .logo-hero {
-            width: 300px; 
-            height: auto;
-            transform: scale(2);
-            margin-bottom: 10px;
-        }
-
-        /* Memastikan Navigasi tetap rapi */
-        nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 5%;
-        }
+        /* Logo Nav & Hero */
+        .logo-nav { height: 30px; width: auto; display: flex; align-items: center; }
+        .logo-hero { width: 300px; height: auto; transform: scale(2); margin-bottom: 10px; }
+        nav { display: flex; justify-content: space-between; align-items: center; padding: 10px 5%; }
 
         /* MODAL / POPUP SYSTEM */
         .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(4px);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 2000;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px);
+            display: flex; justify-content: center; align-items: center; z-index: 2000;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
         }
-
-        .modal-overlay.active {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
         .modal-content {
-            background: white;
-            padding: 30px;
-            border-radius: 20px;
-            width: 90%;
-            max-width: 500px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            transform: scale(0.8);
-            transition: transform 0.3s ease;
-            position: relative;
+            background: white; padding: 30px; border-radius: 20px; width: 90%; max-width: 500px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2); transform: scale(0.8); transition: transform 0.3s ease; position: relative;
         }
-
-        .modal-overlay.active .modal-content {
-            transform: scale(1);
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 10px;
-        }
-
-        .modal-header h3 {
-            margin: 0;
-            color: var(--blue);
-            font-size: 20px;
-        }
-
-        .close-modal {
-            background: none;
-            border: none;
-            font-size: 24px;
-            color: #aaa;
-            cursor: pointer;
-            transition: 0.2s;
-        }
+        .modal-overlay.active .modal-content { transform: scale(1); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        .modal-header h3 { margin: 0; color: var(--blue); font-size: 20px; }
+        .close-modal { background: none; border: none; font-size: 24px; color: #aaa; cursor: pointer; transition: 0.2s; }
         .close-modal:hover { color: #555; }
-
-        .modal-options {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .menu-option {
-            display: block;
-            text-decoration: none;
-            background: #f8faff;
-            border: 2px solid #e1ecfe;
-            padding: 15px 20px;
-            border-radius: 12px;
-            text-align: left;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        .menu-option:hover {
-            background: #eef4ff;
-            border-color: var(--blue);
-            transform: translateY(-2px);
-        }
-
-        .menu-title {
-            display: block;
-            font-weight: 700;
-            color: var(--text);
-            font-size: 16px;
-            margin-bottom: 4px;
-        }
-
-        .menu-desc {
-            display: block;
-            font-size: 12px;
-            color: #666;
-            line-height: 1.4;
-        }
+        .modal-options { display: flex; flex-direction: column; gap: 15px; }
+        .menu-option { display: block; text-decoration: none; background: #f8faff; border: 2px solid #e1ecfe; padding: 15px 20px; border-radius: 12px; text-align: left; cursor: pointer; transition: 0.2s; }
+        .menu-option:hover { background: #eef4ff; border-color: var(--blue); transform: translateY(-2px); }
+        .menu-title { display: block; font-weight: 700; color: var(--text); font-size: 16px; margin-bottom: 4px; }
+        .menu-desc { display: block; font-size: 12px; color: #666; line-height: 1.4; }
 
         @media (max-width: 480px) {
             .hero h1 { font-size: 28px; }
             .nav-links { display: flex; gap: 10px; }
             .nav-links a { font-size: 12px; }
-            .logo-hero { 
-                transform: scale(1.5); 
-                width: 230px; 
-                margin-bottom: 15px; 
-            }
-            .modal-content {
-                padding: 20px;
-            }
+            .logo-hero { transform: scale(1.5); width: 230px; margin-bottom: 15px; }
+            .modal-content { padding: 20px; }
             .menu-title { font-size: 15px; }
             .menu-desc { font-size: 11px; }
         }
@@ -239,7 +134,7 @@
         </div>
         <div class="modal-options">
             
-            <a href="/tka/" class="menu-option">
+            <a href="/tka/" class="menu-option" onclick="sendToSpreadsheet('tka')">
                 <span class="menu-title"><i class="fas fa-graduation-cap" style="color: var(--blue); margin-right: 8px;"></i> Rasionalisasi TKA</span>
                 <span class="menu-desc">Ketahui target nilai TKAmu untuk lolos SNBP</span>
             </a>
@@ -249,7 +144,7 @@
                 <span class="menu-desc">Simulasikan Nilai Raportmu, ketahui seberapa besar peluang lolosnya</span>
             </div>
 
-            <a href="/login" class="menu-option">
+            <a href="/login" class="menu-option" onclick="sendToSpreadsheet('snbt')">
                 <span class="menu-title"><i class="fas fa-pen-alt" style="color: #2db7f5; margin-right: 8px;"></i> Rasionalisasi SNBT</span>
                 <span class="menu-desc">Ketahui target skor SNBT dan latihan soal disini</span>
             </a>
@@ -322,28 +217,37 @@
 
 <script>
     const modal = document.getElementById('analysisModal');
+    
+    // Pastikan URL Apps Script Anda di sini sudah benar
+    const SPREADSHEET_URL = "https://script.google.com/macros/s/AKfycbyfSQvDM3gNgsr7vd0C2zuXaI6frMCZPtUBGdJLdG88lasA7qTL5gxTdcA6qb9A9CgK/exec";
 
-    // Fungsi membuka popup
-    function openModal() {
-        modal.classList.add('active');
+    function openModal() { modal.classList.add('active'); }
+    function closeModal() { modal.classList.remove('active'); }
+    function closeModalOutside(event) { if (event.target === modal) { closeModal(); } }
+
+    function handleSnbpClick() {
+        sendToSpreadsheet('snbp');
+        alert("Rasionalisasi SNBP akan segera hadir");
     }
 
-    // Fungsi menutup popup
-    function closeModal() {
-        modal.classList.remove('active');
-    }
-
-    // Fungsi menutup popup jika user mengklik area luar modal
-    function closeModalOutside(event) {
-        if (event.target === modal) {
-            closeModal();
+    // Fungsi mengirim aksi (+1) ke Spreadsheet di latar belakang
+    async function sendToSpreadsheet(actionType) {
+        try {
+            await fetch(SPREADSHEET_URL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ action: actionType })
+            });
+        } catch (err) {
+            console.error("Gagal mengirim data counter:", err);
         }
     }
 
-    // Aksi ketika Rasionalisasi SNBP diklik
-    function handleSnbpClick() {
-        alert("Rasionalisasi SNBP akan segera hadir");
-    }
+    // Mengirim hitungan otomatis saat halaman diakses oleh pengguna baru
+    window.addEventListener('DOMContentLoaded', () => {
+        sendToSpreadsheet('landing');
+    });
 </script>
 
 </body>
