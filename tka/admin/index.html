@@ -2314,14 +2314,6 @@ function startPingScheduler() {
     let currentTime = Date.now();
     let timeDiff = (currentTime - lastPingTime) / 1000;
 
-    // Proteksi Manipulasi Timer dari sisi Inspect Element Client
-    if (timeDiff < 9) {
-      clearInterval(pingInterval);
-      alert("❌ Anda meninggalkan halaman terlalu lama");
-      forceLogout();
-      return;
-    }
-
     lastPingTime = currentTime; 
 
     let email = localStorage.getItem("email");
