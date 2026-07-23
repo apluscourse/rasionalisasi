@@ -632,7 +632,7 @@ button.btn-login:disabled {
 </div>
 
 <script>
-const API="https://script.google.com/macros/s/AKfycbxRR27dQhFtLm1RufnYfVnfI5haYVgK3NJVupwLz3NgZ0RsLIWPtHg7NZ5ntOx6QNyS/exec";
+const API="https://script.google.com/macros/s/AKfycbylK8DdBq3gOOZL8s6DKBP6Ym6DgaBrm9cv8DdHlYQ8yc4QUfJDVq2yfeVVeOYvegAYyg/exec";
 
 function login() {
   let email = document.getElementById("email").value.trim();
@@ -665,11 +665,11 @@ function login() {
         
         // Redirect berdasarkan role
         if (d.role === "admin") {
-            location.href = "/snbp/admin";
+            location.href = "/snbpp/admin";
         } else if (d.role === "trial") {
-            location.href = "/snbp/trial";
+            location.href = "/snbpp/trial";
         } else {
-            location.href = "/snbp/publik";
+            location.href = "/snbpp/publik";
         }
       } 
       else if (d.status === "expired") {
