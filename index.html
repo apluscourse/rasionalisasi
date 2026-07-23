@@ -7,7 +7,6 @@
     <link rel="icon" type="image/png" href="/tka/icon.png">
     <meta name="description" content="Platform analisis skor UTBK SNBT 2026 menggunakan teknologi AI Gemini untuk membantu menentukan peluang kelulusan di PTN impian.">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-
     
     <style>
         :root {
@@ -140,10 +139,10 @@
                 <span class="menu-desc">Ketahui target nilai TKAmu untuk lolos SNBP</span>
             </a>
 
-            <div class="menu-option" onclick="handleSnbpClick()">
-                <span class="menu-title"><i class="fas fa-file-invoice" style="color: #ff9f43; margin-right: 8px;"></i> Rasionalisasi SNBP</span>
+            <a href="/snbp/" class="menu-option" onclick="sendToSpreadsheet('snbp')">
+                <span class="menu-title"><i class="fas fa-graduation-cap" style="color: #ff9f43; margin-right: 8px;"></i> Rasionalisasi SNBP</span>
                 <span class="menu-desc">Simulasikan Nilai Raportmu, ketahui seberapa besar peluang lolosnya</span>
-            </div>
+              </a>
 
             <a href="/login" class="menu-option" onclick="sendToSpreadsheet('snbt')">
                 <span class="menu-title"><i class="fas fa-pen-alt" style="color: #2db7f5; margin-right: 8px;"></i> Rasionalisasi SNBT</span>
