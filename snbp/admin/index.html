@@ -334,6 +334,11 @@ header h1 {
   letter-spacing: 0.5px;
 }
 
+.dropdown-item.active {
+  background-color: #e2e8f0; /* Atau warna highlight pilihan Anda */
+  font-weight: bold;
+}
+
 .search-box-group {
   display: flex;
   gap: 15px;
@@ -898,6 +903,9 @@ let rawPtnData = {};
 let selectedProdiDetail = null;
 let currentChart = null;
 
+// Variabel penanda indeks item aktif navigasi keyboard
+let activeDropdownIndex = -1;
+
 window.addEventListener('offline', function() {
   alert("Anda sedang offline");
   logout();
@@ -945,7 +953,6 @@ function verifyAndInit() {
   let pass = localStorage.getItem("pass");
   let role = localStorage.getItem("role");
 
-  // Pastikan role di localStorage adalah admin
   if (!email || !pass || role !== "admin") {
     logout();
     return;
@@ -956,7 +963,6 @@ function verifyAndInit() {
   fetch(url)
     .then(r => r.json())
     .then(res => {
-      // Cek status "ok" DAN pastikan server mengonfirmasi role di spreadsheet adalah admin
       if (res.status === "ok" && res.role === "admin") {
         document.getElementById("view-user").innerText = 'Selamat Datang "' + res.email + '" (Admin)';
         document.getElementById("view-paket").innerText = "Paket Anda: " + res.paket;
@@ -969,7 +975,6 @@ function verifyAndInit() {
           localStorage.setItem("last_login_timestamp", Date.now().toString());
         }
       } else {
-        // Jika role di spreadsheet ternyata 'user', paksa logout
         logout();
       }
     })
@@ -980,20 +985,23 @@ function verifyAndInit() {
 }
 
 function initRasionalisasiMenu() {
+  // Pasang listener keyboard navigation satu kali saat menu dibuka
+  setupKeyboardNavigation("ptnSearch", "ptnList");
+  setupKeyboardNavigation("prodiSearch", "prodiList");
+
   if (Object.keys(rawPtnData).length > 0) return;
 
   let email = localStorage.getItem("email");
   let pass = localStorage.getItem("pass");
   let role = localStorage.getItem("role");
 
-  // Menggunakan action khusus admin untuk mengambil seluruh data PTN & Prodi
   let url = `${API}?action=get_ptn_prodi_all&email=${encodeURIComponent(email)}&pass=${encodeURIComponent(pass)}&role=${encodeURIComponent(role)}`;
 
   fetch(url)
     .then(r => r.json())
     .then(res => {
       if (res.status === "ok") {
-        rawPtnData = res.data; // Menerima seluruh object PTN
+        rawPtnData = res.data;
         renderPtnDropdown();
       } else {
         alert(res.message || "Gagal memuat data seluruh PTN.");
@@ -1017,6 +1025,7 @@ function renderPtnDropdown() {
 function selectPTN(ptn) {
   document.getElementById("ptnSearch").value = ptn;
   document.getElementById("ptnList").style.display = "none";
+  activeDropdownIndex = -1;
   
   let prodiInput = document.getElementById("prodiSearch");
   prodiInput.disabled = false;
@@ -1025,7 +1034,6 @@ function selectPTN(ptn) {
   let prodiListEl = document.getElementById("prodiList");
   prodiListEl.innerHTML = "";
   
-  // Ambil daftar prodi dari objek rawPtnData[ptn]
   let prodiArray = Array.isArray(rawPtnData[ptn]) 
     ? rawPtnData[ptn] 
     : Object.keys(rawPtnData[ptn] || {});
@@ -1047,13 +1055,15 @@ function selectPTN(ptn) {
 function selectProdi(ptn, prodiName, prodiData) {
   document.getElementById("prodiSearch").value = prodiName;
   document.getElementById("prodiList").style.display = "none";
+  activeDropdownIndex = -1;
   
-  // Eksekusi Tampilan Detail secara Instan (Tanpa Delay & Tanpa Loading)
   fetchDetailProdiInstan(ptn, prodiName, prodiData);
 }
 
 function showDropdown(type) {
   document.getElementById(type + "List").style.display = "block";
+  activeDropdownIndex = -1;
+  clearDropdownActiveHighlight(type + "List");
 }
 
 function filterDropdown(type) {
@@ -1062,6 +1072,73 @@ function filterDropdown(type) {
   items.forEach(item => {
     item.style.display = item.innerText.toLowerCase().includes(val) ? "block" : "none";
   });
+  activeDropdownIndex = -1;
+  clearDropdownActiveHighlight(type + "List");
+}
+
+// FUNGSI LOGIKA NAVIGASI KEYBOARD (PANAH UP/DOWN, ENTER, ESCAPE)
+function setupKeyboardNavigation(inputId, listId) {
+  let input = document.getElementById(inputId);
+  if (!input || input.dataset.hasKeyNav) return;
+  input.dataset.hasKeyNav = "true";
+
+  input.addEventListener("keydown", function(e) {
+    let listEl = document.getElementById(listId);
+    if (!listEl || listEl.style.display === "none") return;
+
+    // Filter hanya item yang saat ini tampil (visible)
+    let items = Array.from(listEl.querySelectorAll(".dropdown-item"))
+                     .filter(item => item.style.display !== "none");
+
+    if (items.length === 0) return;
+
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      activeDropdownIndex++;
+      if (activeDropdownIndex >= items.length) activeDropdownIndex = 0;
+      updateActiveItem(items, listEl);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      activeDropdownIndex--;
+      if (activeDropdownIndex < 0) activeDropdownIndex = items.length - 1;
+      updateActiveItem(items, listEl);
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      if (activeDropdownIndex >= 0 && activeDropdownIndex < items.length) {
+        items[activeDropdownIndex].click();
+      }
+    } else if (e.key === "Escape") {
+      listEl.style.display = "none";
+      activeDropdownIndex = -1;
+    }
+  });
+}
+
+function updateActiveItem(items, listEl) {
+  items.forEach(item => item.classList.remove("active"));
+  if (activeDropdownIndex >= 0 && activeDropdownIndex < items.length) {
+    let activeItem = items[activeDropdownIndex];
+    activeItem.classList.add("active");
+    
+    // Otomatis scroll ke item yang disorot
+    let itemTop = activeItem.offsetTop;
+    let itemBottom = itemTop + activeItem.offsetHeight;
+    let listScrollTop = listEl.scrollTop;
+    let listHeight = listEl.clientHeight;
+
+    if (itemBottom > listScrollTop + listHeight) {
+      listEl.scrollTop = itemBottom - listHeight;
+    } else if (itemTop < listScrollTop) {
+      listEl.scrollTop = itemTop;
+    }
+  }
+}
+
+function clearDropdownActiveHighlight(listId) {
+  let listEl = document.getElementById(listId);
+  if (listEl) {
+    listEl.querySelectorAll(".dropdown-item").forEach(item => item.classList.remove("active"));
+  }
 }
 
 document.addEventListener("click", function(e) {
@@ -1070,6 +1147,7 @@ document.addEventListener("click", function(e) {
     let prList = document.getElementById("prodiList");
     if(pList) pList.style.display = "none";
     if(prList) prList.style.display = "none";
+    activeDropdownIndex = -1;
   }
   if (!e.target.closest('.card-r') && !e.target.closest('#jellyBalloon')) {
     closeBalloon();
@@ -1080,16 +1158,14 @@ document.addEventListener("click", function(e) {
 function fetchDetailProdiInstan(ptn, prodiName, passedData) {
   closeBalloon();
   
-  // Sembunyikan pesan placeholder dan hilangkan tampilan loading
   let placeholder = document.getElementById("placeholderText");
   let loader = document.getElementById("prodiLoading");
   
   if (placeholder) placeholder.style.display = "none";
-  if (loader) loader.style.display = "none"; // Langsung disembunyikan jika elemen loading masih ada
+  if (loader) loader.style.display = "none";
 
   let data = passedData;
 
-  // Jika data detail belum langsung di-pass dari parameter, cari di rawPtnData secara lokal
   if (!data || typeof data !== "object") {
     let list = rawPtnData[ptn];
     if (Array.isArray(list)) {
@@ -1101,7 +1177,6 @@ function fetchDetailProdiInstan(ptn, prodiName, passedData) {
 
   if (data && typeof data === "object") {
     selectedProdiDetail = data;
-    // Tentukan PTN dan PRODI jika belum ada di dalam object
     if (!selectedProdiDetail.PTN) selectedProdiDetail.PTN = ptn;
     if (!selectedProdiDetail.PRODI) selectedProdiDetail.PRODI = prodiName;
     
@@ -1305,13 +1380,8 @@ function openModalKategori(el, e) {
   let d = selectedProdiDetail;
   let rawK = parseFloat(d.KEKETATAN) || 0;
   
-  // Hitung jumlah kursi (keketatan % x 100)
   let rawKursi = rawK < 1 ? rawK * 100 : rawK;
-  
-  // Gunakan Math.floor untuk pembulatan ke bawah (bilangan bulat)
   let kursiBulat = Math.floor(rawKursi);
-  
-  // Untuk persentase tampilan tetap bisa menggunakan 2 desimal jika desimal
   let percentVal = (rawK < 1 && rawK > 0) ? (rawK * 100).toFixed(2) : (rawK * 100).toFixed(0);
   
   let contentMsg = "";
