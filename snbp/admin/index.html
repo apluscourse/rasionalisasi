@@ -8,6 +8,21 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
+/* PROTEKSI: larang blok teks & klik kanan (kecuali pada form input agar tetap bisa diketik/diedit) */
+html, body {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+input, textarea, select, [contenteditable="true"] {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+}
+
 :root {
   --blue: #1f6feb;
   --blue2: #4fa3ff;
@@ -1840,6 +1855,19 @@ header h1 {
 
 <script>
 const API = "https://script.google.com/macros/s/AKfycbys5soeF6Oioy9EVGBNfnSj6I-QFjDuGOWRH3amZKvuVqIpIXeUU22RxO0YP3XbUVq-/exec";
+
+// ---------------------------------------------------------
+// PROTEKSI: LARANG KLIK KANAN & MENYALIN TEKS
+// ---------------------------------------------------------
+document.addEventListener("contextmenu", function(e) {
+  e.preventDefault();
+});
+document.addEventListener("copy", function(e) {
+  e.preventDefault();
+});
+document.addEventListener("cut", function(e) {
+  e.preventDefault();
+});
 
 // FUNGSI RASIONALISASI PRODI
 
