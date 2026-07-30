@@ -278,12 +278,70 @@ header h1 {
 
 /* KONTEN UTAMA & PROFIL CARD */
 .main-content { padding: 30px 20px; max-width: 100%; margin: 0 auto; display: none; }
-.profile-card {
-  background: var(--card); border-radius: 20px; padding: 30px;
-  box-shadow: var(--shadow); text-align: center; max-width: 600px; margin: 0 auto;
+.profile-card-new {
+  max-width: 420px;
+  margin: 0 auto;
+  text-align: center;
+  padding: 36px 28px;
 }
-.profile-card h2 { font-size: 22px; margin-bottom: 8px; color: var(--text); word-break: break-all; }
-.profile-card p.paket { font-size: 15px; color: var(--muted); font-weight: 600; margin-bottom: 20px; }
+.profile-avatar-jelly {
+  width: 84px;
+  height: 84px;
+  margin: 0 auto 18px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--blue2), var(--blue));
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 34px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow:
+    inset 0 3px 5px rgba(255, 255, 255, 0.5),
+    inset 0 -4px 6px rgba(0, 0, 0, 0.15),
+    0 10px 24px rgba(31, 111, 235, 0.3);
+}
+.profile-welcome-label {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  color: var(--muted);
+  margin: 0 0 6px;
+  text-transform: uppercase;
+}
+.profile-email {
+  font-size: 19px;
+  font-weight: 800;
+  color: var(--text);
+  word-break: break-all;
+  margin: 0 0 16px;
+}
+.profile-paket-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, #fff7e6, #ffe8b3);
+  color: #92650a;
+  font-weight: 800;
+  font-size: 13px;
+  padding: 8px 18px;
+  border-radius: 999px;
+  margin-bottom: 20px;
+  border: 1px solid rgba(217, 164, 6, 0.25);
+}
+.profile-masaaktif-box {
+  background: linear-gradient(145deg, #ffffff, var(--bg));
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 18px;
+  padding: 16px;
+  font-weight: 800;
+  color: var(--blue);
+  font-size: 18px;
+  margin-bottom: 20px;
+  box-shadow:
+    inset 0 3px 5px rgba(255, 255, 255, 0.9),
+    inset 0 -3px 5px rgba(0, 0, 0, 0.04),
+    0 8px 18px rgba(31, 111, 235, 0.12);
+}
+.profile-masaaktif-box i { margin-right: 8px; }
 .info-box {
   background: var(--bg); padding: 15px; border-radius: 12px;
   font-weight: 700; color: var(--blue); font-size: 20px; margin-bottom: 20px;
@@ -732,9 +790,9 @@ header h1 {
 
 <div class="sidebar" id="sidebarMenu">
   <a href="#" class="active-menu" id="menuLinkProfil" onclick="switchMenu('profil')"><i class="fas fa-user"></i> Profil</a>
-  <a href="#" id="menuLinkRasionalisasi" onclick="switchMenu('rasionalisasi')"><i class="fas fa-graduation-cap"></i> Rasionalisasi Prodi</a>
-  <a href="#" id="menuLinkRaport" onclick="switchMenu('raport')"><i class="fas fa-file-invoice"></i> Data Nilai Raport</a>
-  <a href="#" id="menuLinkSimulasi" onclick="switchMenu('simulasi')"><i class="fas fa-calculator"></i> Simulasi SNBP</a>
+  <a href="#" id="menuLinkRasionalisasi" onclick="switchMenu('rasionalisasi')"><i class="fas fa-graduation-cap"></i> Cek Prodi</a>
+  <a href="#" id="menuLinkRaport" onclick="switchMenu('raport')"><i class="fas fa-file-invoice"></i> Input Nilai Raport</a>
+  <a href="#" id="menuLinkSimulasi" onclick="switchMenu('simulasi')"><i class="fas fa-calculator"></i> Cek Peluang SNBP</a>
   <a href="#" id="menuLinkSaran" onclick="switchMenu('saran')"><i class="fas fa-lightbulb"></i> Saran Prodi</a>
   <a href="#" id="menuLinkPengaturan" onclick="switchMenu('pengaturan')"><i class="fas fa-cog"></i> Pengaturan</a>
   <a href="#" class="logout-menu" onclick="openLogoutModal()"><i class="fas fa-sign-out-alt"></i> Keluar</a>
@@ -742,11 +800,15 @@ header h1 {
 
 <!-- KONTEN PROFIL -->
 <div class="main-content" id="mainDashboard">
-  <div class="profile-card">
-    <h2 id="view-user">Selamat Datang -</h2>
-    <p class="paket" id="view-paket">Paket Anda: -</p>
-    <div class="info-box" id="view-masaaktif">
-      Masa Aktif : - Hari Lagi
+  <div class="jelly-card profile-card-new">
+    <div class="profile-avatar-jelly">
+      <i class="fas fa-user-shield"></i>
+    </div>
+    <p class="profile-welcome-label">Selamat Datang</p>
+    <h2 id="view-user" class="profile-email">-</h2>
+    <div class="profile-paket-badge" id="view-paket">Paket Anda: -</div>
+    <div class="profile-masaaktif-box" id="view-masaaktif">
+      <i class="fas fa-clock"></i>Masa Aktif : - Hari Lagi
     </div>
     <p class="hint-text">Untuk menggunakan aplikasi silahkan tekan menu diatas kiri</p>
   </div>
@@ -755,7 +817,7 @@ header h1 {
 <!-- KONTEN RASIONALISASI PRODI -->
 <div class="main-content" id="rasionalisasiMenuContent">
   <div class="rasionalisasi-container">
-    <h2 class="title-header">RASIONALISASI PRODI</h2>
+    <h2 class="title-header">CEK PRODI</h2>
 
     <!-- DROPDOWN SEARCHABLE -->
     <div class="search-box-group">
@@ -864,7 +926,7 @@ header h1 {
     
     <!-- JUDUL & SUB JUDUL -->
     <div style="text-align: center; margin-bottom: 20px;">
-      <h2 style="margin: 0; font-size: 22px; font-weight: 800; color: #0f172a; letter-spacing: -0.5px;">DATA NILAI RAPORT</h2>
+      <h2 style="margin: 0; font-size: 22px; font-weight: 800; color: #0f172a; letter-spacing: -0.5px;">INPUT NILAI RAPORT</h2>
       <div style="font-size: 13px; color: #64748b; margin-top: 4px; font-weight: 600;">
         LIMIT DATA NILAI: <span id="raportLimitCount" style="font-weight: 800; color: #2563eb;">0</span> SISWA
       </div>
@@ -1481,7 +1543,7 @@ header h1 {
   <div class="jelly-wrapper">
 
     <div style="text-align: center; margin-bottom: 20px;">
-      <h2 style="margin: 0; font-size: 22px; font-weight: 800; color: #0f172a; letter-spacing: -0.5px;">SIMULASI PELUANG LOLOS SNBP</h2>
+      <h2 style="margin: 0; font-size: 22px; font-weight: 800; color: #0f172a; letter-spacing: -0.5px;">CEK PELUANG SNBP</h2>
     </div>
 
     <div id="simLoadingBox" style="text-align:center; padding:40px 0;">
@@ -1658,9 +1720,9 @@ header h1 {
       <h2 style="margin: 0; font-size: 22px; font-weight: 800; color: #0f172a; letter-spacing: -0.5px;">SARAN PRODI BERDASARKAN NILAI SISWA</h2>
     </div>
 
-    <div id="saranLoadingBox" style="text-align:center; padding:40px 0;">
-      <div class="spinner" style="margin:0 auto 15px;"></div>
-      <p style="font-weight:600; color:var(--text);">Mohon Ditunggu...</p>
+    <div id="saranLoadingBox" class="prodi-loading-box">
+      <div class="spinner"></div>
+      <p>Mohon Ditunggu...</p>
     </div>
 
     <div id="saranMainBox" style="display:none;">
@@ -1745,20 +1807,31 @@ header h1 {
           <div id="saranResultWrap" style="display:none; margin-top:16px;">
             <input type="text" id="saranTableSearch" placeholder="CARI PTN/PRODI" class="jelly-input"
               oninput="filterSaranTable()" style="width:100%; margin-bottom:12px; padding:12px 16px; border-radius:14px; box-sizing:border-box;">
-            <div id="saranTableScrollBox" style="max-height:420px; overflow-y:auto; border-radius:16px; border:1px solid #e2e8f0;">
+            <div style="border-radius:16px; border:1px solid #e2e8f0; overflow:hidden;">
               <table style="width:100%; border-collapse:collapse; font-size:12px;">
                 <thead>
                   <tr style="background:#f1f5f9;">
-                    <th style="padding:10px 8px; text-align:center; width:36px; position:sticky; top:0; background:#f1f5f9;">No</th>
-                    <th style="padding:10px 8px; text-align:left; position:sticky; top:0; background:#f1f5f9;">PTN - PRODI</th>
-                    <th style="padding:10px 8px; text-align:center; width:60px; position:sticky; top:0; background:#f1f5f9;">Kuota</th>
-                    <th style="padding:10px 8px; text-align:center; width:70px; position:sticky; top:0; background:#f1f5f9;">Peminat</th>
+                    <th style="padding:10px 8px; text-align:center; width:36px;">No</th>
+                    <th style="padding:10px 8px; text-align:left;">PTN - PRODI</th>
+                    <th style="padding:10px 8px; text-align:center; width:60px;">Kuota</th>
+                    <th style="padding:10px 8px; text-align:center; width:70px;">Peminat</th>
                   </tr>
                 </thead>
                 <tbody id="saranTableBody"></tbody>
               </table>
             </div>
             <div id="saranTableEmpty" style="display:none; text-align:center; color:#94a3b8; padding:20px 0; font-size:13px;">Tidak ada data yang cocok.</div>
+
+            <!-- PAGINATION -->
+            <div id="saranPaginationWrap" style="display:none; align-items:center; justify-content:space-between; margin-top:14px;">
+              <button type="button" id="saranPrevBtn" onclick="saranGotoPrevPage()" class="btn-jelly btn-jelly-secondary" style="padding:10px 16px; font-size:12px;">
+                <i class="fas fa-chevron-left"></i>&nbsp; Sebelumnya
+              </button>
+              <span id="saranPageInfo" style="font-size:12px; font-weight:800; color:#475569;">Halaman 1 dari 1</span>
+              <button type="button" id="saranNextBtn" onclick="saranGotoNextPage()" class="btn-jelly btn-jelly-secondary" style="padding:10px 16px; font-size:12px;">
+                Selanjutnya &nbsp;<i class="fas fa-chevron-right"></i>
+              </button>
+            </div>
           </div>
 
         </div>
@@ -1854,7 +1927,7 @@ header h1 {
 </div>
 
 <script>
-const API = "https://script.google.com/macros/s/AKfycbys5soeF6Oioy9EVGBNfnSj6I-QFjDuGOWRH3amZKvuVqIpIXeUU22RxO0YP3XbUVq-/exec";
+const API = "https://script.google.com/macros/s/AKfycbzgDfJQAKh3vyQwoVhUWFIOF6u7H1LaS6FYjy9TLX7aUV63-jBxpHeRlpRFZyapxwcv/exec";
 
 // ---------------------------------------------------------
 // PROTEKSI: LARANG KLIK KANAN & MENYALIN TEKS
@@ -1955,7 +2028,7 @@ function verifyAndInit() {
     .then(r => r.json())
     .then(res => {
       if (res.status === "ok" && res.role === "admin") {
-        document.getElementById("view-user").innerText = 'Selamat Datang "' + res.email + '" (Admin)';
+        document.getElementById("view-user").innerText = res.email + " (Admin)";
         document.getElementById("view-paket").innerText = "Paket Anda: " + res.paket;
         document.getElementById("view-masaaktif").innerText = "Masa Aktif : " + res.masaAktif + " Hari Lagi";
 
@@ -3653,12 +3726,11 @@ function prosesSimulasi() {
   let akreditasiUpper = String(d.AKREDITASI || "").trim().toUpperCase();
   let varAkreditasi = akreditasiUpper === "A" ? 2 : (akreditasiUpper === "B" ? 1 : 0);
 
-  // Bonus dari sheet NILAI kolom KATEGORI1-5: ISTIMEWA (+2%), BAIK (+1%), selain itu (+0%). Maksimal +10%.
+  // Bonus dari sheet NILAI kolom KATEGORI1-5: ISTIMEWA (+1%), selain itu (+0%). Maksimal +5%.
   let varKategoriTKA = 0;
   for (let i = 1; i <= 5; i++) {
     let katUpper = String(d[`KATEGORI${i}`] || "").trim().toUpperCase();
-    if (katUpper === "ISTIMEWA") varKategoriTKA += 2;
-    else if (katUpper === "BAIK") varKategoriTKA += 1;
+    if (katUpper === "ISTIMEWA") varKategoriTKA += 1;
   }
 
   let varTambahan = varDomisili + varAlumni + varRanking + varKeketatan + varAkreditasi + varKategoriTKA;
@@ -3666,18 +3738,14 @@ function prosesSimulasi() {
   // PELUANG FINAL (PF)
   let pf = pa + varSkor + varTambahan;
 
-  // KONVERSI TOLERANSI
-  let toleransi = parseFloat(String(p.TOLERANSI !== undefined && p.TOLERANSI !== "" ? p.TOLERANSI : "1").replace(",", "."));
+  // KONVERSI TOLERANSI (LINTAS MINAT)
+  // - Mapel Pendukung SESUAI (tombol hijau) -> TIDAK dikenakan konversi, Peluang = PF apa adanya
+  // - Mapel Pendukung TIDAK SESUAI (tombol merah) -> dikenakan konversi, Peluang = PF x LINTASMINAT (sheet PTN)
+  // s.sesuai diambil langsung dari simMapelStatus, variabel yang sama persis dengan penentu warna tombol Mapel Pendukung, agar selalu sinkron.
+  let toleransi = parseFloat(String(p.LINTASMINAT !== undefined && p.LINTASMINAT !== "" ? p.LINTASMINAT : "1").replace(",", "."));
   if (isNaN(toleransi)) toleransi = 1;
 
-  let peluang;
-  if (toleransi === 1) {
-    peluang = pf;
-  } else if (toleransi === 0.8) {
-    peluang = s.sesuai ? pf : (0.8 * pf);
-  } else {
-    peluang = toleransi * pf;
-  }
+  let peluang = s.sesuai ? pf : (pf * toleransi);
 
   // KONVERSI PENEMPATAN PILIHAN 2 + KATEGORI KETAT/SANGAT KETAT
   let kategoriUpper = String(p.KATEGORI || "").toUpperCase();
@@ -3727,8 +3795,8 @@ function kirimSimulasi(hasil) {
     "PENDUKUNG": simMapelStatus.sesuai ? "SESUAI" : "TIDAK SESUAI",
     "ALUMNI": simAlumniState.chk2 ? "2" : (simAlumniState.chk1 ? "1" : "0"),
     "SERTIFIKAT": sertifikatText,
-    "SKOR": hasil.skorAkhir.toFixed(2),
-    "PELUANG": hasil.peluang.toFixed(2)
+    "SKOR": hasil.skorAkhir.toFixed(2).replace(".", ","),
+    "PELUANG": hasil.peluang.toFixed(2).replace(".", ",")
   };
 
   let formData = new URLSearchParams();
@@ -3808,9 +3876,10 @@ function tampilkanHasilSimulasi(hasil) {
   let peluang = hasil.peluang;
   simAnimateNumber(document.getElementById("resPeluangPersen"), 0, peluang, 1000, "%", 1);
   let ketPeluang;
-  if (peluang < 40) ketPeluang = "Peluang Lolos Rendah";
-  else if (peluang < 60) ketPeluang = "Peluang Lolos Sedang";
-  else if (peluang < 80) ketPeluang = "Peluang Lolos Tinggi";
+  if (peluang < 40) ketPeluang = "Peluang Lolos Sangat Rendah";
+  else if (peluang < 50) ketPeluang = "Peluang Lolos Rendah";
+  else if (peluang < 65) ketPeluang = "Peluang Lolos Sedang";
+  else if (peluang < 80) ketPeluang = "Peluang Lolos Cukup Tinggi";
   else ketPeluang = "Peluang Lolos Sangat Tinggi";
   document.getElementById("resPeluangKet").innerText = ketPeluang;
 
@@ -3936,7 +4005,7 @@ function popupPeluangLolos(el, e) {
       <div>Kategori Nilai TKA (1-5) : <b>+${c.varKategoriTKA}%</b></div>
       <hr class="jelly-divider" style="margin:10px 0;">
       <div>Peluang Final (PF) : <b>${c.pf.toFixed(2)}%</b></div>
-      ${c.toleransi !== 1 ? `<div>Konversi Toleransi (${c.toleransi}) : Mapel Pendukung ${c.mapelSesuai ? "Sesuai (×1)" : "Tidak Sesuai (×" + c.toleransi + ")"}</div>` : ``}
+      ${!c.mapelSesuai ? `<div>Konversi Toleransi (Lintas Minat) : Mapel Pendukung Tidak Sesuai → PF × ${c.toleransi}</div>` : `<div>Konversi Toleransi (Lintas Minat) : Mapel Pendukung Sesuai → Tidak dikenakan konversi</div>`}
       ${c.kenaPotonganPilihan2 ? `<div>Pilihan ke-2 &amp; Prodi Ketat/Sangat Ketat : × 0.8</div>` : ``}
       <div style="font-weight:900; font-size:15px; color:#0f172a; margin-top:6px;">PELUANG AKHIR = ${c.peluang.toFixed(2)}% ${c.peluang >= 99 ? "(maksimal 99%)" : ""}</div>
     </div>`;
@@ -4181,15 +4250,25 @@ function saranKategoriDiperbolehkan(skorAkhir) {
 }
 
 // Cocokkan MAPEL1 & MAPEL2 sheet PTN dengan 3 mapel nilai teratas siswa
-function saranCekMapelCocok(p, top3Names) {
+// Cocokkan MAPEL1 & MAPEL2 sheet PTN dengan data nilai siswa - kriteria: mapel tersebut EKSIS
+// (siswa punya nilai/angka untuk mapel itu, bukan "-"), tidak harus termasuk 3 mapel teratas.
+function saranCekMapelCocok(p, d) {
   let m1 = String(p.MAPEL1 || "").trim().toUpperCase();
   let m2 = String(p.MAPEL2 || "").trim().toUpperCase();
   if (!m1 || m1 === "-") return false;
-  if (!top3Names.includes(m1)) return false;
+  if (!saranNilaiMapelAda(d, m1)) return false;
   if (m2 && m2 !== "-") {
-    if (!top3Names.includes(m2)) return false;
+    if (!saranNilaiMapelAda(d, m2)) return false;
   }
   return true;
+}
+
+function saranNilaiMapelAda(d, mapelName) {
+  let raw = d[mapelName];
+  let s = String(raw === undefined || raw === null ? "" : raw).trim();
+  if (s === "" || s === "-") return false;
+  let num = parseFloat(s.replace(",", "."));
+  return !isNaN(num);
 }
 
 function prosesSaran(jenis) {
@@ -4207,7 +4286,7 @@ function prosesSaran(jenis) {
       let prov = String(p.PROVINSI || "").trim().toLowerCase();
       let domisili = String(d.PROV || "").trim().toLowerCase();
       if (prov !== domisili) return false;
-      if (!saranCekMapelCocok(p, saranTop3)) return false;
+      if (!saranCekMapelCocok(p, d)) return false;
     }
 
     return true;
@@ -4233,22 +4312,41 @@ function prosesSaran(jenis) {
   document.getElementById("saranTableSearch").value = "";
 }
 
+let saranTableDisplayData = []; // dataset yang sedang aktif ditampilkan (sudah kena filter pencarian jika ada)
+let saranTablePage = 1;
+const SARAN_PAGE_SIZE = 10;
+
 function renderSaranTable(list) {
+  saranTableDisplayData = list || [];
+  saranTablePage = 1;
+  renderSaranTablePage();
+}
+
+function renderSaranTablePage() {
   let tbody = document.getElementById("saranTableBody");
   tbody.innerHTML = "";
   let emptyEl = document.getElementById("saranTableEmpty");
+  let list = saranTableDisplayData;
 
   if (!list || list.length === 0) {
     emptyEl.style.display = "block";
+    document.getElementById("saranPaginationWrap").style.display = "none";
     return;
   }
   emptyEl.style.display = "none";
 
-  list.forEach((p, i) => {
+  let totalPages = Math.max(1, Math.ceil(list.length / SARAN_PAGE_SIZE));
+  if (saranTablePage > totalPages) saranTablePage = totalPages;
+  if (saranTablePage < 1) saranTablePage = 1;
+
+  let startIdx = (saranTablePage - 1) * SARAN_PAGE_SIZE;
+  let pageItems = list.slice(startIdx, startIdx + SARAN_PAGE_SIZE);
+
+  pageItems.forEach((p, i) => {
     let tr = document.createElement("tr");
     tr.style.borderBottom = "1px solid #f1f5f9";
     tr.innerHTML = `
-      <td style="padding:10px 8px; text-align:center; color:#64748b;">${i + 1}</td>
+      <td style="padding:10px 8px; text-align:center; color:#64748b;">${startIdx + i + 1}</td>
       <td style="padding:10px 8px;">
         <div style="font-weight:800; font-size:13px; color:#0f172a;">${p.PTN || "-"}</div>
         <div style="font-size:11px; color:#64748b;">${p.PRODI || "-"}</div>
@@ -4258,6 +4356,31 @@ function renderSaranTable(list) {
     `;
     tbody.appendChild(tr);
   });
+
+  let pagWrap = document.getElementById("saranPaginationWrap");
+  if (totalPages <= 1) {
+    pagWrap.style.display = "none";
+  } else {
+    pagWrap.style.display = "flex";
+    document.getElementById("saranPageInfo").innerText = `Halaman ${saranTablePage} dari ${totalPages}`;
+    document.getElementById("saranPrevBtn").disabled = saranTablePage <= 1;
+    document.getElementById("saranNextBtn").disabled = saranTablePage >= totalPages;
+  }
+}
+
+function saranGotoPrevPage() {
+  if (saranTablePage > 1) {
+    saranTablePage--;
+    renderSaranTablePage();
+  }
+}
+
+function saranGotoNextPage() {
+  let totalPages = Math.max(1, Math.ceil(saranTableDisplayData.length / SARAN_PAGE_SIZE));
+  if (saranTablePage < totalPages) {
+    saranTablePage++;
+    renderSaranTablePage();
+  }
 }
 
 function filterSaranTable() {
@@ -4278,6 +4401,8 @@ function kembaliSaran() {
   document.getElementById("btnKembaliSaran").style.display = "none";
   document.getElementById("saranResultWrap").style.display = "none";
   saranLastTableData = [];
+  saranTableDisplayData = [];
+  saranTablePage = 1;
 }
 
 // BATAS AKHIR FUNGSI SARAN PRODI
