@@ -364,11 +364,6 @@ header h1 {
   letter-spacing: 0.5px;
 }
 
-.dropdown-item.active {
-  background-color: #e2e8f0; /* Atau warna highlight pilihan Anda */
-  font-weight: bold;
-}
-
 .search-box-group {
   display: flex;
   gap: 15px;
@@ -705,6 +700,7 @@ header h1 {
 </head>
 <body>
 
+<div id="appWatermark" class="global-watermark"></div>
 
 <div id="initial-loading">
   <div class="spinner"></div>
@@ -733,7 +729,7 @@ header h1 {
 <div class="sidebar" id="sidebarMenu">
   <a href="#" class="active-menu" id="menuLinkProfil" onclick="switchMenu('profil')"><i class="fas fa-user"></i> Profil</a>
   <a href="#" id="menuLinkRasionalisasi" onclick="switchMenu('rasionalisasi')"><i class="fas fa-graduation-cap"></i> Rasionalisasi Prodi</a>
-  <a href="#" id="menuLinkRaport" onclick="switchMenu('raport')"><i class="fas fa-file-invoice"></i> Data Nilai Raport</a>
+ <a href="#" id="menuLinkRaport" onclick="switchMenu('raport')"><i class="fas fa-file-invoice"></i> Data Nilai Raport</a>
   <a href="#" id="menuLinkSimulasi" onclick="switchMenu('simulasi')"><i class="fas fa-calculator"></i> Simulasi SNBP</a>
   <a href="#" id="menuLinkSaran" onclick="switchMenu('saran')"><i class="fas fa-lightbulb"></i> Saran Prodi</a>
   <a href="#" id="menuLinkPengaturan" onclick="switchMenu('pengaturan')"><i class="fas fa-cog"></i> Pengaturan</a>
@@ -797,24 +793,24 @@ header h1 {
 
         <!-- BARIS 2 (LAPTOP) / BARIS 2 (HP) -->
         <div class="card-r card-green c-dayatampung" onclick="openModalDayaTampung(this, event)">
-          <span class="card-r-label">DAYA TAMPUNG</span>
+          <span class="card-r-label">Kuota 2026</span>
           <div class="card-r-value" id="valDayaTampung">-</div>
         </div>
 
         <div class="card-r card-orange c-peminat" onclick="openModalPeminat(this, event)">
-          <span class="card-r-label">PEMINAT</span>
+          <span class="card-r-label">Peminat 2025</span>
           <div class="card-r-value" id="valPeminat">-</div>
         </div>
 
         <!-- BARIS 1 (LAPTOP) / BARIS 3 (HP) -->
         <div class="card-r c-keketatan" id="cardKeketatan" onclick="openModalKeketatan(this, event)">
-          <span class="card-r-label">KEKETATAN</span>
+          <span class="card-r-label">Keketatan</span>
           <div class="card-r-value" id="valKeketatan">-</div>
         </div>
 
         <!-- BARIS 2 (LAPTOP) / BARIS 3 (HP) -->
         <div class="card-r c-kategori" id="cardKategori" onclick="openModalKategori(this, event)">
-          <span class="card-r-label">KATEGORI</span>
+          <span class="card-r-label">Kategori</span>
           <div class="card-r-value-sm" id="valKategori">-</div>
         </div>
 
@@ -1433,18 +1429,6 @@ header h1 {
   }
 
   /* MODAL OVERLAY & BOX JELLY SOFT */
-  .modal-overlay {
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(15, 23, 42, 0.4);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    z-index: 99999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 15px;
-  }
 
     .modal-raport {
     position: fixed;
@@ -1825,7 +1809,7 @@ header h1 {
 </div>
 
 <!-- MODAL LOGOUT 3D JELLY -->
-<div id="logoutModal" class="modal-overlay" style="display: none;">
+<div id="logoutModal" class="modal-overlay">
   <div class="modal-box-jelly">
     <div class="modal-icon-jelly">
       <i class="fas fa-sign-out-alt"></i>
@@ -1871,12 +1855,10 @@ document.addEventListener("cut", function(e) {
 
 // FUNGSI RASIONALISASI PRODI
 
+let pingInterval = null;
 let rawPtnData = {};
 let selectedProdiDetail = null;
 let currentChart = null;
-
-// Variabel penanda indeks item aktif navigasi keyboard
-let activeDropdownIndex = -1;
 
 window.addEventListener('offline', function() {
   alert("Anda sedang offline");
@@ -1898,18 +1880,14 @@ function toggleMenu() {
 }
 
 function switchMenu(menuName) {
-  // 1. Sembunyikan semua section/halaman konten
   document.getElementById("mainDashboard").style.display = "none";
   document.getElementById("pengaturanMenuContent").style.display = "none";
   document.getElementById("rasionalisasiMenuContent").style.display = "none";
-  document.getElementById("dataNilaiMenuContent").style.display = "none"; // Tambahkan ini
+  document.getElementById("dataNilaiMenuContent").style.display = "none";
   if (document.getElementById("simulasiMenuContent")) document.getElementById("simulasiMenuContent").style.display = "none";
   if (document.getElementById("saranMenuContent")) document.getElementById("saranMenuContent").style.display = "none";
-  
-  // 2. Reset status aktif pada sidebar
   document.querySelectorAll(".sidebar a").forEach(el => el.classList.remove("active-menu"));
 
-  // 3. Tampilkan section yang dipilih
   if (menuName === "profil") {
     document.getElementById("mainDashboard").style.display = "block";
     document.getElementById("menuLinkProfil").classList.add("active-menu");
@@ -1944,18 +1922,20 @@ function verifyAndInit() {
   let pass = localStorage.getItem("pass");
   let role = localStorage.getItem("role");
 
-  if (!email || !pass || role !== "admin") {
+  if (!email || !pass || !role) {
     logout();
     return;
   }
+
+  document.getElementById("appWatermark").innerText = "lisensi: " + email.trim().toLowerCase();
 
   let url = `${API}?action=verify_session&email=${encodeURIComponent(email)}&pass=${encodeURIComponent(pass)}&role=${encodeURIComponent(role)}`;
 
   fetch(url)
     .then(r => r.json())
     .then(res => {
-      if (res.status === "ok" && res.role === "admin") {
-        document.getElementById("view-user").innerText = 'Selamat Datang "' + res.email + '" (Admin)';
+      if (res.status === "ok") {
+        document.getElementById("view-user").innerText = 'Selamat Datang "' + res.email + '"';
         document.getElementById("view-paket").innerText = "Paket Anda: " + res.paket;
         document.getElementById("view-masaaktif").innerText = "Masa Aktif : " + res.masaAktif + " Hari Lagi";
 
@@ -1965,6 +1945,8 @@ function verifyAndInit() {
         if (!localStorage.getItem("last_login_timestamp")) {
           localStorage.setItem("last_login_timestamp", Date.now().toString());
         }
+
+        startPingScheduler();
       } else {
         logout();
       }
@@ -1976,17 +1958,13 @@ function verifyAndInit() {
 }
 
 function initRasionalisasiMenu() {
-  // Pasang listener keyboard navigation satu kali saat menu dibuka
-  setupKeyboardNavigation("ptnSearch", "ptnList");
-  setupKeyboardNavigation("prodiSearch", "prodiList");
-
   if (Object.keys(rawPtnData).length > 0) return;
 
   let email = localStorage.getItem("email");
   let pass = localStorage.getItem("pass");
   let role = localStorage.getItem("role");
 
-  let url = `${API}?action=get_ptn_prodi_all&email=${encodeURIComponent(email)}&pass=${encodeURIComponent(pass)}&role=${encodeURIComponent(role)}`;
+  let url = `${API}?action=get_ptn_prodi&email=${encodeURIComponent(email)}&pass=${encodeURIComponent(pass)}&role=${encodeURIComponent(role)}`;
 
   fetch(url)
     .then(r => r.json())
@@ -1995,7 +1973,7 @@ function initRasionalisasiMenu() {
         rawPtnData = res.data;
         renderPtnDropdown();
       } else {
-        alert(res.message || "Gagal memuat data seluruh PTN.");
+        alert(res.message || "Gagal memuat data PTN.");
       }
     })
     .catch(err => console.error(err));
@@ -2016,7 +1994,6 @@ function renderPtnDropdown() {
 function selectPTN(ptn) {
   document.getElementById("ptnSearch").value = ptn;
   document.getElementById("ptnList").style.display = "none";
-  activeDropdownIndex = -1;
   
   let prodiInput = document.getElementById("prodiSearch");
   prodiInput.disabled = false;
@@ -2025,36 +2002,23 @@ function selectPTN(ptn) {
   let prodiListEl = document.getElementById("prodiList");
   prodiListEl.innerHTML = "";
   
-  let prodiArray = Array.isArray(rawPtnData[ptn]) 
-    ? rawPtnData[ptn] 
-    : Object.keys(rawPtnData[ptn] || {});
-
-  prodiArray.sort((a, b) => {
-    let nameA = typeof a === "object" ? (a.PRODI || a.nama) : a;
-    let nameB = typeof b === "object" ? (b.PRODI || b.nama) : b;
-    return nameA.localeCompare(nameB);
-  }).forEach(prodiItem => {
-    let prodiName = typeof prodiItem === "object" ? (prodiItem.PRODI || prodiItem.nama) : prodiItem;
+  (rawPtnData[ptn] || []).sort().forEach(prodi => {
     let item = document.createElement("div");
     item.className = "dropdown-item";
-    item.innerText = prodiName;
-    item.onclick = () => selectProdi(ptn, prodiName, prodiItem);
+    item.innerText = prodi;
+    item.onclick = () => selectProdi(ptn, prodi);
     prodiListEl.appendChild(item);
   });
 }
 
-function selectProdi(ptn, prodiName, prodiData) {
-  document.getElementById("prodiSearch").value = prodiName;
+function selectProdi(ptn, prodi) {
+  document.getElementById("prodiSearch").value = prodi;
   document.getElementById("prodiList").style.display = "none";
-  activeDropdownIndex = -1;
-  
-  fetchDetailProdiInstan(ptn, prodiName, prodiData);
+  fetchDetailProdi(ptn, prodi);
 }
 
 function showDropdown(type) {
   document.getElementById(type + "List").style.display = "block";
-  activeDropdownIndex = -1;
-  clearDropdownActiveHighlight(type + "List");
 }
 
 function filterDropdown(type) {
@@ -2063,73 +2027,6 @@ function filterDropdown(type) {
   items.forEach(item => {
     item.style.display = item.innerText.toLowerCase().includes(val) ? "block" : "none";
   });
-  activeDropdownIndex = -1;
-  clearDropdownActiveHighlight(type + "List");
-}
-
-// FUNGSI LOGIKA NAVIGASI KEYBOARD (PANAH UP/DOWN, ENTER, ESCAPE)
-function setupKeyboardNavigation(inputId, listId) {
-  let input = document.getElementById(inputId);
-  if (!input || input.dataset.hasKeyNav) return;
-  input.dataset.hasKeyNav = "true";
-
-  input.addEventListener("keydown", function(e) {
-    let listEl = document.getElementById(listId);
-    if (!listEl || listEl.style.display === "none") return;
-
-    // Filter hanya item yang saat ini tampil (visible)
-    let items = Array.from(listEl.querySelectorAll(".dropdown-item"))
-                     .filter(item => item.style.display !== "none");
-
-    if (items.length === 0) return;
-
-    if (e.key === "ArrowDown") {
-      e.preventDefault();
-      activeDropdownIndex++;
-      if (activeDropdownIndex >= items.length) activeDropdownIndex = 0;
-      updateActiveItem(items, listEl);
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault();
-      activeDropdownIndex--;
-      if (activeDropdownIndex < 0) activeDropdownIndex = items.length - 1;
-      updateActiveItem(items, listEl);
-    } else if (e.key === "Enter") {
-      e.preventDefault();
-      if (activeDropdownIndex >= 0 && activeDropdownIndex < items.length) {
-        items[activeDropdownIndex].click();
-      }
-    } else if (e.key === "Escape") {
-      listEl.style.display = "none";
-      activeDropdownIndex = -1;
-    }
-  });
-}
-
-function updateActiveItem(items, listEl) {
-  items.forEach(item => item.classList.remove("active"));
-  if (activeDropdownIndex >= 0 && activeDropdownIndex < items.length) {
-    let activeItem = items[activeDropdownIndex];
-    activeItem.classList.add("active");
-    
-    // Otomatis scroll ke item yang disorot
-    let itemTop = activeItem.offsetTop;
-    let itemBottom = itemTop + activeItem.offsetHeight;
-    let listScrollTop = listEl.scrollTop;
-    let listHeight = listEl.clientHeight;
-
-    if (itemBottom > listScrollTop + listHeight) {
-      listEl.scrollTop = itemBottom - listHeight;
-    } else if (itemTop < listScrollTop) {
-      listEl.scrollTop = itemTop;
-    }
-  }
-}
-
-function clearDropdownActiveHighlight(listId) {
-  let listEl = document.getElementById(listId);
-  if (listEl) {
-    listEl.querySelectorAll(".dropdown-item").forEach(item => item.classList.remove("active"));
-  }
 }
 
 document.addEventListener("click", function(e) {
@@ -2138,7 +2035,6 @@ document.addEventListener("click", function(e) {
     let prList = document.getElementById("prodiList");
     if(pList) pList.style.display = "none";
     if(prList) prList.style.display = "none";
-    activeDropdownIndex = -1;
     document.querySelectorAll('#simulasiMenuContent .dropdown-list').forEach(dl => dl.style.display = "none");
     document.querySelectorAll('#saranMenuContent .dropdown-list').forEach(dl => dl.style.display = "none");
   }
@@ -2147,52 +2043,49 @@ document.addEventListener("click", function(e) {
   }
 });
 
-// PENGAMBILAN DATA PRODI LOKAL (INSTAN TANPA NETWORK FETCH & TANPA DELAY LOADING)
-function fetchDetailProdiInstan(ptn, prodiName, passedData) {
+function fetchDetailProdi(ptn, prodi) {
   closeBalloon();
-  
-  let placeholder = document.getElementById("placeholderText");
-  let loader = document.getElementById("prodiLoading");
-  
-  if (placeholder) placeholder.style.display = "none";
-  if (loader) loader.style.display = "none";
+  document.getElementById("placeholderText").style.display = "none";
+  document.getElementById("detailResultContainer").style.display = "none";
+  document.getElementById("prodiLoading").style.display = "flex";
 
-  let data = passedData;
+  let email = localStorage.getItem("email");
+  let pass = localStorage.getItem("pass");
+  let role = localStorage.getItem("role");
 
-  if (!data || typeof data !== "object") {
-    let list = rawPtnData[ptn];
-    if (Array.isArray(list)) {
-      data = list.find(item => (typeof item === "object" ? (item.PRODI || item.nama) : item) === prodiName);
-    } else if (list && typeof list === "object") {
-      data = list[prodiName];
-    }
-  }
+  let url = `${API}?action=get_detail_prodi&email=${encodeURIComponent(email)}&pass=${encodeURIComponent(pass)}&role=${encodeURIComponent(role)}&ptn=${encodeURIComponent(ptn)}&prodi=${encodeURIComponent(prodi)}`;
 
-  if (data && typeof data === "object") {
-    selectedProdiDetail = data;
-    if (!selectedProdiDetail.PTN) selectedProdiDetail.PTN = ptn;
-    if (!selectedProdiDetail.PRODI) selectedProdiDetail.PRODI = prodiName;
-    
-    renderRasionalisasiDetailView();
-  } else {
-    if (placeholder) placeholder.style.display = "block";
-    alert("Data prodi tidak ditemukan.");
-  }
+  fetch(url)
+    .then(r => r.json())
+    .then(res => {
+      document.getElementById("prodiLoading").style.display = "none";
+      if (res.status === "ok" && res.data) {
+        selectedProdiDetail = res.data;
+        renderRasionalisasiDetailView();
+      } else {
+        document.getElementById("placeholderText").style.display = "block";
+        alert(res.message || "Data prodi tidak ditemukan.");
+      }
+    })
+    .catch(err => {
+      document.getElementById("prodiLoading").style.display = "none";
+      document.getElementById("placeholderText").style.display = "block";
+      alert("Terjadi kesalahan koneksi.");
+    });
 }
 
 function renderRasionalisasiDetailView() {
   let d = selectedProdiDetail;
-  let container = document.getElementById("detailResultContainer");
-  if (container) container.style.display = "block";
+  document.getElementById("detailResultContainer").style.display = "block";
 
   document.getElementById("resProdiTitle").innerText = d.PRODI || "-";
-  document.getElementById("resPtnTitle").innerText = d.PTN || "-";
+  document.getElementById("resPtnTitle").innerText = d.PTN;
 
   document.getElementById("valRataan1").innerText = d.RATAAN1 || "-";
   document.getElementById("valDayaTampung").innerText = d.DAYATAMPUNG || "0";
   document.getElementById("valPeminat").innerText = d.PEMINAT ? Number(d.PEMINAT).toLocaleString("id-ID") : "0";
 
-  // LOGIKA KEKETATAN
+  // LOGIKA KEKETATAN PERBAIKAN
   let rawK = parseFloat(d.KEKETATAN) || 0;
   let keketatanPercentText = "";
   if (rawK < 1 && rawK > 0) {
@@ -2203,6 +2096,7 @@ function renderRasionalisasiDetailView() {
     keketatanPercentText = rawK + "%";
   }
   
+  // JIKA PRODI BARU & KEKETATAN 0/TIDAK ADA DATA, TAMPILKAN KETERANGAN KHUSUS
   let kat = (d.KATEGORI || "").toUpperCase().trim();
   if (kat.includes("BARU") || kat.includes("PRODI BARU")) {
     document.getElementById("valKeketatan").innerText = "Prodi Baru";
@@ -2215,11 +2109,11 @@ function renderRasionalisasiDetailView() {
   document.getElementById("valMapel2").innerText = d.MAPEL2 || "-";
   document.getElementById("valPortofolio").innerText = d.PORTOFOLIO || "Tidak Ada";
 
-  // LOGIKA WARNA CARD
-  let colorClass = "bg-sangat-ketat";
+  // LOGIKA WARNA CARD KEKETATAN & KATEGORI
+  let colorClass = "bg-sangat-ketat"; // Default merah jika ketat
 
   if (kat.includes("BARU") || kat.includes("PRODI BARU")) {
-    colorClass = "bg-aman";
+    colorClass = "bg-aman"; // <<-- Mengubah Prodi Baru menjadi HIJAU
   } else if (kat.includes("SANGAT AMAN")) {
     colorClass = "bg-sangat-aman";
   } else if (kat.includes("AMAN")) {
@@ -2232,10 +2126,11 @@ function renderRasionalisasiDetailView() {
     colorClass = "bg-ketat";
   }
 
+  // TERAPKAN KELAS WARNA KE CARD
   document.getElementById("cardKeketatan").className = `card-r c-keketatan ${colorClass}`;
   document.getElementById("cardKategori").className = `card-r c-kategori ${colorClass}`;
 
-  // ANIMASI POP-IN UNTUK CARD
+  // ANIMASI POP-IN UNTUK SEMUA CARD
   let cards = document.querySelectorAll('.dashboard-grid .card-r');
   cards.forEach((card, index) => {
     card.classList.remove('card-pop-in');
@@ -2373,8 +2268,13 @@ function openModalKategori(el, e) {
   let d = selectedProdiDetail;
   let rawK = parseFloat(d.KEKETATAN) || 0;
   
+  // Hitung jumlah kursi (keketatan % x 100)
   let rawKursi = rawK < 1 ? rawK * 100 : rawK;
+  
+  // Gunakan Math.floor untuk pembulatan ke bawah (bilangan bulat)
   let kursiBulat = Math.floor(rawKursi);
+  
+  // Untuk persentase tampilan tetap bisa menggunakan 2 desimal jika desimal
   let percentVal = (rawK < 1 && rawK > 0) ? (rawK * 100).toFixed(2) : (rawK * 100).toFixed(0);
   
   let contentMsg = "";
@@ -2437,7 +2337,6 @@ function openModalSaran(el, e) {
 }
 
 // BARIS AKHIR FUNGSI RASIONALISASI PRODI
-
 
 // FUNGSI DARI MENU DATA NILAI RAPORT 
 
@@ -4293,13 +4192,52 @@ function kembaliSaran() {
 // BATAS AKHIR FUNGSI SARAN PRODI
 
 
+
+
+function startPingScheduler() {
+  if (pingInterval) clearInterval(pingInterval);
+
+  pingInterval = setInterval(() => {
+    if (!navigator.onLine) {
+      alert("Anda sedang offline");
+      logout();
+      return;
+    }
+
+    let email = localStorage.getItem("email");
+    let pass = localStorage.getItem("pass");
+    let role = localStorage.getItem("role");
+
+    if (!email || !pass || !role) {
+      triggerViolation();
+      return;
+    }
+
+    let url = `${API}?action=ping_online&email=${encodeURIComponent(email)}&pass=${encodeURIComponent(pass)}&role=${encodeURIComponent(role)}&_cb=${new Date().getTime()}`;
+
+    fetch(url)
+      .then(r => r.json())
+      .then(res => {
+        if (res.status === "multi_device") {
+          alert("Anda membuka aplikasi di 2 perangkat atau lebih");
+          logout();
+          return;
+        }
+
+        if (res.status === "violational" || res.status !== "ok") {
+          triggerViolation();
+        }
+      })
+      .catch(() => {});
+  }, 10000);
+}
+
 function triggerViolation() {
   if (pingInterval) clearInterval(pingInterval);
   if (document.getElementById("simulasiMenuContent")) document.getElementById("simulasiMenuContent").style.display = "none";
   document.getElementById("mainDashboard").style.display = "none";
   document.getElementById("pengaturanMenuContent").style.display = "none";
   document.getElementById("rasionalisasiMenuContent").style.display = "none";
-  document.getElementById("dataNilaiMenuContent").style.display = "none";
   document.getElementById("initial-loading").style.display = "none";
   document.getElementById("blocked-screen").style.display = "flex";
 }
@@ -4370,16 +4308,10 @@ function confirmLogout() {
   logout();
 }
 
-// FUNGSI LOGOUT ADMIN
 function logout() {
-  // 1. Hapus data sesi pengguna yang tersimpan di browser
-  localStorage.removeItem("email");
-  localStorage.removeItem("pass");
-  localStorage.removeItem("role");
-  localStorage.removeItem("last_login_timestamp");
-
-  // 2. Arahkan kembali pengguna ke halaman login utama
-  window.location.href = "/snbpp"; // Sesuaikan dengan nama/path file login Anda
+  localStorage.clear();
+  if (pingInterval) clearInterval(pingInterval);
+  window.location.href = "/snbpp";
 }
 </script>
 
