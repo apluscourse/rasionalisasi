@@ -294,16 +294,13 @@ function toMillis(val) {
 const BULAN_INDO = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
 
 function formatTanggalIndo(val) {
-  let ms = toMillis(val);
-  if (ms === null) return "-";
-  let g = new Date(ms);
-  let tgl = g.getUTCDate();
-  let bln = BULAN_INDO[g.getUTCMonth()];
-  let thn = g.getUTCFullYear();
-  let jam = String(g.getUTCHours()).padStart(2, "0");
-  let mnt = String(g.getUTCMinutes()).padStart(2, "0");
-  let dtk = String(g.getUTCSeconds()).padStart(2, "0");
-  return `${tgl} ${bln} ${thn}, jam ${jam}:${mnt}:${dtk}`;
+  if (!val) return "-";
+  let match = String(val).trim().match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2}):(\d{2})/);
+  if (!match) return "-";
+  let [, y, mo, d, h, mi, s] = match;
+  let tgl = parseInt(d, 10);
+  let bln = BULAN_INDO[parseInt(mo, 10) - 1];
+  return `${tgl} ${bln} ${y}, jam ${h}:${mi}:${s}`;
 }
 
 function hitungMasaAktifText(expired) {
