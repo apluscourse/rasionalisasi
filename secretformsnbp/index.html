@@ -293,11 +293,10 @@ function toMillis(val) {
 
 const BULAN_INDO = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
 
-// Selalu ditampilkan dalam WIB (GMT+7), apa pun zona waktu perangkat yang membuka halaman ini.
 function formatTanggalIndo(val) {
   let ms = toMillis(val);
   if (ms === null) return "-";
-  let g = new Date(ms + 7 * 60 * 60 * 1000);
+  let g = new Date(ms);
   let tgl = g.getUTCDate();
   let bln = BULAN_INDO[g.getUTCMonth()];
   let thn = g.getUTCFullYear();
