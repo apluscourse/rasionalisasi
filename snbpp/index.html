@@ -585,6 +585,7 @@ button.btn-login:disabled {
               <div class="package-features">
                   <span class="feature-badge"><i class="fas fa-check"></i> Akses Semua Fitur</span>
                   <span class="feature-badge"><i class="fas fa-clock"></i> 1 Minggu</span>
+                  <span class="feature-badge"><i class="fas fa-star"></i> Analisis Rapor SNBP</span>
               </div>
           </button>
 
@@ -597,6 +598,7 @@ button.btn-login:disabled {
               <div class="package-features">
                   <span class="feature-badge"><i class="fas fa-check"></i> Akses Semua Fitur</span>
                   <span class="feature-badge"><i class="fas fa-clock"></i> 1 Bulan</span>
+                  <span class="feature-badge"><i class="fas fa-star"></i> Analisis Rapor SNBP</span>  
               </div>
           </button>
 
@@ -609,7 +611,7 @@ button.btn-login:disabled {
               </div>
               <div class="package-features">
                   <span class="feature-badge"><i class="fas fa-check"></i> Akses Semua Fitur</span>
-                  <span class="feature-badge"><i class="fas fa-clock"></i> 3 Bulan</span>
+                  <span class="feature-badge"><i class="fas fa-clock"></i> 6 Bulan</span>
                   <span class="feature-badge"><i class="fas fa-star"></i> Analisis Rapor SNBP</span>
               </div>
           </button>
@@ -632,7 +634,8 @@ button.btn-login:disabled {
 </div>
 
 <script>
-const API="https://script.google.com/macros/s/AKfycbyfzmiVVeayk7L-RuNtPep6eY3a_My76FbzQQ6aF4VVW3cnoYRrq64igVfkhh4b_r2Pgw/exec";
+const SUPABASE_URL = "https://dwmmckxdsvcvnqruekwy.supabase.co";
+const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR3bW1ja3hkc3Zjdm5xcnVla3d5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUzNTU3OTEsImV4cCI6MjEwMDkzMTc5MX0.kERdmDc8_VBgH9mJKHVMhmwaX9dLxhz7onaTZKIqdZY";
 
 function login() {
   let email = document.getElementById("email").value.trim();
@@ -649,7 +652,14 @@ function login() {
   loadTxt.style.display = "block";
   localStorage.clear(); // Bersihkan sisa data lama
 
-  fetch(`${API}?action=auth_req&email=${encodeURIComponent(email)}&pass=${encodeURIComponent(pass)}`)
+  fetch(`${SUPABASE_URL}/functions/v1/login`, {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${ANON_KEY}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ email, pass })
+  })
     .then(r => r.json())
     .then(d => {
       if (d.status === "ok") {
@@ -665,11 +675,11 @@ function login() {
         
         // Redirect berdasarkan role
         if (d.role === "admin") {
-            location.href = "/snbpp/admin";
+            location.href = "/snbp2/admin";
         } else if (d.role === "trial") {
-            location.href = "/snbpp/trial";
+            location.href = "/snbp2/trial";
         } else {
-            location.href = "/snbpp/publik";
+            location.href = "/snbp2/publik";
         }
       } 
       else if (d.status === "expired") {
@@ -735,7 +745,7 @@ function closeModalOutside(event) {
 }
 
 function orderPackage(packageName) {
-  const adminWA = "62895423024582";
+  const adminWA = "6285740062544";
   const baseMessage = `Beli Aplikasi Rasionalisasi SNBP paket ${packageName}`;
   const encodedMessage = encodeURIComponent(baseMessage);
   
