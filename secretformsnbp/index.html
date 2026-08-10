@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kelola Akun</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<style>
+:root {
+  --blue: #1f6feb;
+  --blue2: #4fa3ff;
+  --bg: #f4f8ff;
+  --text: #1e293b;
+  --muted: #64748b;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: linear-gradient(160deg, var(--bg), #eaf1ff);
+  min-height: 100vh;
+  color: var(--text);
+  padding: 20px;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+
+.jelly-card {
+  background: linear-gradient(145deg, #ffffff, #f8fafc);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 22px;
+  padding: 22px;
+  box-shadow:
+    inset 0 4px 6px rgba(255, 255, 255, 0.9),
+    inset 0 -4px 6px rgba(0, 0, 0, 0.03),
+    0 12px 30px rgba(31, 111, 235, 0.12);
+  margin-bottom: 18px;
+}
+
+/* GATE PASSPHRASE */
+#gateScreen { text-align: center; padding-top: 60px; }
+#gateScreen .icon-lock {
+  width: 74px; height: 74px; margin: 0 auto 18px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--blue2), var(--blue));
+  color: white; display: flex; align-items: center; justify-content: center;
+  font-size: 30px;
+  box-shadow: 0 10px 24px rgba(31,111,235,0.3);
+}
+#gateScreen h2 { margin: 0 0 6px; font-size: 19px; }
+#gateScreen p { color: var(--muted); font-size: 13px; margin: 0 0 20px; }
+
+.jelly-input {
+  width: 100%;
+  padding: 13px 16px;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  font-size: 14px;
+  outline: none;
+  margin-bottom: 12px;
+}
+.jelly-input:focus { border-color: var(--blue); }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  border: none; border-radius: 14px; padding: 13px 20px;
+  font-weight: 800; font-size: 13px; cursor: pointer;
+  transition: transform 0.1s ease;
+}
+.btn:active { transform: scale(0.97); }
+.btn-blue { background: linear-gradient(135deg, var(--blue2), var(--blue)); color: white; width: 100%; }
+.btn-green { background: linear-gradient(135deg, #34d399, #16a34a); color: white; }
+.btn-gray-solid { background: linear-gradient(135deg, #94a3b8, #64748b); color: white; }
+.btn-red { background: linear-gradient(135deg, #ff6b6b, #d63031); color: white; }
+.btn-gray { background: #e2e8f0; color: var(--text); }
+.btn-sm { padding: 8px 12px; font-size: 12px; }
+
+/* HEADER */
+.header-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; gap: 10px; flex-wrap: wrap; }
+.header-row h2 { margin: 0; font-size: 19px; }
+.header-row p { margin: 2px 0 0; font-size: 12px; color: var(--muted); }
+.header-btns { display: flex; gap: 8px; }
+
+/* KARTU AKUN - 3D ABU-ABU */
+.akun-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 16px 18px; border-radius: 18px;
+  background: linear-gradient(145deg, #f1f5f9, #e2e8f0);
+  border: 1px solid rgba(255,255,255,0.7);
+  box-shadow:
+    inset 0 2px 4px rgba(255,255,255,0.8),
+    inset 0 -3px 5px rgba(0,0,0,0.05),
+    0 8px 18px rgba(0,0,0,0.08);
+  margin-bottom: 12px;
+}
+.akun-row.online {
+  background: linear-gradient(145deg, #d1fae5, #a7f3d0);
+  border: 1px solid rgba(255,255,255,0.7);
+  box-shadow:
+    inset 0 2px 4px rgba(255,255,255,0.8),
+    inset 0 -3px 5px rgba(0,0,0,0.06),
+    0 8px 18px rgba(22,163,74,0.2);
+}
+.akun-row .info { min-width: 0; flex: 1; }
+.akun-row .email { font-weight: 800; font-size: 13px; word-break: break-all; margin-bottom: 6px; }
+.akun-row .meta-line { font-size: 12px; color: var(--muted); margin-top: 3px; display: flex; align-items: center; gap: 6px; }
+.badge {
+  display: inline-block; padding: 3px 10px; border-radius: 999px;
+  font-size: 10px; font-weight: 800;
+}
+.badge-admin { background: #fde68a; color: #92400e; }
+.badge-publik { background: #dbeafe; color: #1e3a8a; }
+.badge-trial { background: #e2e8f0; color: #475569; }
+
+.akun-actions { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; }
+.akun-actions button { padding: 9px 11px; border-radius: 10px; border: none; cursor: pointer; font-size: 13px; }
+
+.kode-besar {
+  font-size: 42px;
+  font-weight: 900;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-self: stretch;
+  padding: 0 6px;
+  flex-shrink: 0;
+}
+.kode-besar.kode-1 { color: #1f6feb; }
+.kode-besar.kode-2 { color: #dc2626; }
+
+/* MODAL FORM */
+.modal-overlay {
+  display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.45);
+  align-items: center; justify-content: center; z-index: 999; padding: 16px;
+}
+.modal-box {
+  background: white; border-radius: 22px; padding: 24px; width: 100%; max-width: 440px;
+  max-height: 90vh; overflow-y: auto;
+}
+.modal-box h3 { margin: 0 0 16px; font-size: 17px; }
+.field-label { font-size: 12px; font-weight: 800; color: var(--muted); margin-bottom: 5px; display: block; }
+.modal-actions { display: flex; gap: 10px; margin-top: 8px; }
+.modal-actions .btn { flex: 1; }
+
+#loadingText { text-align: center; color: var(--muted); font-size: 13px; padding: 20px 0; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <!-- GATE PASSPHRASE -->
+  <div id="gateScreen">
+    <div class="icon-lock"><i class="fas fa-lock"></i></div>
+    <h2>Area Terbatas</h2>
+    <p>Masukkan passphrase untuk melanjutkan</p>
+    <div class="jelly-card" style="max-width:360px; margin:0 auto;">
+      <input type="password" id="secretInput" class="jelly-input" placeholder="Passphrase" style="margin-bottom:14px;" onkeydown="if(event.key==='Enter') bukaGate()">
+      <button class="btn btn-blue" onclick="bukaGate()">Masuk</button>
+    </div>
+  </div>
+
+  <!-- KONTEN UTAMA -->
+  <div id="mainScreen" style="display:none;">
+    <div class="header-row">
+      <div>
+        <h2>Kelola Akun</h2>
+        <p id="totalAkunText">-</p>
+      </div>
+      <div class="header-btns">
+        <button class="btn btn-gray-solid btn-sm" onclick="muatUlang()"><i class="fas fa-rotate"></i>&nbsp; Refresh</button>
+        <button class="btn btn-green btn-sm" onclick="bukaFormTambah()"><i class="fas fa-plus"></i>&nbsp; Tambah</button>
+      </div>
+    </div>
+
+    <input type="text" id="searchInput" class="jelly-input" placeholder="Cari email..." oninput="renderList()">
+
+    <div id="loadingText" style="display:none;">Memuat data...</div>
+    <div id="listWrap"></div>
+  </div>
+
+</div>
+
+<!-- MODAL TAMBAH/EDIT -->
+<div class="modal-overlay" id="formModal">
+  <div class="modal-box">
+    <h3 id="formTitle">Tambah Akun</h3>
+
+    <label class="field-label">Email</label>
+    <input type="text" id="fEmail" class="jelly-input" placeholder="email@contoh.com">
+
+    <label class="field-label">Password <span id="passHint" style="font-weight:400;"></span></label>
+    <input type="text" id="fPass" class="jelly-input" placeholder="Password">
+
+    <div id="roleFieldWrap">
+      <label class="field-label">Peran</label>
+      <select id="fRole" class="jelly-input">
+        <option value="admin">Admin</option>
+        <option value="publik">Publik</option>
+        <option value="trial">Trial</option>
+      </select>
+    </div>
+
+    <label class="field-label">Tanggal Expired (kosongkan = tidak ada batas)</label>
+    <input type="date" id="fExpired" class="jelly-input">
+
+    <label class="field-label">Paket</label>
+    <select id="fPaket" class="jelly-input">
+      <option value="EKONOMIS">EKONOMIS</option>
+      <option value="REGULER">REGULER</option>
+      <option value="EKSLUSIF">EKSLUSIF</option>
+      <option value="PLATINUM">PLATINUM</option>
+    </select>
+
+    <label class="field-label">Kuota</label>
+    <input type="number" id="fKuota" class="jelly-input" placeholder="1">
+
+    <div id="kodeFieldWrap">
+      <label class="field-label">Kode</label>
+      <select id="fKode" class="jelly-input">
+        <option value="1">1</option>
+        <option value="2">2</option>
+      </select>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-gray" onclick="tutupForm()">Batal</button>
+      <button class="btn btn-blue" onclick="simpanAkun()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = "https://dwmmckxdsvcvnqruekwy.supabase.co";
+const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR3bW1ja3hkc3Zjdm5xcnVla3d5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUzNTU3OTEsImV4cCI6MjEwMDkzMTc5MX0.kERdmDc8_VBgH9mJKHVMhmwaX9dLxhz7onaTZKIqdZY";
+
+let SECRET = "";
+let myRole = ""; // "owner" atau "staff" - dikirim balik oleh server, menentukan tampilan
+let allUsers = [];
+let editingEmail = null; // null = mode tambah baru
+
+function callOwner(action, params) {
+  return fetch(`${SUPABASE_URL}/functions/v1/owner`, {
+    method: "POST",
+    headers: { "Authorization": `Bearer ${ANON_KEY}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ action, secret: SECRET, ...(params || {}) })
+  }).then(r => r.json());
+}
+
+function bukaGate() {
+  let val = document.getElementById("secretInput").value.trim();
+  if (!val) return;
+  SECRET = val;
+
+  callOwner("list_users").then(res => {
+    if (res.status === "ok") {
+      myRole = res.myRole;
+      document.getElementById("gateScreen").style.display = "none";
+      document.getElementById("mainScreen").style.display = "block";
+
+      // Staff: sembunyikan kotak pencarian
+      document.getElementById("searchInput").style.display = (myRole === "staff") ? "none" : "block";
+
+      allUsers = res.users || [];
+      renderList();
+    } else {
+      alert("Passphrase salah atau terjadi kesalahan.");
+      SECRET = "";
+    }
+  }).catch(() => alert("Gagal terhubung ke server."));
+}
+
+function muatUlang() {
+  document.getElementById("loadingText").style.display = "block";
+  document.getElementById("listWrap").innerHTML = "";
+  callOwner("list_users").then(res => {
+    document.getElementById("loadingText").style.display = "none";
+    if (res.status === "ok") {
+      allUsers = res.users || [];
+      renderList();
+    }
+  });
+}
+
+// Data lastonline/expired dari Supabase sudah format ISO standar (contoh: 2026-08-04T11:16:08+00:00),
+// jadi cukup pakai new Date() langsung - selalu akurat, tidak perlu parsing manual lagi.
+function toMillis(val) {
+  if (!val) return null;
+  let d = new Date(val);
+  return isNaN(d.getTime()) ? null : d.getTime();
+}
+
+const BULAN_INDO = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+
+// Selalu ditampilkan dalam WIB (GMT+7), apa pun zona waktu perangkat yang membuka halaman ini.
+function formatTanggalIndo(val) {
+  let ms = toMillis(val);
+  if (ms === null) return "-";
+  let g = new Date(ms);
+  let tgl = g.getUTCDate();
+  let bln = BULAN_INDO[g.getUTCMonth()];
+  let thn = g.getUTCFullYear();
+  let jam = String(g.getUTCHours()).padStart(2, "0");
+  let mnt = String(g.getUTCMinutes()).padStart(2, "0");
+  let dtk = String(g.getUTCSeconds()).padStart(2, "0");
+  return `${tgl} ${bln} ${thn}, jam ${jam}:${mnt}:${dtk}`;
+}
+
+function hitungMasaAktifText(expired) {
+  if (!expired) return "Tanpa batas";
+  let expDate = new Date(expired);
+  if (isNaN(expDate.getTime())) return "-";
+  let today = new Date();
+  let todayOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  let expOnly = new Date(expDate.getFullYear(), expDate.getMonth(), expDate.getDate());
+  let diffDays = Math.round((expOnly - todayOnly) / 86400000);
+  if (diffDays < 0) return `Habis (${Math.abs(diffDays)} hari lalu)`;
+  if (diffDays === 0) return "Habis hari ini";
+  return `${diffDays} hari lagi`;
+}
+
+function renderList() {
+  let search = document.getElementById("searchInput").value.toLowerCase().trim();
+  let filtered = allUsers.filter(u => String(u.email || "").toLowerCase().includes(search));
+
+  // Urutkan berdasarkan lastonline TERBARU dulu - biar gampang pantau siapa yang sedang aktif
+  filtered = filtered.slice().sort((a, b) => {
+    let ta = toMillis(a.lastonline) || 0;
+    let tb = toMillis(b.lastonline) || 0;
+    return tb - ta;
+  });
+
+  document.getElementById("totalAkunText").innerText = `${filtered.length} akun`;
+
+  let wrap = document.getElementById("listWrap");
+  wrap.innerHTML = "";
+
+  if (filtered.length === 0) {
+    wrap.innerHTML = `<p style="text-align:center; color:var(--muted); padding:20px 0;">Tidak ada akun ditemukan.</p>`;
+    return;
+  }
+
+  let nowMs = Date.now();
+
+  filtered.forEach(u => {
+    let roleLower = String(u.role || "publik").toLowerCase();
+    let badgeClass = roleLower === "admin" ? "badge-admin" : (roleLower === "trial" ? "badge-trial" : "badge-publik");
+
+    let lastonlineMs = toMillis(u.lastonline);
+    let isOnline = lastonlineMs !== null && (nowMs - lastonlineMs) <= 60000; // <= 1 menit = online
+
+    let kodeStr = String(u.kode ?? "").trim();
+    let kodeClass = kodeStr === "2" ? "kode-2" : "kode-1";
+    let kodeHtml = (myRole === "owner" && kodeStr)
+      ? `<div class="kode-besar ${kodeClass}">${kodeStr}</div>`
+      : "";
+
+    let row = document.createElement("div");
+    row.className = "akun-row" + (isOnline ? " online" : "");
+    row.innerHTML = `
+      <div class="info">
+        <div class="email">${u.email}</div>
+        <div class="meta-line"><span class="badge ${badgeClass}">${roleLower.toUpperCase()}</span></div>
+        <div class="meta-line">Masa Aktif: ${hitungMasaAktifText(u.expired)}</div>
+        <div class="meta-line">Limit: ${u.kuota ?? 0}</div>
+        <div class="meta-line">Lastonline: ${formatTanggalIndo(u.lastonline)}</div>
+      </div>
+      ${kodeHtml}
+      <div class="akun-actions">
+        <button class="btn-gray" onclick='bukaFormEdit(${JSON.stringify(u)})'><i class="fas fa-pen"></i></button>
+        <button class="btn-red" style="color:white;" onclick="hapusAkun('${u.email}')"><i class="fas fa-trash"></i></button>
+      </div>
+    `;
+    wrap.appendChild(row);
+  });
+}
+
+// Tampilkan/sembunyikan field Peran & Kode sesuai role halaman (owner lihat semua, staff disederhanakan)
+function terapkanTampilanForm() {
+  document.getElementById("roleFieldWrap").style.display = (myRole === "owner") ? "block" : "none";
+  document.getElementById("kodeFieldWrap").style.display = (myRole === "owner") ? "block" : "none";
+}
+
+function bukaFormTambah() {
+  editingEmail = null;
+  terapkanTampilanForm();
+  document.getElementById("formTitle").innerText = "Tambah Akun";
+  document.getElementById("fEmail").value = "";
+  document.getElementById("fEmail").disabled = false;
+  document.getElementById("fPass").value = "12345";
+  document.getElementById("passHint").innerText = "";
+  document.getElementById("fRole").value = "publik";
+  document.getElementById("fExpired").value = "";
+  document.getElementById("fPaket").value = "EKONOMIS";
+  document.getElementById("fKuota").value = "1";
+  document.getElementById("fKode").value = "1";
+  document.getElementById("formModal").style.display = "flex";
+}
+
+function bukaFormEdit(u) {
+  editingEmail = u.email;
+  terapkanTampilanForm();
+  document.getElementById("formTitle").innerText = "Edit Akun";
+  document.getElementById("fEmail").value = u.email;
+  document.getElementById("fPass").value = "";
+  document.getElementById("passHint").innerText = "(kosongkan jika tidak diganti)";
+  document.getElementById("fRole").value = String(u.role || "publik").toLowerCase();
+  document.getElementById("fExpired").value = u.expired ? String(u.expired).slice(0, 10) : "";
+  document.getElementById("fPaket").value = u.paket || "EKONOMIS";
+  document.getElementById("fKuota").value = u.kuota ?? 1;
+  document.getElementById("fKode").value = u.kode ?? "1";
+  document.getElementById("formModal").style.display = "flex";
+}
+
+function tutupForm() {
+  document.getElementById("formModal").style.display = "none";
+}
+
+function simpanAkun() {
+  let email = document.getElementById("fEmail").value.trim();
+  let pass = document.getElementById("fPass").value.trim();
+  let role = document.getElementById("fRole").value;
+  let expired = document.getElementById("fExpired").value || null;
+  let paket = document.getElementById("fPaket").value;
+  let kuota = document.getElementById("fKuota").value;
+  let kode = document.getElementById("fKode").value;
+
+  if (!email) { alert("Email wajib diisi."); return; }
+
+  if (editingEmail) {
+    callOwner("update_user", { originalEmail: editingEmail, email, pass, role, expired, paket, kuota, kode })
+      .then(res => {
+        if (res.status === "ok") { tutupForm(); muatUlang(); }
+        else alert(res.message || "Gagal menyimpan.");
+      });
+  } else {
+    if (!pass) { alert("Password wajib diisi untuk akun baru."); return; }
+    callOwner("add_user", { email, pass, role, expired, paket, kuota, kode })
+      .then(res => {
+        if (res.status === "ok") { tutupForm(); muatUlang(); }
+        else alert(res.message || "Gagal menyimpan.");
+      });
+  }
+}
+
+function hapusAkun(email) {
+  if (!confirm(`Yakin ingin menghapus akun "${email}"?`)) return;
+  callOwner("delete_user", { email }).then(res => {
+    if (res.status === "ok") muatUlang();
+    else alert(res.message || "Gagal menghapus.");
+  });
+}
+</script>
+</body>
+</html>
