@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<title>Aplikasi Rasionalisasi SNBP</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<style>
+:root{
+  --blue:#1f6feb;
+  --blue2:#4fa3ff;
+  --bg:#f4f8ff;
+  --card:#ffffff;
+  --text:#1f2d3d;
+  --muted:#6b7a90;
+  --shadow:0 8px 25px rgba(0,0,0,.08);
+}
+
+*{box-sizing:border-box;font-family:Segoe UI,Arial,sans-serif;}
+
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  display:flex;
+  flex-direction: column;
+  min-height:100vh;
+}
+
+nav {
+    background: var(--card);
+    padding: 10px 5%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    z-index: 1000;
+}
+
+.logo-nav {
+    height: 30px;
+    width: auto;
+    display: flex;
+    align-items: center;
+}
+
+.nav-links { display: flex; gap: 20px; }
+.nav-links a { text-decoration: none; color: var(--text); font-weight: 600; font-size: 14px; }
+
+/* CONTAINER UTAMA DENGAN POSISI LEBIH KE ATAS */
+.main-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start; /* Mengubah dari center ke flex-start agar terangkat ke atas */
+    align-items: center;
+    padding: 60px 20px 40px; /* Padding atas disesuaikan agar mendekati header */
+}
+
+/* LOGO SNBP */
+.main-logo {
+  width: 100%;             
+  max-width: 360px;        
+  height: auto;            
+  object-fit: cover;       
+  border-radius: 22px;     
+  margin-bottom: 20px; /* Diperkecil agar jarak logo dan tombol lebih pas */
+  filter: drop-shadow(0 6px 15px rgba(0,0,0,0.12));
+}
+
+/* CONTAINER TOMBOL UTAMA BERGAYA 3D JELLY */
+.main-action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  width: 100%;
+  max-width: 360px;
+}
+
+/* DESAIN DASAR TOMBOL UTAMA 3D JELLY */
+.btn-jelly-main {
+  width: 100%;
+  padding: 16px 20px;
+  border-radius: 50px;
+  font-weight: 800;
+  font-size: 15px;
+  cursor: pointer;
+  border: none;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.15s ease;
+  letter-spacing: 0.3px;
+}
+
+/* Efek Kilauan Top Glare 3D Jelly */
+.btn-jelly-main::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 20px;
+  right: 20px;
+  height: 6px;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0) 100%);
+  border-radius: 20px;
+}
+
+/* 1. Tombol Biru Jelly - Login */
+.btn-jelly-blue {
+  background: linear-gradient(to bottom, #4fa3ff 0%, #1f6feb 100%);
+  color: #ffffff;
+  box-shadow: 0 6px 0 #134db2, 0 12px 20px rgba(31, 111, 235, 0.35);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.btn-jelly-blue:hover {
+  background: linear-gradient(to bottom, #66afff 0%, #2b77f3 100%);
+  transform: translateY(2px);
+  box-shadow: 0 4px 0 #134db2, 0 8px 15px rgba(31, 111, 235, 0.3);
+}
+
+.btn-jelly-blue:active {
+  transform: translateY(6px);
+  box-shadow: 0 0 0 #134db2, 0 4px 10px rgba(31, 111, 235, 0.2);
+}
+
+/* 2. Tombol Hijau Jelly - Simulasi */
+.btn-jelly-green {
+  background: linear-gradient(to bottom, #34d399 0%, #059669 100%);
+  color: #ffffff;
+  box-shadow: 0 6px 0 #046c4b, 0 12px 20px rgba(5, 150, 105, 0.35);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.btn-jelly-green:hover {
+  background: linear-gradient(to bottom, #4ade80 0%, #10b981 100%);
+  transform: translateY(2px);
+  box-shadow: 0 4px 0 #046c4b, 0 8px 15px rgba(5, 150, 105, 0.3);
+}
+
+.btn-jelly-green:active {
+  transform: translateY(6px);
+  box-shadow: 0 0 0 #046c4b, 0 4px 10px rgba(5, 150, 105, 0.2);
+}
+
+/* MODAL / POPUP OVERLAY DASAR */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(15, 35, 65, 0.5);
+  backdrop-filter: blur(6px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.modal-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* POPUP LOGIN CONTENT */
+.login-modal-content {
+  background: var(--card);
+  padding: 30px 25px;
+  border-radius: 26px;
+  width: 90%;
+  max-width: 380px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  transform: scale(0.85);
+  transition: transform 0.3s ease;
+  position: relative;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-overlay.active .login-modal-content,
+.modal-overlay.active .modal-content {
+  transform: scale(1);
+}
+
+.login-header{
+  text-align:center;
+  margin-bottom:20px;
+}
+
+.login-header h2{
+  margin:0;
+  font-size:22px;
+  background:linear-gradient(135deg,var(--blue),var(--blue2));
+  -webkit-background-clip:text;
+  color:transparent;
+}
+
+.login-header p {
+  margin: 5px 0 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+input{
+  width:100%;
+  padding:14px;
+  border-radius:12px;
+  border:1px solid #dbe7ff;
+  margin-bottom:12px;
+  font-size:15px;
+  outline: none;
+}
+
+button.btn-login{
+  width:100%;
+  padding:14px;
+  border-radius:14px;
+  border:none;
+  background:linear-gradient(135deg,var(--blue),var(--blue2));
+  color:white;
+  font-weight:700;
+  font-size:16px;
+  box-shadow:0 4px 12px rgba(31,111,235,.3);
+  cursor:pointer;
+  transition: 0.3s;
+}
+
+button.btn-login:disabled {
+  background: #ccc;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+#loading-text {
+  display: none;
+  text-align: center;
+  font-size: 14px;
+  color: var(--blue);
+  margin-top: 12px;
+  font-weight: 600;
+}
+
+.dots::after {
+  content: '';
+  animation: blink 1.5s infinite;
+}
+
+@keyframes blink {
+  0% { content: '.'; }
+  33% { content: '..'; }
+  66% { content: '...'; }
+}
+
+/* SECTION PERTANYAAN SUBSKRIPSI DALAM POPUP LOGIN */
+.subscription-section {
+  text-align: center;
+  margin-top: 25px;
+  padding-top: 20px;
+  border-top: 1px dashed #e2e8f0;
+}
+
+.sub-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--blue);
+  margin: 0 0 4px 0;
+}
+
+.sub-desc {
+  font-size: 13px;
+  color: var(--muted);
+  margin: 0 0 14px 0;
+}
+
+/* TOMBOL LANGGANAN JELLY 3D KUNING */
+.btn-sub {
+  background: linear-gradient(to bottom, #ffe066 0%, #f5b000 100%);
+  color: #5c3a00;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 50px;
+  font-weight: 800;
+  font-size: 14px;
+  cursor: pointer;
+  width: auto;
+  display: inline-block;
+  position: relative;
+  box-shadow: 0 5px 0 #c28a00, 0 10px 18px rgba(245, 176, 0, 0.35);
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.6);
+  transition: all 0.15s ease;
+  overflow: hidden;
+}
+
+.btn-sub::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 15px;
+  right: 15px;
+  height: 5px;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0) 100%);
+  border-radius: 20px;
+}
+
+.btn-sub:hover {
+  background: linear-gradient(to bottom, #ffe57f 0%, #ffbc1a 100%);
+  transform: translateY(2px);
+  box-shadow: 0 3px 0 #c28a00, 0 6px 12px rgba(245, 176, 0, 0.3);
+}
+
+.btn-sub:active {
+  transform: translateY(5px);
+  box-shadow: 0 0 0 #c28a00, 0 3px 8px rgba(245, 176, 0, 0.2);
+}
+
+/* POPUP BACKGROUND BIRU CERAH MINIMALIS (PAKET) */
+.modal-content {
+  background: linear-gradient(145deg, #ebf4ff 0%, #dbeafe 60%, #c7d2fe 100%);
+  padding: 25px 20px;
+  border-radius: 26px;
+  width: 90%;
+  max-width: 440px;
+  border: 2px solid #ffffff;
+  box-shadow: 0 20px 40px rgba(31, 111, 235, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  transform: scale(0.85);
+  transition: transform 0.3s ease;
+  position: relative;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  border-bottom: 1px solid rgba(31, 111, 235, 0.15);
+  padding-bottom: 12px;
+}
+
+.modal-header h3 {
+  margin: 0;
+  color: #1e3a8a;
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+}
+
+.close-modal {
+  background: rgba(255, 255, 255, 0.6);
+  border: none;
+  font-size: 20px;
+  color: #3b82f6;
+  cursor: pointer;
+  transition: 0.2s;
+  padding: 0;
+  line-height: 1;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.close-modal:hover { 
+  background: #ffffff; 
+  color: #1d4ed8; 
+}
+
+.package-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px; 
+  padding: 8px 4px;
+}
+
+/* MODEL DASAR TOMBOL PAKET 3D JELLY */
+.package-item {
+  border: none;
+  border-radius: 18px;
+  padding: 18px 20px 16px 20px;
+  text-align: left;
+  cursor: pointer;
+  width: 100%;
+  transition: all 0.15s ease;
+  position: relative;
+}
+
+.package-item::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 12px;
+  right: 12px;
+  height: 5px;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.75) 0%, rgba(255,255,255,0) 100%);
+  border-radius: 10px;
+  pointer-events: none;
+}
+
+.package-item:active {
+  transform: translateY(5px) !important;
+}
+
+.package-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.package-name {
+  font-weight: 800;
+  font-size: 16px;
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.4);
+}
+
+.package-price {
+  font-weight: 800;
+  font-size: 17px;
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.4);
+}
+
+.package-features {
+  font-size: 12px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.feature-badge {
+  padding: 3px 10px;
+  border-radius: 8px;
+  font-weight: 700;
+}
+
+/* KARTU PAKET 3D JELLY STYLES */
+.pkg-bronze {
+  background: linear-gradient(to bottom, #fde8d7 0%, #e09f6e 100%);
+  color: #4a2711;
+  box-shadow: 0 6px 0 #9e6438, 0 10px 18px rgba(158, 100, 56, 0.25);
+}
+.pkg-bronze .package-price { color: #4a2711; }
+.pkg-bronze .feature-badge { background: rgba(74, 39, 17, 0.12); color: #4a2711; }
+.pkg-bronze:hover { transform: translateY(2px); box-shadow: 0 4px 0 #9e6438, 0 6px 12px rgba(158, 100, 56, 0.2); }
+
+.pkg-silver {
+  background: linear-gradient(to bottom, #ffffff 0%, #c1d2e8 100%);
+  color: #1e293b;
+  box-shadow: 0 6px 0 #809bbd, 0 10px 18px rgba(128, 155, 189, 0.25);
+}
+.pkg-silver .package-price { color: #1e293b; }
+.pkg-silver .feature-badge { background: rgba(30, 41, 59, 0.12); color: #1e293b; }
+.pkg-silver:hover { transform: translateY(2px); box-shadow: 0 4px 0 #809bbd, 0 6px 12px rgba(128, 155, 189, 0.2); }
+
+.pkg-gold {
+  background: linear-gradient(to bottom, #fff5b8 0%, #facc15 100%);
+  color: #583f00;
+  box-shadow: 0 6px 0 #b38f00, 0 12px 20px rgba(179, 143, 0, 0.3);
+  padding-top: 22px;
+}
+.pkg-gold .package-price { color: #583f00; font-size: 19px; }
+.pkg-gold .feature-badge { background: rgba(88, 63, 0, 0.15); color: #583f00; }
+.pkg-gold:hover { transform: translateY(2px); box-shadow: 0 4px 0 #b38f00, 0 8px 14px rgba(179, 143, 0, 0.25); }
+
+.best-seller-badge {
+  position: absolute;
+  top: 6px;
+  right: 12px;
+  background: linear-gradient(135deg, #ff2a5f, #e60039);
+  color: white;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: 800;
+  box-shadow: 0 2px 6px rgba(230, 0, 57, 0.35);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  border: 1px solid rgba(255,255,255,0.7);
+  z-index: 5;
+  white-space: nowrap;
+}
+
+.pkg-diamond {
+  background: linear-gradient(to bottom, #e0f2fe 0%, #38bdf8 100%);
+  color: #034569;
+  box-shadow: 0 6px 0 #0284c7, 0 10px 18px rgba(2, 132, 199, 0.25);
+}
+.pkg-diamond .package-price { color: #034569; }
+.pkg-diamond .feature-badge { background: rgba(3, 69, 105, 0.12); color: #034569; }
+.pkg-diamond:hover { transform: translateY(2px); box-shadow: 0 4px 0 #0284c7, 0 6px 12px rgba(2, 132, 199, 0.2); }
+
+@media (max-width: 480px) {
+    .main-container { padding-top: 30px; } /* Jarak lebih dekat di mobile */
+    .nav-links { display: flex; gap: 10px; }
+    .nav-links a { font-size: 12px; }
+    .modal-content { padding: 20px 15px; }
+    .package-name, .package-price { font-size: 15px; }
+    .best-seller-badge { font-size: 9px; padding: 2px 8px; top: 6px; right: 10px; }
+    .btn-jelly-main { font-size: 13.5px; padding: 15px 16px; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+    <a href="/" class="logo-nav">
+        <img src="/logo.png" alt="Logo" style="height: 100%;">
+    </a>
+    <div class="nav-links">
+        <a href="/#about">Tentang</a>
+        <a href="/#contact">Kontak</a>
+        <a href="/" style="color: var(--blue);">Beranda</a>
+    </div>
+</nav>
+
+<div class="main-container">
+    <img src="/snbp/snbp.png" alt="Logo SNBP" class="main-logo">
+
+    <!-- DUA TOMBOL UTAMA BERGAYA 3D JELLY -->
+    <div class="main-action-buttons">
+      <button class="btn-jelly-main btn-jelly-blue" onclick="openLoginModal()">
+        <i class="fas fa-sign-in-alt"></i> LOGIN APLIKASI SNBP
+      </button>
+
+      <button class="btn-jelly-main btn-jelly-green" onclick="alert('Fitur segera hadir!')">
+        <i class="fas fa-calculator"></i> SIMULASI NILAI RAPORT SNBP
+      </button>
+    </div>
+</div>
+
+<!-- MODAL POPUP 1: LOGIN APLIKASI & SUBSKRIPSI -->
+<div class="modal-overlay" id="loginModal" onclick="closeLoginModalOutside(event)">
+  <div class="login-modal-content">
+      <div class="modal-header">
+          <h3></h3>
+          <button class="close-modal" onclick="closeLoginModal()">&times;</button>
+      </div>
+
+      <div class="login-header">
+        <h2>Rasionalisasi SNBP</h2>
+
+      </div>
+
+      <input id="email" placeholder="User / Email">
+      <input id="pass" type="password" placeholder="Password">
+
+      <button id="loginBtn" class="btn-login" onclick="login()">LOGIN</button>
+      
+      <div id="loading-text">Sedang mencoba login<span class="dots"></span></div>
+
+      <!-- SUBSKRIPSI DI DALAM POPUP LOGIN -->
+      <div class="subscription-section">
+        <p class="sub-title">Tidak Bisa Login?</p>
+        <p class="sub-desc">Sudah langganan belum?</p>
+        <button class="btn-sub" onclick="openPackageModal()">Langganan Sekarang</button>
+      </div>
+  </div>
+</div>
+
+<!-- MODAL POPUP 2: PILIHAN PAKET SUBSKRIPSI -->
+<div class="modal-overlay" id="packageModal" onclick="closeModalOutside(event)">
+  <div class="modal-content">
+      <div class="modal-header">
+          <h3>Pilih Paket Rasionalisasi SNBP</h3>
+          <button class="close-modal" onclick="closePackageModal()">&times;</button>
+      </div>
+      <div class="package-list">
+          
+          <!-- Paket 1: Bronze -->
+          <button class="package-item pkg-bronze" onclick="orderPackage('Ekonomis')">
+              <div class="package-top">
+                  <span class="package-name">Paket 1 - Ekonomis</span>
+                  <span class="package-price">Rp 25.000</span>
+              </div>
+              <div class="package-features">
+                  <span class="feature-badge"><i class="fas fa-check"></i> Akses Semua Fitur</span>
+                  <span class="feature-badge"><i class="fas fa-clock"></i> 1 Minggu</span>
+                  <span class="feature-badge"><i class="fas fa-star"></i> Analisis Rapor SNBP</span>
+              </div>
+          </button>
+
+          <!-- Paket 2: Silver -->
+          <button class="package-item pkg-silver" onclick="orderPackage('Reguler')">
+              <div class="package-top">
+                  <span class="package-name">Paket 2 - Reguler</span>
+                  <span class="package-price">Rp 50.000</span>
+              </div>
+              <div class="package-features">
+                  <span class="feature-badge"><i class="fas fa-check"></i> Akses Semua Fitur</span>
+                  <span class="feature-badge"><i class="fas fa-clock"></i> 1 Bulan</span>
+                  <span class="feature-badge"><i class="fas fa-star"></i> Analisis Rapor SNBP</span>  
+              </div>
+          </button>
+
+          <!-- Paket 3: Gold -->
+          <button class="package-item pkg-gold" onclick="orderPackage('Eksklusif')">
+              <div class="best-seller-badge"><i class="fas fa-fire"></i> Best Seller</div>
+              <div class="package-top">
+                  <span class="package-name">Paket 3 - Eksklusif</span>
+                  <span class="package-price">Rp 100.000</span>
+              </div>
+              <div class="package-features">
+                  <span class="feature-badge"><i class="fas fa-check"></i> Akses Semua Fitur</span>
+                  <span class="feature-badge"><i class="fas fa-clock"></i> 6 Bulan</span>
+                  <span class="feature-badge"><i class="fas fa-star"></i> Analisis Rapor SNBP</span>
+              </div>
+          </button>
+
+          <!-- Paket 4: Diamond -->
+          <button class="package-item pkg-diamond" onclick="orderPackage('Platinum')">
+              <div class="package-top">
+                  <span class="package-name">Paket 4 - Platinum</span>
+                  <span class="package-price">Rp 200.000</span>
+              </div>
+              <div class="package-features">
+                  <span class="feature-badge"><i class="fas fa-check"></i> Akses Semua Fitur</span>
+                  <span class="feature-badge"><i class="fas fa-clock"></i> 1 Tahun</span>
+                  <span class="feature-badge"><i class="fas fa-star"></i> Analisis Rapor SNBP</span>
+              </div>
+          </button>
+
+      </div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = "https://dwmmckxdsvcvnqruekwy.supabase.co";
+const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR3bW1ja3hkc3Zjdm5xcnVla3d5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUzNTU3OTEsImV4cCI6MjEwMDkzMTc5MX0.kERdmDc8_VBgH9mJKHVMhmwaX9dLxhz7onaTZKIqdZY";
+
+function login() {
+  let email = document.getElementById("email").value.trim();
+  let pass = document.getElementById("pass").value.trim();
+  let btn = document.getElementById("loginBtn");
+  let loadTxt = document.getElementById("loading-text");
+
+  if (!email || !pass) {
+    alert("Silakan isi email dan password!");
+    return;
+  }
+
+  btn.disabled = true;
+  loadTxt.style.display = "block";
+  localStorage.clear(); // Bersihkan sisa data lama
+
+  fetch(`${SUPABASE_URL}/functions/v1/login`, {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${ANON_KEY}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ email, pass })
+  })
+    .then(r => r.json())
+    .then(d => {
+      if (d.status === "ok") {
+        // SIMPAN SEMUA VARIABEL PENTING KE LOCALSTORAGE
+        localStorage.setItem("email", d.email);
+        localStorage.setItem("pass", d.pass);
+        localStorage.setItem("role", d.role);
+        localStorage.setItem("masaAktif", d.masaAktif);
+        localStorage.setItem("paket", d.paket);
+        localStorage.setItem("kuota", d.kuota);
+        localStorage.setItem("lastOpen", d.lastOpen);
+        sessionStorage.setItem("app_active_session", "true");
+        
+        // Redirect berdasarkan role
+        if (d.role === "admin") {
+            location.href = "/snbp2/admin";
+        } else if (d.role === "trial") {
+            location.href = "/snbp2/trial";
+        } else {
+            location.href = "/snbp2/publik";
+        }
+      } 
+      else if (d.status === "expired") {
+        alert("⚠️ Masa aktif akun anda sudah habis, silahkan berlangganan ulang atau hubungi admin.");
+        resetUI();
+      } 
+      else {
+        alert("❌ Email atau password salah.");
+        resetUI();
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      alert("Gagal terhubung ke server.");
+      resetUI();
+    });
+}
+
+function resetUI() {
+  document.getElementById("loginBtn").disabled = false;
+  document.getElementById("loading-text").style.display = "none";
+}
+
+document.addEventListener("keypress", function(e) {
+  if (e.key === "Enter") {
+    login();
+  }
+});
+
+/* LOGIC MODAL LOGIN */
+const loginModal = document.getElementById('loginModal');
+
+function openLoginModal() {
+  loginModal.classList.add('active');
+}
+
+function closeLoginModal() {
+  loginModal.classList.remove('active');
+}
+
+function closeLoginModalOutside(event) {
+  if (event.target === loginModal) {
+    closeLoginModal();
+  }
+}
+
+/* LOGIC MODAL PAKET SUBSKRIPSI */
+const pkmModal = document.getElementById('packageModal');
+
+function openPackageModal() {
+  closeLoginModal(); // Tutup modal login jika terbuka
+  pkmModal.classList.add('active');
+}
+
+function closePackageModal() {
+  pkmModal.classList.remove('active');
+}
+
+function closeModalOutside(event) {
+  if (event.target === pkmModal) {
+    closePackageModal();
+  }
+}
+
+function orderPackage(packageName) {
+  const adminWA = "6285740062544";
+  const baseMessage = `Beli Aplikasi Rasionalisasi SNBP paket ${packageName}`;
+  const encodedMessage = encodeURIComponent(baseMessage);
+  
+  window.open(`https://wa.me/${adminWA}?text=${encodedMessage}`, '_blank');
+}
+</script>
+
+</body>
+</html>
