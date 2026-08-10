@@ -2480,7 +2480,12 @@ function openModalRataan(el, e) {
 }
 
 function renderTrendBalloon(el, title, labels, values, isInverseColor, isPercent, e) {
-  let parsedValues = values.map(v => (v === "-" || !v) ? 0 : parseFloat(v));
+  let parsedValues = values.map(v => {
+  if (v === "-" || v === null || v === undefined || v === "") return 0;
+  if (typeof v === "string") v = v.replace(",", ".");
+  let n = parseFloat(v);
+  return isNaN(n) ? 0 : n;
+});
   let firstVal = parsedValues[0];
   let lastVal = parsedValues[parsedValues.length - 1];
   let isUp = lastVal >= firstVal;
@@ -2553,7 +2558,7 @@ function openModalKeketatan(el, e) {
 
 function openModalKategori(el, e) {
   let d = selectedProdiDetail;
-  let rawK = parseFloat(d.KEKETATAN) || 0;
+  let rawK = parseFloat(String(d.KEKETATAN || "").replace(",", ".")) || 0;
   
   let rawKursi = rawK < 1 ? rawK * 100 : rawK;
   let kursiBulat = Math.floor(rawKursi);
