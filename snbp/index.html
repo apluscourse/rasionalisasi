@@ -634,7 +634,8 @@ button.btn-login:disabled {
 </div>
 
 <script>
-const API="https://script.google.com/macros/s/AKfycbxRR27dQhFtLm1RufnYfVnfI5haYVgK3NJVupwLz3NgZ0RsLIWPtHg7NZ5ntOx6QNyS/exec";
+const SUPABASE_URL = "https://dwmmckxdsvcvnqruekwy.supabase.co";
+const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR3bW1ja3hkc3Zjdm5xcnVla3d5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUzNTU3OTEsImV4cCI6MjEwMDkzMTc5MX0.kERdmDc8_VBgH9mJKHVMhmwaX9dLxhz7onaTZKIqdZY";
 
 function login() {
   let email = document.getElementById("email").value.trim();
@@ -651,7 +652,14 @@ function login() {
   loadTxt.style.display = "block";
   localStorage.clear(); // Bersihkan sisa data lama
 
-  fetch(`${API}?action=auth_req&email=${encodeURIComponent(email)}&pass=${encodeURIComponent(pass)}`)
+  fetch(`${SUPABASE_URL}/functions/v1/login`, {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${ANON_KEY}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ email, pass })
+  })
     .then(r => r.json())
     .then(d => {
       if (d.status === "ok") {
@@ -667,11 +675,11 @@ function login() {
         
         // Redirect berdasarkan role
         if (d.role === "admin") {
-            location.href = "/snbp/admin";
+            location.href = "/snbp2/admin";
         } else if (d.role === "trial") {
-            location.href = "/snbp/trial";
+            location.href = "/snbp2/trial";
         } else {
-            location.href = "/snbp/publik";
+            location.href = "/snbp2/publik";
         }
       } 
       else if (d.status === "expired") {
