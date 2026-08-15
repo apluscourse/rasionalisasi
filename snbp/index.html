@@ -54,9 +54,9 @@ nav {
     flex: 1;
     display: flex;
     flex-direction: column;
-    justify-content: flex-start; /* Mengubah dari center ke flex-start agar terangkat ke atas */
+    justify-content: center;
     align-items: center;
-    padding: 60px 20px 40px; /* Padding atas disesuaikan agar mendekati header */
+    padding: 40px 20px;
 }
 
 /* LOGO SNBP */
@@ -179,7 +179,7 @@ nav {
   width: 90%;
   max-width: 380px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-  transform: scale(0.85);
+  transform: scale(1);
   transition: transform 0.3s ease;
   position: relative;
   max-height: 90vh;
@@ -526,29 +526,10 @@ button.btn-login:disabled {
 <div class="main-container">
     <img src="/snbp/snbp.png" alt="Logo SNBP" class="main-logo">
 
-    <!-- DUA TOMBOL UTAMA BERGAYA 3D JELLY -->
-    <div class="main-action-buttons">
-      <button class="btn-jelly-main btn-jelly-blue" onclick="openLoginModal()">
-        <i class="fas fa-sign-in-alt"></i> LOGIN APLIKASI SNBP
-      </button>
-
-      <button class="btn-jelly-main btn-jelly-green" onclick="alert('Fitur segera hadir!')">
-        <i class="fas fa-calculator"></i> SIMULASI NILAI RAPORT SNBP
-      </button>
-    </div>
-</div>
-
-<!-- MODAL POPUP 1: LOGIN APLIKASI & SUBSKRIPSI -->
-<div class="modal-overlay" id="loginModal" onclick="closeLoginModalOutside(event)">
-  <div class="login-modal-content">
-      <div class="modal-header">
-          <h3></h3>
-          <button class="close-modal" onclick="closeLoginModal()">&times;</button>
-      </div>
-
+    <!-- FORM LOGIN LANGSUNG TAMPIL -->
+    <div class="login-modal-content">
       <div class="login-header">
         <h2>Rasionalisasi SNBP</h2>
-
       </div>
 
       <input id="email" placeholder="User / Email">
@@ -558,13 +539,13 @@ button.btn-login:disabled {
       
       <div id="loading-text">Sedang mencoba login<span class="dots"></span></div>
 
-      <!-- SUBSKRIPSI DI DALAM POPUP LOGIN -->
+      <!-- SUBSKRIPSI DI BAWAH FORM LOGIN -->
       <div class="subscription-section">
         <p class="sub-title">Tidak Bisa Login?</p>
         <p class="sub-desc">Sudah langganan belum?</p>
         <button class="btn-sub" onclick="openPackageModal()">Langganan Sekarang</button>
       </div>
-  </div>
+    </div>
 </div>
 
 <!-- MODAL POPUP 2: PILIHAN PAKET SUBSKRIPSI -->
@@ -709,28 +690,10 @@ document.addEventListener("keypress", function(e) {
   }
 });
 
-/* LOGIC MODAL LOGIN */
-const loginModal = document.getElementById('loginModal');
-
-function openLoginModal() {
-  loginModal.classList.add('active');
-}
-
-function closeLoginModal() {
-  loginModal.classList.remove('active');
-}
-
-function closeLoginModalOutside(event) {
-  if (event.target === loginModal) {
-    closeLoginModal();
-  }
-}
-
 /* LOGIC MODAL PAKET SUBSKRIPSI */
 const pkmModal = document.getElementById('packageModal');
 
 function openPackageModal() {
-  closeLoginModal(); // Tutup modal login jika terbuka
   pkmModal.classList.add('active');
 }
 
