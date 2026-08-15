@@ -3893,7 +3893,7 @@ function tampilkanHasilSimulasi(hasil) {
   let ketPeluang;
   if (peluang < 40) ketPeluang = "Peluang Lolos Sangat Rendah";
   else if (peluang < 50) ketPeluang = "Peluang Lolos Rendah";
-  else if (peluang < 65) ketPeluang = "Peluang Lolos Sedang";
+  else if (peluang < 70) ketPeluang = "Peluang Lolos Sedang";
   else if (peluang < 80) ketPeluang = "Peluang Lolos Cukup Tinggi";
   else ketPeluang = "Peluang Lolos Sangat Tinggi";
   document.getElementById("resPeluangKet").innerText = ketPeluang;
@@ -4453,7 +4453,7 @@ function initRiwayatMenu() {
 
 function riwayatWarnaByPersen(persen) {
   if (persen < 50) return "merah";
-  if (persen < 65) return "kuning";
+  if (persen < 70) return "kuning";
   return "hijau";
 }
 
