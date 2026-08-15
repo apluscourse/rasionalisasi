@@ -3103,11 +3103,12 @@ function buildOptionsWithPoin(arrVal, arrPoin) {
 
 function calculateCertWeight(i) {
   let getSelectedPoin = (id) => {
-    let el = document.getElementById(id);
-    if (!el || el.selectedIndex <= 0) return null;
-    let opt = el.options[el.selectedIndex];
-    return parseFloat(opt.getAttribute("data-poin")) || 0;
-  };
+  let el = document.getElementById(id);
+  if (!el || el.selectedIndex <= 0) return null;
+  let opt = el.options[el.selectedIndex];
+  let raw = String(opt.getAttribute("data-poin") || "0").replace(",", ".");
+  return parseFloat(raw) || 0;
+};
 
   let pPen = getSelectedPoin(`inpPENYELENGGARA${i}`);
   let pTing = getSelectedPoin(`inpTINGKAT${i}`);
