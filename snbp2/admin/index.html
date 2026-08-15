@@ -187,7 +187,7 @@ body {
 header {
   position: fixed; 
   top: 0; left: 0; 
-  width: 100%; height: px; 
+  width: 100%; height: 65px; 
   background: linear-gradient(135deg, rgba(10, 108, 255, 0.85), rgba(10, 108, 255, 0.85));
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -319,7 +319,7 @@ header h1 {
 .profile-paket-badge {
   display: inline-block;
   background: linear-gradient(135deg, #fff7e6, #ffe8b3);
-  color: #920a;
+  color: #92650a;
   font-weight: 800;
   font-size: 13px;
   padding: 8px 18px;
@@ -634,7 +634,7 @@ header h1 {
 
 .card-blue { background: linear-gradient(135deg, #2b6cff, #1f3fbf) !important; color: white; }
 .card-green { background: linear-gradient(135deg, #27ae60, #1e874b) !important; color: white; }
-.card-orange { background: linear-gradient(135deg, #ff7a18, #e100) !important; color: white; }
+.card-orange { background: linear-gradient(135deg, #ff7a18, #e65100) !important; color: white; }
 .card-gray { 
   background: linear-gradient(135deg, #ffffff, #f1f5f9); 
   color: #1e293b; 
@@ -648,7 +648,7 @@ header h1 {
 .bg-sangat-aman { background: linear-gradient(135deg, #0f9d58, #0b7d45) !important; color: white !important; }
 .bg-aman { background: linear-gradient(135deg, #27ae60, #1e874b) !important; color: white !important; }
 .bg-sedang { background: linear-gradient(135deg, #f4c430, #e0a800) !important; color: #1f2d3d !important; }
-.bg-ketat { background: linear-gradient(135deg, #ff7a18, #e100) !important; color: white !important; }
+.bg-ketat { background: linear-gradient(135deg, #ff7a18, #e65100) !important; color: white !important; }
 .bg-sangat-ketat { background: linear-gradient(135deg, #d63031, #a4161a) !important; color: white !important; }
 
 /* ANIMASI POP-IN DARI CARD SAAT DATA MUNCUL */
@@ -1215,7 +1215,7 @@ header h1 {
   /* === STYLES 3D JELLY SOFT & LAYOUT KONTEN DATA NILAI RAPORT === */
   
   .jelly-wrapper {
-    max-width: 0px;
+    max-width: 650px;
     margin: 0 auto;
     width: 100%;
     box-sizing: border-box;
@@ -1496,8 +1496,8 @@ header h1 {
     line-height: 1.1;
   }
   .riwayat-circle.merah { border-color: #d63031; color: #b91c1c; }
-  .riwayat-circle.kuning { border-color: #e0a800; color: #920a; }
-  .riwayat-circle.hijau { border-color: #1e874b; color: #1634; }
+  .riwayat-circle.kuning { border-color: #e0a800; color: #92650a; }
+  .riwayat-circle.hijau { border-color: #1e874b; color: #166534; }
 
   .riwayat-body {
     flex: 1;
@@ -3969,7 +3969,7 @@ function tampilkanHasilSimulasi(hasil) {
   let ketPeluang;
   if (peluang < 40) ketPeluang = "Peluang Lolos Sangat Rendah";
   else if (peluang < 50) ketPeluang = "Peluang Lolos Rendah";
-  else if (peluang < 70) ketPeluang = "Peluang Lolos Sedang";
+  else if (peluang < 65) ketPeluang = "Peluang Lolos Sedang";
   else if (peluang < 80) ketPeluang = "Peluang Lolos Cukup Tinggi";
   else ketPeluang = "Peluang Lolos Sangat Tinggi";
   document.getElementById("resPeluangKet").innerText = ketPeluang;
@@ -4531,7 +4531,7 @@ function initRiwayatMenu() {
 
 function riwayatWarnaByPersen(persen) {
   if (persen < 50) return "merah";
-  if (persen < 70) return "kuning";
+  if (persen < 65) return "kuning";
   return "hijau";
 }
 
