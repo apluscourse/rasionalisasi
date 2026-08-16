@@ -929,7 +929,7 @@ header h1 {
     <div style="text-align: center; margin-bottom: 20px;">
       <h2 style="margin: 0; font-size: 22px; font-weight: 800; color: #0f172a; letter-spacing: -0.5px;">INPUT NILAI RAPORT</h2>
       <div style="font-size: 13px; color: #64748b; margin-top: 4px; font-weight: 600;">
-       KAPASITAS: <span id="raportLimitCount" style="font-weight: 800; color: #2563eb;">0</span> RAPORT
+        KAPASITAS: <span id="raportLimitCount" style="font-weight: 800; color: #2563eb;">0</span> RAPORT
       </div>
     </div>
 
@@ -1751,7 +1751,11 @@ header h1 {
         </div>
       </div>
 
-      <button type="button" class="btn-jelly btn-jelly-danger" id="btnResetSimulasi" style="width:100%; padding:14px; margin-top:20px; font-size:14px; display:none;" onclick="confirmResetSimulasi()">
+      <button type="button" class="btn-jelly btn-jelly-blue" id="btnDownloadSimulasi" style="width:100%; padding:14px; margin-top:20px; font-size:14px; display:none;" onclick="downloadSimulasiForm()">
+        <i class="fas fa-download"></i>&nbsp; DOWNLOAD
+      </button>
+
+      <button type="button" class="btn-jelly btn-jelly-danger" id="btnResetSimulasi" style="width:100%; padding:14px; margin-top:10px; font-size:14px; display:none;" onclick="confirmResetSimulasi()">
         <i class="fas fa-rotate-left"></i>&nbsp; RESET
       </button>
 
@@ -3353,6 +3357,7 @@ let simSelectedPtnProdi = null;
 let simMapelStatus = null;
 let simDomisiliStatus = null;
 let simAlumniState = { chk1: false, chk2: false };
+let simDownloadPayload = null;
 let simSertifikatState = {};
 let simDataLoaded = false;
 let simLocked = false; // true setelah hasil simulasi keluar - checkbox dikunci tapi tombol tetap bisa dibuka utk lihat detail
@@ -3467,6 +3472,7 @@ function renderSimFormState() {
   document.getElementById("btnSimulasikan").style.display = "inline-flex";
   document.getElementById("btnSimulasikan").disabled = false;
   document.getElementById("btnResetSimulasi").style.display = "none";
+  document.getElementById("btnDownloadSimulasi").style.display = "none";
 
   simSelectedPtnProdi = null;
   simAlumniState = { chk1: false, chk2: false };
@@ -3505,6 +3511,7 @@ function selectSimPtn(ptn) {
   document.getElementById("btnSimulasikan").style.display = "inline-flex";
   document.getElementById("btnSimulasikan").disabled = false;
   document.getElementById("btnResetSimulasi").style.display = "none";
+  document.getElementById("btnDownloadSimulasi").style.display = "none";
   simSelectedPtnProdi = null;
   simAlumniState = { chk1: false, chk2: false };
   simSertifikatState = {};
@@ -3969,12 +3976,72 @@ function tampilkanHasilSimulasi(hasil) {
   let ketPeluang;
   if (peluang < 40) ketPeluang = "Peluang Lolos Sangat Rendah";
   else if (peluang < 50) ketPeluang = "Peluang Lolos Rendah";
-  else if (peluang < 65) ketPeluang = "Peluang Lolos Sedang";
+  else if (peluang < 70) ketPeluang = "Peluang Lolos Sedang";
   else if (peluang < 80) ketPeluang = "Peluang Lolos Cukup Tinggi";
   else ketPeluang = "Peluang Lolos Sangat Tinggi";
   document.getElementById("resPeluangKet").innerText = ketPeluang;
 
   animatePie3D(peluang, 1000);
+
+  document.getElementById("btnDownloadSimulasi").style.display = "block";
+
+  // Menyiapkan seluruh variabel yang dibutuhkan form Download (snbp/download.html)
+  let pilihanVal = document.getElementById("simPilihan").value;
+  let alumniLabel = simAlumniState.chk2 ? "Ada Alumni PTN & Prodi" : (simAlumniState.chk1 ? "Ada Alumni PTN" : "Tidak Ada Alumni");
+  let domisiliLabel = simDomisiliStatus && simDomisiliStatus.match ? "Sedomisili" : "Tidak Domisili";
+  let sertifikatArr = [];
+  for (let i = 1; i <= 3; i++) {
+    let val = d[`SERTIFIKAT${i}`];
+    if (val && String(val).trim() !== "-" && String(val).trim() !== "") {
+      sertifikatArr.push(String(val));
+    }
+  }
+
+  simDownloadPayload = {
+    nama: d.NAMA || "-",
+    sekolah: d.SEKOLAH || "-",
+    tka: [
+      { label: "Matematika", nilai: d.TKA1 || "-", kategori: d.KATEGORI1 || "-" },
+      { label: "Bahasa Indonesia", nilai: d.TKA2 || "-", kategori: d.KATEGORI2 || "-" },
+      { label: "Bahasa Inggris", nilai: d.TKA3 || "-", kategori: d.KATEGORI3 || "-" },
+      { label: d.MAPELTKA4 || "TKA 4", nilai: d.TKA4 || "-", kategori: d.KATEGORI4 || "-" },
+      { label: d.MAPELTKA5 || "TKA 5", nilai: d.TKA5 || "-", kategori: d.KATEGORI5 || "-" }
+    ],
+    rataan: d.RATAAN || "-",
+    mapel1Label: m1Ada ? p.MAPEL1 : "-",
+    mapel1Val: m1Ada ? (d[String(p.MAPEL1).toUpperCase()] || "-") : "-",
+    mapel2Label: m2Ada ? p.MAPEL2 : "-",
+    mapel2Val: m2Ada ? (d[String(p.MAPEL2).toUpperCase()] || "-") : "-",
+    ptn: p.PTN || "-",
+    prodi: p.PRODI || "-",
+    pilihan: pilihanVal,
+    domisili: domisiliLabel,
+    portofolio: simCekAdaPortofolio(p) ? p.PORTOFOLIO : "Tidak Ada",
+    alumni: alumniLabel,
+    sertifikat: sertifikatArr,
+    skorAkhir: skor.toFixed(2).replace(".", ","),
+    skorKet: ketSkor,
+    peluang: peluang.toFixed(2).replace(".", ","),
+    peluangKet: ketPeluang
+  };
+}
+
+// ---------------------------------------------------------
+// DOWNLOAD HASIL SIMULASI (membawa data ke snbp/download.html)
+// ---------------------------------------------------------
+function downloadSimulasiForm() {
+  if (!simDownloadPayload) {
+    alert("Silahkan lakukan simulasi terlebih dahulu.");
+    return;
+  }
+  try {
+    localStorage.setItem("snbpDownloadData", JSON.stringify(simDownloadPayload));
+  } catch (err) {
+    alert("Gagal menyiapkan data untuk diunduh.");
+    console.error(err);
+    return;
+  }
+  window.open("/snbp2/admin/download.html", "_blank");
 }
 
 // ---------------------------------------------------------
@@ -4138,6 +4205,7 @@ function doResetSimulasi() {
   document.getElementById("simSubmitLoading").style.display = "none";
   document.getElementById("simResultBox").style.display = "none";
   document.getElementById("btnResetSimulasi").style.display = "none";
+  document.getElementById("btnDownloadSimulasi").style.display = "none";
 }
 
 // BATAS AKHIR FUNGSI SIMULASI SNBP
@@ -4531,7 +4599,7 @@ function initRiwayatMenu() {
 
 function riwayatWarnaByPersen(persen) {
   if (persen < 50) return "merah";
-  if (persen < 65) return "kuning";
+  if (persen < 70) return "kuning";
   return "hijau";
 }
 
