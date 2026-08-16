@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=900">
+<title>Simulasi Peluang Lolos SNBP 2027</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  :root{
+    --blue:#1e6fc0;
+    --field-bg:#eef0f2;
+    --text:#1c2b36;
+    --muted:#5a6a76;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    padding:32px 16px 60px;
+    background:#dfe6ea;
+    font-family:'Segoe UI', Arial, sans-serif;
+    color:var(--text);
+  }
+  .toolbar{
+    max-width:900px;
+    margin:0 auto 16px;
+    display:flex;
+    justify-content:flex-end;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .toolbar button, .toolbar a{
+    border:none;
+    cursor:pointer;
+    font-size:15px;
+    font-weight:800;
+    padding:12px 20px;
+    border-radius:8px;
+    color:#fff;
+    text-decoration:none;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+  }
+  #btnDownloadNow{ background:var(--blue); }
+  .choice-box{
+    display:none;
+    max-width:900px;
+    margin:0 auto 16px;
+    background:#fff;
+    border-radius:8px;
+    padding:16px;
+    text-align:center;
+    box-shadow:0 4px 14px rgba(0,0,0,0.08);
+  }
+  .choice-box p{ margin:0 0 12px; font-weight:800; font-size:15px; }
+  .choice-box button{
+    border:none;
+    cursor:pointer;
+    font-weight:800;
+    font-size:15px;
+    padding:12px 22px;
+    border-radius:8px;
+    color:#fff;
+    margin:0 6px;
+  }
+  .choice-img{ background:#219150; }
+  .choice-pdf{ background:#c0392b; }
+
+  #captureArea{
+    max-width:900px;
+    margin:0 auto;
+    background:#fff;
+    border-radius:6px;
+    overflow:hidden;
+    box-shadow:0 6px 24px rgba(0,0,0,0.12);
+  }
+
+  /* HEADER */
+  .header{
+    position:relative;
+    background:var(--blue);
+    color:#fff;
+    padding:24px 24px;
+    display:flex;
+    align-items:center;
+    min-height:150px;
+    overflow:hidden;
+  }
+  .header h1{
+    margin:0;
+    padding-right:160px;
+    font-size:clamp(26px, 5vw, 42px);
+    line-height:1.15;
+    font-weight:900;
+    letter-spacing:0.3px;
+    text-transform:uppercase;
+    flex:1;
+  }
+  .logo-box{
+    position:absolute;
+    top:0;
+    right:0;
+    bottom:0;
+    width:150px;
+    background:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:16px;
+  }
+  .logo-box img{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+  }
+  .body{
+    padding:28px 32px 8px;
+  }
+  .row{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-bottom:16px;
+  }
+  .row .label{
+    width:150px;
+    flex:0 0 150px;
+    font-size:17px;
+    font-weight:800;
+    color:var(--text);
+  }
+  .row .colon{ flex:0 0 8px; font-weight:800; font-size:17px; }
+  .row .value{
+    flex:1;
+    background:var(--field-bg);
+    border-radius:4px;
+    padding:10px 14px;
+    font-size:17px;
+    font-weight:700;
+    color:var(--text);
+  }
+  .section-title{
+    background:var(--blue);
+    color:#fff;
+    font-weight:900;
+    font-size:18px;
+    padding:11px 16px;
+    border-radius:4px;
+    margin:26px 0 16px;
+    letter-spacing:0.3px;
+  }
+  .two-col{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:0 28px;
+  }
+  .disclaimer{
+    font-size:12px;
+    color:var(--muted);
+    font-style:italic;
+    font-weight:400;
+    line-height:1.5;
+    margin:-6px 0 20px;
+  }
+
+  /* HASIL SIMULASI */
+  .results{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:0;
+    padding-bottom:28px;
+  }
+  .result-card{
+    border:1.5px solid #1c2b36;
+    border-radius:8px;
+    padding:18px 14px;
+    text-align:center;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    width:210px;
+    height:210px;
+    justify-self:center;
+  }
+  .result-card .title{
+    font-weight:900;
+    font-size:14px;
+    letter-spacing:0.4px;
+    margin-bottom:14px;
+  }
+  .result-card .score{
+    font-size:42px;
+    font-weight:900;
+    line-height:1;
+  }
+  .result-card .caption{
+    font-weight:800;
+    font-size:13px;
+    letter-spacing:0.3px;
+    margin-top:12px;
+  }
+  #fPieCanvas{
+    width:92px;
+    height:92px;
+    margin:2px auto 12px;
+    display:block;
+  }
+  /* FOOTER */
+  .footer{
+    background:var(--blue);
+    color:#fff;
+    padding:18px 24px;
+    text-align:center;
+    font-size:16px;
+    font-weight:800;
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:10px 28px;
+    align-items:center;
+  }
+  .footer .f-item{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+  }
+  .footer i{ font-size:19px; }
+
+  #emptyState{
+    max-width:900px;
+    margin:60px auto;
+    background:#fff;
+    border-radius:8px;
+    padding:40px 24px;
+    text-align:center;
+    font-weight:800;
+    color:var(--muted);
+    display:none;
+  }
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <button type="button" id="btnDownloadNow">&#8681; Download Sekarang</button>
+</div>
+
+<div class="choice-box" id="choiceBox">
+  <p>Pilih format unduhan:</p>
+  <button type="button" class="choice-img" id="btnAsGambar">Gambar (PNG)</button>
+  <button type="button" class="choice-pdf" id="btnAsPdf">PDF</button>
+</div>
+
+<div id="emptyState">
+  Data simulasi tidak ditemukan. Silahkan kembali dan lakukan simulasi terlebih dahulu.
+</div>
+
+<div class="sheet" id="captureArea">
+
+  <div class="header">
+    <h1>SIMULASI PELUANG<br>LOLO SNBP 2027</h1>
+    <div class="logo-box">
+      <img src="/snbp/logokanan.png" alt="Logo" id="logoImg">
+    </div>
+  </div>
+
+  <div class="body">
+
+    <div class="row"><div class="label">Nama</div><div class="colon">:</div><div class="value" id="fNama">-</div></div>
+    <div class="row"><div class="label">Asal Sekolah</div><div class="colon">:</div><div class="value" id="fSekolah">-</div></div>
+
+    <div class="two-col">
+      <div>
+        <div class="section-title">Data Nilai TKA</div>
+        <div class="row"><div class="label" id="fTka1Label">Matematika</div><div class="colon">:</div><div class="value" id="fTka1">-</div></div>
+        <div class="row"><div class="label" id="fTka2Label">Bahasa Indonesia</div><div class="colon">:</div><div class="value" id="fTka2">-</div></div>
+        <div class="row"><div class="label" id="fTka3Label">Bahasa Inggris</div><div class="colon">:</div><div class="value" id="fTka3">-</div></div>
+        <div class="row"><div class="label" id="fTka4Label">TKA 4</div><div class="colon">:</div><div class="value" id="fTka4">-</div></div>
+        <div class="row"><div class="label" id="fTka5Label">TKA 5</div><div class="colon">:</div><div class="value" id="fTka5">-</div></div>
+      </div>
+      <div>
+        <div class="section-title">Data Nilai Raport</div>
+        <div class="row"><div class="label">Rata2 5 SMT</div><div class="colon">:</div><div class="value" id="fRataan">-</div></div>
+        <div class="row"><div class="label" id="fMapel1Label">Rata2 Mapel1</div><div class="colon">:</div><div class="value" id="fMapel1Val">-</div></div>
+        <div class="row"><div class="label" id="fMapel2Label">Rata2 Mapel2</div><div class="colon">:</div><div class="value" id="fMapel2Val">-</div></div>
+      </div>
+    </div>
+
+    <div class="section-title">Data Tujuan</div>
+    <div class="row"><div class="label">PTN</div><div class="colon">:</div><div class="value" id="fPtn">-</div></div>
+    <div class="row"><div class="label">Prodi</div><div class="colon">:</div><div class="value" id="fProdi">-</div></div>
+    <div class="row"><div class="label">Pilihan</div><div class="colon">:</div><div class="value" id="fPilihan">-</div></div>
+
+    <div class="two-col">
+      <div>
+        <div class="section-title">Data Tambahan</div>
+        <div class="row"><div class="label">Domisili</div><div class="colon">:</div><div class="value" id="fDomisili">-</div></div>
+        <div class="row"><div class="label">Portofolio</div><div class="colon">:</div><div class="value" id="fPortofolio">-</div></div>
+        <div class="row"><div class="label">Alumni</div><div class="colon">:</div><div class="value" id="fAlumni">-</div></div>
+      </div>
+      <div>
+        <div class="section-title">Sertifikat Pendukung</div>
+        <div id="fSertifikatWrap"></div>
+      </div>
+    </div>
+
+    <div class="section-title">Hasil Simulasi</div>
+    <p class="disclaimer">Disclaimer: Hasil simulasi merupakan perkiraan peluang lolos dengan penilaian skor sesuai aturan SNPMB, dan hasil peluang merupakan perkiraan menggunakan komponen data nilai dan data tambahan.</p>
+
+    <div class="results">
+      <div class="result-card">
+        <div class="title">SKOR AKHIR SISWA</div>
+        <div class="score" id="fSkor">-</div>
+      </div>
+      <div class="result-card">
+        <div class="title">PERKIRAAN PELUANG</div>
+        <canvas id="fPieCanvas" width="160" height="160"></canvas>
+        <div class="score" style="font-size:26px;" id="fPeluang">-</div>
+        <div class="caption" id="fPeluangKet">-</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer">
+    <span class="f-item">INFORMASI LANJUT MENGENAI SIMULASI SNBP</span>
+    <span class="f-item"><i class="fab fa-whatsapp"></i> 0895423024582</span>
+    <span class="f-item"><i class="fab fa-tiktok"></i> aplus.course</span>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  var raw = localStorage.getItem("snbpDownloadData");
+  if (!raw) {
+    document.getElementById("captureArea").style.display = "none";
+    document.querySelector(".toolbar").style.display = "none";
+    document.getElementById("emptyState").style.display = "block";
+    return;
+  }
+
+  var d;
+  try {
+    d = JSON.parse(raw);
+  } catch (e) {
+    document.getElementById("captureArea").style.display = "none";
+    document.querySelector(".toolbar").style.display = "none";
+    document.getElementById("emptyState").style.display = "block";
+    return;
+  }
+
+  function set(id, val){
+    var el = document.getElementById(id);
+    if (el) el.innerText = (val === undefined || val === null || val === "") ? "-" : val;
+  }
+
+  set("fNama", d.nama);
+  set("fSekolah", d.sekolah);
+
+  var tkaIds = ["fTka1","fTka2","fTka3","fTka4","fTka5"];
+  var tkaLabelIds = ["fTka1Label","fTka2Label","fTka3Label","fTka4Label","fTka5Label"];
+  (d.tka || []).forEach(function(item, i){
+    if (i >= 5) return;
+    set(tkaLabelIds[i], item.label);
+    var nilaiTeks = (item.nilai || "-") + " (" + (item.kategori || "-") + ")";
+    set(tkaIds[i], nilaiTeks);
+  });
+
+  set("fRataan", d.rataan);
+  set("fMapel1Label", "Rata2 " + (d.mapel1Label || "-"));
+  set("fMapel1Val", d.mapel1Val);
+  set("fMapel2Label", "Rata2 " + (d.mapel2Label || "-"));
+  set("fMapel2Val", d.mapel2Val);
+
+  set("fPtn", d.ptn);
+  set("fProdi", d.prodi);
+  set("fPilihan", d.pilihan);
+
+  set("fDomisili", d.domisili);
+  set("fPortofolio", d.portofolio);
+  set("fAlumni", d.alumni);
+
+  var sertWrap = document.getElementById("fSertifikatWrap");
+  sertWrap.innerHTML = "";
+  if (d.sertifikat && d.sertifikat.length > 0) {
+    d.sertifikat.forEach(function(nama, i){
+      var row = document.createElement("div");
+      row.className = "row";
+      row.innerHTML = '<div class="value">Sertifikat ' + (i + 1) + ' : ' + nama + '</div>';
+      sertWrap.appendChild(row);
+    });
+  } else {
+    var row = document.createElement("div");
+    row.className = "row";
+    row.innerHTML = '<div class="value">Tidak Ada Sertifikat</div>';
+    sertWrap.appendChild(row);
+  }
+
+  set("fSkor", d.skorAkhir);
+  set("fPeluang", (d.peluang || "0") + "%");
+  set("fPeluangKet", d.peluangKet);
+
+  // Diagram pie lingkaran (SVG arc) hijau/merah sesuai persentase peluang
+  var persen = parseFloat(String(d.peluang || "0").replace(",", "."));
+  if (isNaN(persen)) persen = 0;
+  persen = Math.max(0, Math.min(100, persen));
+
+  var canvas = document.getElementById("fPieCanvas");
+  var ctx = canvas.getContext("2d");
+  var size = canvas.width;
+  var cx = size / 2, cy = size / 2, r = size / 2 - 4;
+
+  ctx.clearRect(0, 0, size, size);
+
+  // lingkaran dasar merah (sisa peluang)
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, Math.PI * 2);
+  ctx.fillStyle = "#c0392b";
+  ctx.fill();
+
+  // irisan hijau sesuai persentase peluang, mulai dari jam 12 searah jarum jam
+  if (persen > 0.01) {
+    var startAngle = -Math.PI / 2;
+    var endAngle = startAngle + (persen / 100) * Math.PI * 2;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, r, startAngle, endAngle, false);
+    ctx.closePath();
+    ctx.fillStyle = "#219150";
+    ctx.fill();
+  }
+
+  // ------------------------------------------------------
+  // DOWNLOAD: pilih Gambar (PNG) atau PDF
+  // ------------------------------------------------------
+  document.getElementById("btnDownloadNow").addEventListener("click", function(){
+    var box = document.getElementById("choiceBox");
+    box.style.display = box.style.display === "block" ? "none" : "block";
+  });
+
+  function withCapture(callback){
+    var toolbar = document.querySelector(".toolbar");
+    var choice = document.getElementById("choiceBox");
+    toolbar.style.display = "none";
+    choice.style.display = "none";
+    html2canvas(document.getElementById("captureArea"), { scale: 2, useCORS: true, backgroundColor: "#ffffff" })
+      .then(function(canvas){
+        toolbar.style.display = "flex";
+        callback(canvas);
+      })
+      .catch(function(err){
+        toolbar.style.display = "flex";
+        alert("Gagal membuat file. Coba lagi.");
+        console.error(err);
+      });
+  }
+
+  document.getElementById("btnAsGambar").addEventListener("click", function(){
+    withCapture(function(canvas){
+      var link = document.createElement("a");
+      link.download = "simulasi-snbp-" + (d.nama || "siswa").replace(/\s+/g, "_") + ".png";
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    });
+  });
+
+  document.getElementById("btnAsPdf").addEventListener("click", function(){
+    withCapture(function(canvas){
+      var imgData = canvas.toDataURL("image/png");
+      var jsPDF = window.jspdf.jsPDF;
+      var pdfWidth = 210;
+      var pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      var pdf = new jsPDF({
+        orientation: pdfHeight > pdfWidth ? "portrait" : "landscape",
+        unit: "mm",
+        format: [pdfWidth, pdfHeight]
+      });
+      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+      pdf.save("simulasi-snbp-" + (d.nama || "siswa").replace(/\s+/g, "_") + ".pdf");
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
