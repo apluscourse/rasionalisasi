@@ -176,6 +176,19 @@ body {
 
     <input type="text" id="searchInput" class="jelly-input" placeholder="Cari email..." oninput="renderList()">
 
+    <div style="display:flex; gap:8px;">
+      <select id="sortSelect" class="jelly-input" onchange="terapkanArahSort(); renderList()" style="flex:1;">
+        <option value="lastonline">Urutkan: Last Online</option>
+        <option value="user">Urutkan: User (Email)</option>
+        <option value="role">Urutkan: Role</option>
+        <option value="masa_aktif">Urutkan: Masa Aktif</option>
+      </select>
+      <select id="sortDirSelect" class="jelly-input" onchange="renderList()" style="flex:0 0 110px;">
+        <option value="asc">A-Z</option>
+        <option value="desc" selected>Z-A</option>
+      </select>
+    </div>
+
     <div id="loadingText" style="display:none;">Memuat data...</div>
     <div id="listWrap"></div>
   </div>
@@ -263,6 +276,7 @@ function bukaGate() {
       document.getElementById("searchInput").style.display = (myRole === "staff") ? "none" : "block";
 
       allUsers = res.users || [];
+      terapkanArahSort();
       renderList();
     } else {
       alert("Passphrase salah atau terjadi kesalahan.");
@@ -294,13 +308,16 @@ function toMillis(val) {
 const BULAN_INDO = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
 
 function formatTanggalIndo(val) {
-  if (!val) return "-";
-  let match = String(val).trim().match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2}):(\d{2})/);
-  if (!match) return "-";
-  let [, y, mo, d, h, mi, s] = match;
-  let tgl = parseInt(d, 10);
-  let bln = BULAN_INDO[parseInt(mo, 10) - 1];
-  return `${tgl} ${bln} ${y}, jam ${h}:${mi}:${s}`;
+  let ms = toMillis(val);
+  if (ms === null) return "-";
+  let g = new Date(ms);
+  let tgl = g.getUTCDate();
+  let bln = BULAN_INDO[g.getUTCMonth()];
+  let thn = g.getUTCFullYear();
+  let jam = String(g.getUTCHours()).padStart(2, "0");
+  let mnt = String(g.getUTCMinutes()).padStart(2, "0");
+  let dtk = String(g.getUTCSeconds()).padStart(2, "0");
+  return `${tgl} ${bln} ${thn}, jam ${jam}:${mnt}:${dtk}`;
 }
 
 function hitungMasaAktifText(expired) {
@@ -316,15 +333,53 @@ function hitungMasaAktifText(expired) {
   return `${diffDays} hari lagi`;
 }
 
+// Ganti label arah sort supaya masuk akal sesuai jenis data yang dipilih
+function terapkanArahSort() {
+  let sortBy = document.getElementById("sortSelect").value;
+  let dirSelect = document.getElementById("sortDirSelect");
+  let labelAsc, labelDesc;
+
+  if (sortBy === "user" || sortBy === "role") {
+    labelAsc = "A-Z"; labelDesc = "Z-A";
+  } else if (sortBy === "masa_aktif") {
+    labelAsc = "Terdekat Habis"; labelDesc = "Terjauh Habis";
+  } else {
+    labelAsc = "Terlama"; labelDesc = "Terbaru";
+  }
+
+  dirSelect.options[0].text = labelAsc;
+  dirSelect.options[1].text = labelDesc;
+}
+
 function renderList() {
   let search = document.getElementById("searchInput").value.toLowerCase().trim();
   let filtered = allUsers.filter(u => String(u.email || "").toLowerCase().includes(search));
 
-  // Urutkan berdasarkan lastonline TERBARU dulu - biar gampang pantau siapa yang sedang aktif
+  // Urutkan sesuai pilihan dropdown sort + arah
+  let sortBy = document.getElementById("sortSelect").value;
+  let sortDir = document.getElementById("sortDirSelect").value; // "asc" atau "desc"
+  let dirMult = sortDir === "desc" ? -1 : 1;
+
   filtered = filtered.slice().sort((a, b) => {
+    if (sortBy === "user") {
+      return dirMult * String(a.email || "").toLowerCase().localeCompare(String(b.email || "").toLowerCase());
+    }
+    if (sortBy === "role") {
+      return dirMult * String(a.role || "").toLowerCase().localeCompare(String(b.role || "").toLowerCase());
+    }
+    if (sortBy === "masa_aktif") {
+      // Tanpa batas (expired kosong) selalu di akhir, tidak ikut kebalik arah
+      let ea = toMillis(a.expired);
+      let eb = toMillis(b.expired);
+      if (ea === null && eb === null) return 0;
+      if (ea === null) return 1;
+      if (eb === null) return -1;
+      return dirMult * (ea - eb);
+    }
+    // default: lastonline. asc = terlama dulu, desc (default dropdown) = terbaru dulu
     let ta = toMillis(a.lastonline) || 0;
     let tb = toMillis(b.lastonline) || 0;
-    return tb - ta;
+    return dirMult * (ta - tb);
   });
 
   document.getElementById("totalAkunText").innerText = `${filtered.length} akun`;
@@ -352,12 +407,17 @@ function renderList() {
       ? `<div class="kode-besar ${kodeClass}">${kodeStr}</div>`
       : "";
 
+    let passHtml = (myRole === "owner")
+      ? `<div class="meta-line">Pass: ${u.pass ?? "-"}</div>`
+      : "";
+
     let row = document.createElement("div");
     row.className = "akun-row" + (isOnline ? " online" : "");
     row.innerHTML = `
       <div class="info">
         <div class="email">${u.email}</div>
         <div class="meta-line"><span class="badge ${badgeClass}">${roleLower.toUpperCase()}</span></div>
+        ${passHtml}
         <div class="meta-line">Masa Aktif: ${hitungMasaAktifText(u.expired)}</div>
         <div class="meta-line">Limit: ${u.kuota ?? 0}</div>
         <div class="meta-line">Lastonline: ${formatTanggalIndo(u.lastonline)}</div>
