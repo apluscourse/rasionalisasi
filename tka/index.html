@@ -562,7 +562,22 @@ document.addEventListener("keypress", function(e) {
 /* JAVASCRIPT LOGIC MODAL & REDIRECT */
 const pkmModal = document.getElementById('packageModal');
 
+/* ============================================================
+   SAKLAR MODE TOMBOL LANGGANAN
+   true  = klik "Langganan Sekarang" langsung buka WA (tanpa popup paket)
+   false = klik "Langganan Sekarang" buka popup pilihan paket (perilaku lama)
+   Ubah nilai ini kapan saja untuk switch, tidak perlu hapus kode lain.
+   ============================================================ */
+const USE_WA_DIRECT = true;
+const ADMIN_WA = "6285740062544";
+const WA_DIRECT_MESSAGE = "Beli Aplikasi TKA";
+
 function openPackageModal() {
+  if (USE_WA_DIRECT) {
+    const encodedMessage = encodeURIComponent(WA_DIRECT_MESSAGE);
+    window.open(`https://wa.me/${ADMIN_WA}?text=${encodedMessage}`, '_blank');
+    return;
+  }
   pkmModal.classList.add('active');
 }
 
