@@ -388,12 +388,158 @@ button:disabled {
 .pkg-diamond .feature-badge { background: rgba(13, 71, 161, 0.1); color: #0d47a1; }
 .pkg-diamond:hover { transform: translateY(-1px); box-shadow: 0 6px 0 #42a5f5, 0 10px 18px rgba(13, 71, 161, 0.25); }
 
+/* ===== HARGA CORET & BADGE PROMO ===== */
+.price-old {
+  text-decoration: line-through;
+  color: var(--muted);
+  font-size: 12.5px;
+  font-weight: 700;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+.price-new { color: #d90429; }
+
+.promo-badge {
+  position: absolute;
+  top: -10px;
+  left: 15px;
+  background: linear-gradient(135deg, #ff9500, #ff5e00);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  box-shadow: 0 3px 8px rgba(255, 94, 0, 0.4);
+  border: 1px solid rgba(255,255,255,0.3);
+  white-space: nowrap;
+}
+
+.package-item.has-topbadge { margin-top: 14px; }
+
+/* ===== TOMBOL PAKET BUNDLING ===== */
+.btn-bundling {
+  width: 100%;
+  margin-top: 6px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: none;
+  cursor: pointer;
+  font-weight: 800;
+  font-size: 14px;
+  background: linear-gradient(to bottom, #a5b4fc 0%, #6366f1 100%);
+  color: #ffffff;
+  box-shadow: 0 5px 0 #4338ca, 0 10px 16px rgba(67, 56, 202, 0.3);
+  text-shadow: 0 1px 1px rgba(0,0,0,0.15);
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.btn-bundling:hover { transform: translateY(2px); box-shadow: 0 3px 0 #4338ca, 0 6px 10px rgba(67, 56, 202, 0.25); }
+.btn-bundling:active { transform: translateY(5px); box-shadow: 0 0 0 #4338ca; }
+
+.bundling-note {
+  text-align: center;
+  font-size: 11px;
+  color: var(--muted);
+  margin: 8px 0 0;
+}
+
+/* Popup bundling dibuat lebih lebar */
+.modal-content-wide {
+  max-width: 620px;
+  width: 94%;
+}
+
+.bundling-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px 10px;
+  margin-bottom: 8px;
+}
+
+.bundling-col-title {
+  text-align: center;
+  font-weight: 800;
+  font-size: 13px;
+  color: var(--blue);
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 2px solid rgba(31,111,235,0.15);
+}
+
+.bundling-cell {
+  width: 100%;
+  padding: 11px 4px;
+  margin-bottom: 8px;
+  border-radius: 12px;
+  border: 1.5px solid #dbe7ff;
+  background: #ffffff;
+  font-weight: 800;
+  font-size: 11.5px;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  transition: 0.2s;
+  color: var(--text);
+  text-align: center;
+}
+.bundling-cell:hover { border-color: var(--blue2); }
+.bundling-cell.selected {
+  background: linear-gradient(135deg, var(--blue), var(--blue2));
+  color: #ffffff;
+  border-color: var(--blue);
+  box-shadow: 0 3px 8px rgba(31,111,235,.35);
+  transform: translateY(1px);
+}
+
+.bundling-total {
+  text-align: center;
+  font-weight: 800;
+  font-size: 17px;
+  color: var(--blue);
+  margin: 18px 0;
+  padding: 12px;
+  background: #f4f8ff;
+  border-radius: 14px;
+  border: 1px dashed rgba(31,111,235,0.3);
+}
+#bundlingTotalPrice { color: #d90429; margin-left: 6px; }
+
+.btn-bundling-submit {
+  width: 100%;
+  padding: 14px;
+  border-radius: 16px;
+  border: none;
+  background: linear-gradient(to bottom, #a5b4fc 0%, #6366f1 100%);
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 15px;
+  cursor: pointer;
+  box-shadow: 0 5px 0 #4338ca, 0 10px 16px rgba(67, 56, 202, 0.3);
+  text-shadow: 0 1px 1px rgba(0,0,0,0.15);
+  transition: all 0.15s ease;
+}
+.btn-bundling-submit:hover:not(:disabled) { transform: translateY(2px); box-shadow: 0 3px 0 #4338ca, 0 6px 10px rgba(67, 56, 202, 0.25); }
+.btn-bundling-submit:active:not(:disabled) { transform: translateY(5px); box-shadow: 0 0 0 #4338ca; }
+.btn-bundling-submit:disabled {
+  background: #ccc;
+  box-shadow: none;
+  cursor: not-allowed;
+  text-shadow: none;
+}
+
 @media (max-width: 480px) {
     .nav-links { display: flex; gap: 10px; }
     .nav-links a { font-size: 12px; }
     .modal-content { padding: 20px; }
     .package-name, .package-price { font-size: 15px; }
     .best-seller-badge { right: 10px; font-size: 10px; }
+    .bundling-cell { font-size: 10px; padding: 9px 2px; }
+    .bundling-col-title { font-size: 11.5px; }
+    .modal-content-wide { max-width: 96%; padding: 20px 12px; }
 }
 </style>
 </head>
@@ -442,60 +588,37 @@ button:disabled {
           <h3>Pilih Paket Rasionalisasi SNBT</h3>
           <button class="close-modal" onclick="closePackageModal()">&times;</button>
       </div>
-      <div class="package-list">
-          
-          <!-- Paket 1: Bronze -->
-          <button class="package-item pkg-bronze" onclick="orderPackage('Ekonomis')">
-              <div class="package-top">
-                  <span class="package-name">Paket 1 - Ekonomis</span>
-                  <span class="package-price">Rp 25.000</span>
-              </div>
-              <div class="package-features">
-                  <span class="feature-badge"><i class="fas fa-check"></i> Akses Semua Fitur</span>
-                  <span class="feature-badge"><i class="fas fa-clock"></i> 1 Minggu</span>
-              </div>
-          </button>
-
-          <!-- Paket 2: Silver -->
-          <button class="package-item pkg-silver" onclick="orderPackage('Reguler')">
-              <div class="package-top">
-                  <span class="package-name">Paket 2 - Reguler</span>
-                  <span class="package-price">Rp 50.000</span>
-              </div>
-              <div class="package-features">
-                  <span class="feature-badge"><i class="fas fa-check"></i> Akses Semua Fitur</span>
-                  <span class="feature-badge"><i class="fas fa-clock"></i> 1 Bulan</span>
-              </div>
-          </button>
-
-          <!-- Paket 3: Emas Gradien Mewah + Best Seller -->
-          <button class="package-item pkg-gold" onclick="orderPackage('Ekslusif')">
-              <div class="best-seller-badge"><i class="fas fa-fire"></i> Best Seller</div>
-              <div class="package-top">
-                  <span class="package-name">Paket 3 - Ekslusif</span>
-                  <span class="package-price">Rp 100.000</span>
-              </div>
-              <div class="package-features">
-                  <span class="feature-badge"><i class="fas fa-check"></i> Akses Semua Fitur</span>
-                  <span class="feature-badge"><i class="fas fa-clock"></i> 3 Bulan</span>
-                  <span class="feature-badge"><i class="fas fa-star"></i> Tryout SNBT</span>
-              </div>
-          </button>
-
-          <!-- Paket 4: Diamond -->
-          <button class="package-item pkg-diamond" onclick="orderPackage('Platinum')">
-              <div class="package-top">
-                  <span class="package-name">Paket 4 - Platinum</span>
-                  <span class="package-price">Rp 200.000</span>
-              </div>
-              <div class="package-features">
-                  <span class="feature-badge"><i class="fas fa-check"></i> Akses Semua Fitur</span>
-                  <span class="feature-badge"><i class="fas fa-clock"></i> 1 Tahun</span>
-                  <span class="feature-badge"><i class="fas fa-star"></i> Tryout SNBT</span>
-              </div>
-          </button>
-
+      <div class="package-list" id="packageList">
+          <!-- Diisi otomatis oleh JS: renderPackages() -->
       </div>
+
+      <button class="btn-bundling" onclick="openBundlingModal()">
+          <i class="fas fa-layer-group"></i> Paket Bundling
+      </button>
+      <p class="bundling-note">*Paket bundling tidak terpengaruh promo</p>
+
+  </div>
+</div>
+
+<!-- MODAL POPUP: PAKET BUNDLING SEMUA APLIKASI -->
+<div class="modal-overlay" id="bundlingModal" onclick="closeBundlingModalOutside(event)">
+  <div class="modal-content modal-content-wide">
+      <div class="modal-header">
+          <h3>Silahkan Pilih Minimal 2 Aplikasi</h3>
+          <button class="close-modal" onclick="closeBundlingModal()">&times;</button>
+      </div>
+
+      <div class="bundling-grid" id="bundlingApps">
+          <!-- Diisi otomatis oleh JS: renderBundlingApps() -->
+      </div>
+
+      <div class="bundling-total">
+          Harga Bundling<span id="bundlingTotalPrice">Rp 0</span>
+      </div>
+
+      <button class="btn-bundling-submit" id="bundlingSubmitBtn" onclick="orderBundling()" disabled>
+          <i class="fab fa-whatsapp"></i> PESAN SEKARANG
+      </button>
   </div>
 </div>
 
@@ -594,12 +717,189 @@ function closeModalOutside(event) {
   }
 }
 
-function orderPackage(packageName) {
-  const adminWA = "6285740062544";
-  const baseMessage = `Beli Aplikasi Rasionalisasi SNBT paket ${packageName}`;
+/* ============================================================
+   KONFIGURASI HARGA & PROMO PAKET SNBT
+   - PROMO_AKTIF = true  -> tampilkan harga promo (coret harga lama)
+   - PROMO_AKTIF = false -> tampilkan harga normal semua (tidak ada coret)
+   - Paket yang harga promonya SAMA dengan harga normal otomatis
+     TIDAK dicoret (dianggap tidak sedang promo).
+   - Atur harga promo tiap paket di HARGA_PROMO di bawah ini.
+   ============================================================ */
+const PROMO_AKTIF = true;
+
+const HARGA_NORMAL = {
+  ekonomis:  25000,
+  reguler:   50000,
+  eksklusif: 100000,
+  platinum:  200000
+};
+
+const HARGA_PROMO = {
+  ekonomis:  20000,
+  reguler:   40000,
+  eksklusif: 100000,
+  platinum:  200000
+};
+
+const PAKET_INFO = [
+  { key: 'ekonomis',  nama: 'Paket 1 - Ekonomis',  cls: 'pkg-bronze',  durasi: '1 Minggu', bestSeller: false, extraBadge: null },
+  { key: 'reguler',   nama: 'Paket 2 - Reguler',   cls: 'pkg-silver',  durasi: '1 Bulan',  bestSeller: false, extraBadge: null },
+  { key: 'eksklusif', nama: 'Paket 3 - Ekslusif',  cls: 'pkg-gold',    durasi: '3 Bulan',  bestSeller: true,  extraBadge: 'Tryout SNBT' },
+  { key: 'platinum',  nama: 'Paket 4 - Platinum',  cls: 'pkg-diamond', durasi: '1 Tahun',  bestSeller: false, extraBadge: 'Tryout SNBT' }
+];
+
+function formatRupiah(harga) {
+  return 'Rp ' + harga.toLocaleString('id-ID');
+}
+
+function formatRb(harga) {
+  return Math.round(harga / 1000) + 'rb';
+}
+
+function renderPackages() {
+  const list = document.getElementById('packageList');
+  list.innerHTML = PAKET_INFO.map(p => {
+    const normal = HARGA_NORMAL[p.key];
+    const promo = HARGA_PROMO[p.key];
+    const isPromo = PROMO_AKTIF && promo < normal;
+
+    const priceHtml = isPromo
+      ? `<span class="price-old">${formatRupiah(normal)}</span><span class="package-price price-new">${formatRupiah(promo)}</span>`
+      : `<span class="package-price">${formatRupiah(normal)}</span>`;
+
+    const promoBadgeHtml = isPromo
+      ? `<div class="promo-badge"><i class="fas fa-bolt"></i> Promo</div>`
+      : '';
+    const bestSellerHtml = p.bestSeller
+      ? `<div class="best-seller-badge"><i class="fas fa-fire"></i> Best Seller</div>`
+      : '';
+    const extraBadgeHtml = p.extraBadge
+      ? `<span class="feature-badge"><i class="fas fa-star"></i> ${p.extraBadge}</span>`
+      : '';
+    const topBadgeClass = (isPromo || p.bestSeller) ? 'has-topbadge' : '';
+
+    return `
+      <button class="package-item ${p.cls} ${topBadgeClass}" onclick="orderPackage('${p.key}')">
+          ${bestSellerHtml}
+          ${promoBadgeHtml}
+          <div class="package-top">
+              <span class="package-name">${p.nama}</span>
+              ${priceHtml}
+          </div>
+          <div class="package-features">
+              <span class="feature-badge"><i class="fas fa-check"></i> Akses Semua Fitur</span>
+              <span class="feature-badge"><i class="fas fa-clock"></i> ${p.durasi}</span>
+              ${extraBadgeHtml}
+          </div>
+      </button>`;
+  }).join('');
+}
+
+function orderPackage(key) {
+  const p = PAKET_INFO.find(x => x.key === key);
+  const normal = HARGA_NORMAL[key];
+  const promo = HARGA_PROMO[key];
+  const isPromo = PROMO_AKTIF && promo < normal;
+  const hargaFinal = isPromo ? promo : normal;
+  const namaTampil = p.nama.split(' - ')[1];
+  const promoText = isPromo ? ' promo' : '';
+
+  const baseMessage = `Beli Aplikasi SNBT ${namaTampil}${promoText} (harga ${formatRb(hargaFinal)})`;
   const encodedMessage = encodeURIComponent(baseMessage);
-  
-  window.open(`https://wa.me/${adminWA}?text=${encodedMessage}`, '_blank');
+
+  window.open(`https://wa.me/${ADMIN_WA}?text=${encodedMessage}`, '_blank');
+}
+
+renderPackages();
+
+/* ============================================================
+   PAKET BUNDLING SEMUA APLIKASI (TKA, SNBP, SNBT)
+   Harga di sini adalah harga normal per aplikasi & TIDAK
+   terpengaruh oleh PROMO_AKTIF/HARGA_PROMO di atas.
+   ============================================================ */
+const BUNDLING_APPS = {
+  TKA:  { ekonomis: 25000, reguler: 50000, eksklusif: 100000, platinum: 150000 },
+  SNBP: { ekonomis: 25000, reguler: 50000, eksklusif: 100000, platinum: 200000 },
+  SNBT: { ekonomis: 25000, reguler: 50000, eksklusif: 100000, platinum: 200000 }
+};
+const TIER_LABEL = { ekonomis: 'Ekonomis', reguler: 'Reguler', eksklusif: 'Eksklusif', platinum: 'Platinum' };
+const BUNDLING_DISCOUNT = 0.2;
+const BUNDLING_MIN_ITEM = 2;
+
+let bundlingSelected = {};
+/* bundlingSelected = { TKA: {tier, harga}, SNBP: {...}, SNBT: {...} } — 1 pilihan per aplikasi */
+
+function renderBundlingApps() {
+  const container = document.getElementById('bundlingApps');
+  container.innerHTML = Object.keys(BUNDLING_APPS).map(app => {
+    const tiers = BUNDLING_APPS[app];
+    const cells = Object.keys(tiers).map(tier => {
+      const harga = tiers[tier];
+      const isSelected = bundlingSelected[app] && bundlingSelected[app].tier === tier;
+      return `<button type="button" class="bundling-cell ${isSelected ? 'selected' : ''}" id="cell-${app}-${tier}" onclick="selectBundlingTier('${app}','${tier}',${harga})">${TIER_LABEL[tier].toUpperCase()}</button>`;
+    }).join('');
+
+    return `
+      <div class="bundling-col" data-app="${app}">
+          <div class="bundling-col-title">${app}</div>
+          ${cells}
+      </div>`;
+  }).join('');
+}
+
+function selectBundlingTier(app, tier, harga) {
+  const current = bundlingSelected[app];
+
+  if (current && current.tier === tier) {
+    delete bundlingSelected[app];
+  } else {
+    bundlingSelected[app] = { tier, harga };
+  }
+
+  renderBundlingApps();
+  updateBundlingTotal();
+}
+
+function updateBundlingTotal() {
+  const items = Object.keys(bundlingSelected).map(app => ({ app, ...bundlingSelected[app] }));
+  const subtotal = items.reduce((sum, it) => sum + it.harga, 0);
+  const cukupSyarat = items.length >= BUNDLING_MIN_ITEM;
+  const total = cukupSyarat ? Math.round(subtotal * (1 - BUNDLING_DISCOUNT)) : subtotal;
+
+  document.getElementById('bundlingTotalPrice').textContent = ' ' + formatRupiah(total);
+  document.getElementById('bundlingSubmitBtn').disabled = !cukupSyarat;
+}
+
+function orderBundling() {
+  const items = Object.keys(bundlingSelected).map(app => ({ app, ...bundlingSelected[app] }));
+  if (items.length < BUNDLING_MIN_ITEM) return;
+
+  const subtotal = items.reduce((sum, it) => sum + it.harga, 0);
+  const total = Math.round(subtotal * (1 - BUNDLING_DISCOUNT));
+  const namaParts = items.map(it => `${it.app} ${TIER_LABEL[it.tier]}`).join(' & ');
+
+  const baseMessage = `Beli Aplikasi Bundling ${namaParts} (harga ${formatRb(total)})`;
+  const encodedMessage = encodeURIComponent(baseMessage);
+
+  window.open(`https://wa.me/${ADMIN_WA}?text=${encodedMessage}`, '_blank');
+}
+
+function openBundlingModal() {
+  bundlingSelected = {};
+  renderBundlingApps();
+  updateBundlingTotal();
+  document.getElementById('bundlingModal').classList.add('active');
+}
+
+function closeBundlingModal() {
+  document.getElementById('bundlingModal').classList.remove('active');
+}
+
+function closeBundlingModalOutside(event) {
+  const modal = document.getElementById('bundlingModal');
+  if (event.target === modal) {
+    closeBundlingModal();
+  }
 }
 </script>
 
