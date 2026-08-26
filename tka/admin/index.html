@@ -343,24 +343,18 @@ header h1 {
   font-size: 14px;
   color: var(--text);
 }
-/* --- KOTAK PTN / PRODI DI MENU RASIONALISASI: DISAMAKAN DENGAN GAYA ADMIN SNBP --- */
+/* --- KOTAK PTN / PRODI DI MENU RASIONALISASI: GAYA SAMA SEPERTI ADMIN SNBP, SUSUNAN ATAS-BAWAH --- */
 #rasionalisasiMenuContent > .filter-container {
   background: transparent;
   padding: 0;
   box-shadow: none;
   border-radius: 0;
-  flex-direction: row;
+  flex-direction: column;
   gap: 15px;
   margin-bottom: 20px;
 }
 #rasionalisasiMenuContent > .filter-container .filter-group {
   flex: 1;
-}
-@media (max-width: 768px) {
-  #rasionalisasiMenuContent > .filter-container {
-    flex-direction: column;
-    gap: 12px;
-  }
 }
 /* Input pencarian text menggantikan select konvensional (gaya sama seperti admin SNBP) */
 .search-select-input {
@@ -1016,13 +1010,13 @@ header h1 {
   <div class="filter-container">
     <div class="filter-group">
       <label><i class="fas fa-university"></i> Perguruan Tinggi Negeri (PTN)</label>
-      <input type="text" id="searchPTN" class="search-select-input" placeholder="Ketik nama PTN / Kampus..." oninput="filterPTNAction()" onfocus="showPTNDropdown()" onkeydown="handlePTNKeydown(event)">
+      <input type="text" id="searchPTN" class="search-select-input" placeholder="Ketik nama PTN / Kampus..." autocomplete="off" oninput="filterPTNAction()" onfocus="showPTNDropdown()" onkeydown="handlePTNKeydown(event)">
       <div id="listPTNDropdown" class="search-dropdown-list"></div>
     </div>
     
     <div class="filter-group">
       <label><i class="fas fa-book-open"></i> Program Studi (Prodi)</label>
-      <input type="text" id="searchProdi" class="search-select-input" placeholder="-- Pilih PTN Terlebih Dahulu --" oninput="filterProdiAction()" onfocus="showProdiDropdown()" onkeydown="handleProdiKeydown(event)" disabled>
+      <input type="text" id="searchProdi" class="search-select-input" placeholder="-- Pilih PTN Terlebih Dahulu --" autocomplete="off" oninput="filterProdiAction()" onfocus="showProdiDropdown()" onkeydown="handleProdiKeydown(event)" disabled>
       <div id="listProdiDropdown" class="search-dropdown-list"></div>
     </div>
   </div>
@@ -1105,7 +1099,7 @@ header h1 {
       <div class="filter-container" style="margin-bottom: 20px; padding: 0; box-shadow: none; background: transparent;">
         <div class="filter-group" style="flex: 1;">
           <label><i class="fas fa-university"></i> Filter PTN</label>
-          <input type="text" id="searchPeminatanPTN" class="search-select-input" placeholder="Ketik nama PTN untuk menyaring..." oninput="filterPeminatanTable()">
+          <input type="text" id="searchPeminatanPTN" class="search-select-input" placeholder="Ketik nama PTN untuk menyaring..." autocomplete="off" oninput="filterPeminatanTable()">
           <div id="listPeminatanPTNDropdown" class="search-dropdown-list"></div>
         </div>
         
