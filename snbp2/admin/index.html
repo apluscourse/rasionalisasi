@@ -2030,6 +2030,24 @@ header h1 {
 const SUPABASE_URL = "https://dwmmckxdsvcvnqruekwy.supabase.co";
 const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR3bW1ja3hkc3Zjdm5xcnVla3d5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUzNTU3OTEsImV4cCI6MjEwMDkzMTc5MX0.kERdmDc8_VBgH9mJKHVMhmwaX9dLxhz7onaTZKIqdZY";
 
+// ---------------------------------------------------------
+// PENANDA TAMPILKAN / SEMBUNYIKAN FOOTER
+// Ubah nilainya: true = footer tampil, false = footer disembunyikan
+// ---------------------------------------------------------
+const SHOW_FOOTER = false;
+
+(function terapkanFooterToggle() {
+  let footerEl = document.querySelector(".footer");
+  if (!footerEl) return;
+  if (SHOW_FOOTER) {
+    footerEl.style.display = "grid";
+    document.body.style.paddingBottom = "70px";
+  } else {
+    footerEl.style.display = "none";
+    document.body.style.paddingBottom = "0px";
+  }
+})();
+
 // Helper pemanggil Edge Function "api" - menggantikan semua fetch(`${API}?action=...`) versi lama.
 // Selalu POST, selalu JSON, action + parameter lain digabung jadi satu object.
 function callApi(action, params) {
