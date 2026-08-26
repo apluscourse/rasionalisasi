@@ -332,7 +332,6 @@ header h1 {
   box-shadow: var(--shadow); margin-bottom: 25px;
   display: flex; flex-direction: column; gap: 15px;
 }
-/* --- EDIT DROPDOWN JADI SEARCHABLE (KOTAK INPUT STYLE) --- */
 .filter-group {
   position: relative;
   display: flex;
@@ -344,59 +343,83 @@ header h1 {
   font-size: 14px;
   color: var(--text);
 }
-/* Input pencarian text menggantikan select konvensional */
+/* --- KOTAK PTN / PRODI DI MENU RASIONALISASI: DISAMAKAN DENGAN GAYA ADMIN SNBP --- */
+#rasionalisasiMenuContent > .filter-container {
+  background: transparent;
+  padding: 0;
+  box-shadow: none;
+  border-radius: 0;
+  flex-direction: row;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+#rasionalisasiMenuContent > .filter-container .filter-group {
+  flex: 1;
+}
+@media (max-width: 768px) {
+  #rasionalisasiMenuContent > .filter-container {
+    flex-direction: column;
+    gap: 12px;
+  }
+}
+/* Input pencarian text menggantikan select konvensional (gaya sama seperti admin SNBP) */
 .search-select-input {
-  padding: 12px 15px;
-  border-radius: 10px;
-  border: 2px solid #e2e8f0;
+  width: 100%;
+  padding: 14px 18px;
+  border-radius: 16px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
   font-size: 15px;
   font-weight: 600;
-  color: var(--text);
+  color: #0f172a;
   outline: none;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+  box-sizing: border-box;
   transition: 0.2s;
-  background: #ffffff;
 }
 .search-select-input:focus {
   border-color: var(--blue);
 }
-/* Dropdown menu melayang untuk list searchable */
+/* Dropdown menu melayang untuk list searchable (gaya sama seperti admin SNBP) */
 .search-dropdown-list {
   position: absolute;
-  top: 100%;
+  top: 105%;
   left: 0;
-  width: 100%;
+  right: 0;
+  width: auto;
   max-height: 220px;
   overflow-y: auto;
   background: white;
-  border: 2px solid #e2e8f0;
-  border-top: none;
-  border-radius: 0 0 12px 12px;
-  z-index: 50;
-  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  z-index: 1000;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
   display: none;
 }
 .search-dropdown-item {
-  padding: 10px 15px;
+  padding: 12px 16px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   color: var(--text);
+  border-bottom: 1px solid #f1f5f9;
 }
 .search-dropdown-item:hover {
-  background: #e8f2ff;
+  background: #f8fafc;
   color: var(--blue);
 }
 
 /* --- GRID KOTAK 3D TEGAS SEPERTI HEADER & FOOTER --- */
 .rasionalisasi-results-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 18px;
   margin-top: 25px;
 }
 
 /* KOTAK DENGAN STYLE 3D TIMBUL KELUAR */
 .result-card {
+  min-width: 0;
   border-radius: 20px;
   padding: 22px;
   display: flex;
@@ -435,18 +458,30 @@ header h1 {
 .result-item {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: baseline;
   font-size: 15px;
   font-weight: 600;
   gap: 10px;
+  min-width: 0;
 }
 
-/* FONT DOMINAN BESAR PADA DATA AKHIR */
+/* Label (Kuota:, Peminat:, dst) selalu utuh, tidak ikut menyempit */
+.result-item > span:first-child {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* FONT DOMINAN BESAR PADA DATA AKHIR — DIBUAT MELIPAT KE BAWAH, TIDAK MELUBER KE KANAN */
 .result-item span.value {
   font-size: 22px; /* Diperbesar sangat dominan */
   font-weight: 900;
   text-align: right;
   letter-spacing: -0.5px;
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 /* --- TEMA WARNA 3D TEGAS (OUTSET HARD SHADOW) --- */
@@ -2373,6 +2408,26 @@ function forceLogout() {
 
   <div class="footer-part"></div>
 </div>
+
+<script>
+// ---------------------------------------------------------
+// PENANDA TAMPILKAN / SEMBUNYIKAN FOOTER
+// Ubah nilainya: true = footer tampil, false = footer disembunyikan
+// ---------------------------------------------------------
+const SHOW_FOOTER = false;
+
+(function terapkanFooterToggle() {
+  let footerEl = document.querySelector(".footer");
+  if (!footerEl) return;
+  if (SHOW_FOOTER) {
+    footerEl.style.display = "grid";
+    document.body.style.paddingBottom = "70px";
+  } else {
+    footerEl.style.display = "none";
+    document.body.style.paddingBottom = "0px";
+  }
+})();
+</script>
 </body>
 </body>
 </html>
