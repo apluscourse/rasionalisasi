@@ -2224,8 +2224,7 @@ function selectPTN(ptn) {
   
   let prodiInput = document.getElementById("prodiSearch");
   prodiInput.disabled = false;
-  prodiInput.value = "";
-  
+  prodiInput.value = "";  
   let prodiListEl = document.getElementById("prodiList");
   prodiListEl.innerHTML = "";
   
@@ -2245,6 +2244,9 @@ function selectPTN(ptn) {
     item.onclick = () => selectProdi(ptn, prodiName, prodiItem);
     prodiListEl.appendChild(item);
   });
+
+  // Langsung pindah fokus ke kotak Prodi supaya bisa lanjut pilih tanpa klik/tab manual
+  prodiInput.focus();
 }
 
 function selectProdi(ptn, prodiName, prodiData) {
