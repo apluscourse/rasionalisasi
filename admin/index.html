@@ -330,6 +330,11 @@ select,input{
   color: var(--blue);
 }
 
+.dropdown-item.active-keydown {
+  background: #e8f2ff;
+  color: var(--blue);
+}
+
 /* RESULT */
 .result{
   margin-top:12px;
@@ -822,6 +827,8 @@ function showMenu(menu){
 // ================= RASIONALISASI ==================
 let ptnListDataRasio = [];
 let prodiListDataRasio = [];
+let currentPTNIndexRasio = -1;
+let currentProdiIndexRasio = -1;
 
 function loadRasionalisasi(){
   document.getElementById("content").innerHTML=`
@@ -830,12 +837,12 @@ function loadRasionalisasi(){
       <h3 style="margin-bottom:0;">🎓 Rasionalisasi Prodi</h3>
 
     <div class="select-wrapper" style="margin-top:14px;">
-      <input type="text" id="ptn" placeholder="Pilih PTN..." autocomplete="off" onfocus="showDropdownRasio('ptn')" oninput="filterDropdownRasio('ptn')">
+      <input type="text" id="ptn" placeholder="Pilih PTN..." autocomplete="off" onfocus="showDropdownRasio('ptn')" oninput="filterDropdownRasio('ptn')" onkeydown="handleRasioKeydown(event,'ptn')">
       <div id="ptnDropdownList" class="dropdown-list"></div>
     </div>
 
     <div class="select-wrapper">
-      <input type="text" id="prodi" placeholder="Pilih Prodi..." autocomplete="off" disabled onfocus="showDropdownRasio('prodi')" oninput="filterDropdownRasio('prodi')">
+      <input type="text" id="prodi" placeholder="Pilih Prodi..." autocomplete="off" disabled onfocus="showDropdownRasio('prodi')" oninput="filterDropdownRasio('prodi')" onkeydown="handleRasioKeydown(event,'prodi')">
       <div id="prodiDropdownList" class="dropdown-list"></div>
     </div>
 
@@ -876,6 +883,7 @@ function renderDropdownRasio(type, items){
 
 function showDropdownRasio(type){
   if(type==="prodi" && document.getElementById("prodi").disabled) return;
+  if(type==="ptn") currentPTNIndexRasio=-1; else currentProdiIndexRasio=-1;
   const thisList=document.getElementById(type+"DropdownList");
   const otherType=type==="ptn" ? "prodi" : "ptn";
   const otherList=document.getElementById(otherType+"DropdownList");
@@ -884,6 +892,7 @@ function showDropdownRasio(type){
 }
 
 function filterDropdownRasio(type){
+  if(type==="ptn") currentPTNIndexRasio=-1; else currentProdiIndexRasio=-1;
   let keyword=document.getElementById(type).value.toLowerCase();
   let source = type==="ptn" ? ptnListDataRasio : prodiListDataRasio;
   let filtered=source.filter(x=>x.toLowerCase().includes(keyword));
@@ -900,6 +909,8 @@ function selectDropdownRasio(type, value){
     prodiInput.disabled=false;
     document.getElementById("hasil").innerHTML="Silakan pilih Prodi";
     loadProdi();
+    // Langsung pindah fokus ke kotak Prodi supaya bisa lanjut pilih tanpa klik/tab manual
+    prodiInput.focus();
   } else {
     showData();
   }
@@ -914,6 +925,53 @@ document.addEventListener("click", function(e){
     if(l2) l2.style.display="none";
   }
 });
+
+// --- LOGIKA NAVIGASI TOMBOL PANAH KEYBOARD (EXCEL STYLE) UNTUK PTN/PRODI RASIONALISASI ---
+function handleRasioKeydown(e, type){
+  const container=document.getElementById(type+"DropdownList");
+  if(!container || container.style.display==="none") return;
+
+  const items=container.getElementsByClassName("dropdown-item");
+  if(items.length===0) return;
+
+  let idx = type==="ptn" ? currentPTNIndexRasio : currentProdiIndexRasio;
+
+  if(e.key==="ArrowDown"){
+    e.preventDefault();
+    idx=(idx+1) % items.length;
+  } else if(e.key==="ArrowUp"){
+    e.preventDefault();
+    idx=(idx-1+items.length) % items.length;
+  } else if(e.key==="Enter"){
+    e.preventDefault();
+    if(idx>-1 && items[idx]){
+      items[idx].click();
+    }
+    idx=-1;
+  } else {
+    return;
+  }
+
+  if(type==="ptn") currentPTNIndexRasio=idx; else currentProdiIndexRasio=idx;
+  highlightDropdownItemRasio(items, idx, container);
+}
+
+// Efek highlight biru muda saat item dilewati keyboard + auto scroll mengejar
+function highlightDropdownItemRasio(items, index, container){
+  for(let i=0;i<items.length;i++){
+    items[i].classList.remove("active-keydown");
+  }
+  const activeItem=items[index];
+  if(!activeItem) return;
+
+  activeItem.classList.add("active-keydown");
+
+  if(activeItem.offsetTop + activeItem.clientHeight > container.scrollTop + container.clientHeight){
+    container.scrollTop = activeItem.offsetTop + activeItem.clientHeight - container.clientHeight;
+  } else if(activeItem.offsetTop < container.scrollTop){
+    container.scrollTop = activeItem.offsetTop;
+  }
+}
 
 function showData(){
 
