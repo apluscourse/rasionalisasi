@@ -1424,6 +1424,9 @@ function onPTNSelectedAction() {
   let filteredProdi = masterProdiData.filter(item => item.ptn === selectedPTNName);
   filteredProdi.sort((a,b) => a.prodi.localeCompare(b.prodi));
   renderProdiList(filteredProdi);
+
+  // Langsung pindah fokus ke kotak Prodi supaya bisa lanjut pilih tanpa klik/tab manual
+  prodiInput.focus();
 }
 
 function renderProdiList(dataArray) {
@@ -2412,7 +2415,7 @@ function forceLogout() {
 // PENANDA TAMPILKAN / SEMBUNYIKAN FOOTER
 // Ubah nilainya: true = footer tampil, false = footer disembunyikan
 // ---------------------------------------------------------
-const SHOW_FOOTER = true;
+const SHOW_FOOTER = false;
 
 (function terapkanFooterToggle() {
   let footerEl = document.querySelector(".footer");
