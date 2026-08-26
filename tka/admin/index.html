@@ -457,31 +457,35 @@ header h1 {
 
 .result-item {
   display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  font-size: 15px;
-  font-weight: 600;
-  gap: 10px;
+  flex-direction: column;
+  gap: 3px;
   min-width: 0;
 }
 
-/* Label (Kuota:, Peminat:, dst) selalu utuh, tidak ikut menyempit */
-.result-item > span:first-child {
-  flex-shrink: 0;
-  white-space: nowrap;
+/* Label (statis: Kuota/Peminat/dst, ATAU dinamis: nama mapel pada lblTka1/lblTka2/lblPkk) */
+.result-item > span:first-child:not(.value) {
+  font-size: 12.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  opacity: 0.85;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  line-height: 1.35;
 }
 
-/* FONT DOMINAN BESAR PADA DATA AKHIR — DIBUAT MELIPAT KE BAWAH, TIDAK MELUBER KE KANAN */
+/* FONT DOMINAN BESAR PADA DATA AKHIR — SELALU MELIPAT KE BAWAH, TIDAK PERNAH MELUBER */
 .result-item span.value {
+  display: block;
   font-size: 22px; /* Diperbesar sangat dominan */
   font-weight: 900;
-  text-align: right;
+  text-align: left;
   letter-spacing: -0.5px;
-  flex: 1 1 auto;
   min-width: 0;
   white-space: normal;
   word-break: break-word;
   overflow-wrap: break-word;
+  line-height: 1.2;
 }
 
 /* --- TEMA WARNA 3D TEGAS (OUTSET HARD SHADOW) --- */
