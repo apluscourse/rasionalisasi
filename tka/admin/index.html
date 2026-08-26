@@ -620,11 +620,10 @@ header h1 {
 }
 
 .table-scroll-container {
-  max-height: 400px; /* Ukuran tinggi maksimal box tabel */
-  overflow-y: auto;  /* Scroll vertikal jika data banyak */
   border: 1px solid #e2e8f0;
   border-radius: 10px;
   margin-top: 15px;
+  /* Dibuat memanjang kebawah mengikuti jumlah data, tanpa batas tinggi/scroll */
 }
 
 .peminatan-table {
@@ -1092,38 +1091,12 @@ header h1 {
     </div>
 
     <div id="peminatanResultSection" style="display: none;">
-      <h3 style="font-size: 15px; font-weight: 800; color: var(--text); text-transform: uppercase; margin-bottom: 15px; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px;">
-        <i class="fas fa-sliders"></i> Filter Pencarian Hasil
-      </h3>
-      
-      <div class="filter-container" style="margin-bottom: 20px; padding: 0; box-shadow: none; background: transparent;">
-        <div class="filter-group" style="flex: 1;">
-          <label><i class="fas fa-university"></i> Filter PTN</label>
-          <input type="text" id="searchPeminatanPTN" class="search-select-input" placeholder="Ketik nama PTN untuk menyaring..." autocomplete="off" oninput="filterPeminatanTable()">
-          <div id="listPeminatanPTNDropdown" class="search-dropdown-list"></div>
-        </div>
-        
-        <div class="filter-group" style="flex: 1;">
-          <label><i class="fas fa-gauge-high"></i> Filter Target TKA</label>
-          <select id="filterPeminatanTarget" class="peminatan-select" onchange="filterPeminatanTable()">
-            <option value="">-- Semua Kategori Nilai --</option>
-            <option value="KURANG">KURANG</option>
-            <option value="MEMADAI">MEMADAI</option>
-            <option value="BAIK">BAIK</option>
-            <option value="ISTIMEWA">ISTIMEWA</option>
-          </select>
-        </div>
-      </div>
-
       <div class="table-scroll-container">
         <table class="peminatan-table">
           <thead>
             <tr>
-              <th style="width: 50px; text-align: center;">No</th>
-              <th>PTN</th>
+              <th style="width: 60px; text-align: center;">No</th>
               <th>Prodi</th>
-              <th style="text-align: right;">Keketatan SNBP</th>
-              <th style="text-align: right;">Target TKA (Kategori)</th>
             </tr>
           </thead>
           <tbody id="peminatanTableBody">
@@ -1762,8 +1735,6 @@ function onMapel1Changed() {
 function resetPeminatToPlaceholder() {
   document.getElementById("peminatanPlaceholder").style.display = "block";
   document.getElementById("peminatanResultSection").style.display = "none";
-  document.getElementById("searchPeminatanPTN").value = "";
-  document.getElementById("filterPeminatanTarget").value = "";
 }
 
 // Fungsi Evaluasi Utama Penyaringan Kompleks Kombinasi Mapel
@@ -1800,66 +1771,36 @@ function generatePeminatanResult() {
     return (t1 === checkM1 && t2 === checkM2) || (t1 === checkM2 && t2 === checkM1);
   });
   
-  // Render data hasil akhir ke struktur tabel HTML
+  // Render data hasil akhir ke struktur tabel HTML (nama prodi saja, tanpa PTN, unik/tidak berganda)
   renderPeminatanTableData(filteredPeminatanRows);
 }
 
 // Memproses visualisasi array data ke dalam element tbody tabel
+// Hanya menampilkan No & Prodi, nama prodi di-unique-kan agar tidak ada data berganda
 function renderPeminatanTableData(dataArray) {
   const tbody = document.getElementById("peminatanTableBody");
   tbody.innerHTML = "";
-  
-  if (dataArray.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--muted); padding:30px;">Tidak ada data prodi yang cocok dengan kriteria mapel pilihan.</td></tr>';
+
+  // Ambil nama prodi unik saja (tanpa PTN)
+  let uniqueProdiSet = new Set();
+  dataArray.forEach(item => {
+    if (item.prodi) uniqueProdiSet.add(item.prodi.trim());
+  });
+  let uniqueProdiList = [...uniqueProdiSet].sort((a, b) => a.localeCompare(b));
+
+  if (uniqueProdiList.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="2" style="text-align:center; color:var(--muted); padding:30px;">Tidak ada data prodi yang cocok dengan kriteria mapel pilihan.</td></tr>';
     return;
   }
-  
-  dataArray.forEach((item, index) => {
+
+  uniqueProdiList.forEach((prodi, index) => {
     let tr = document.createElement("tr");
-    
-    // Format persen keketatan SNBP
-    let rasioPercent = "-";
-    let rawRasio = parseFloat(item.rasioSnbp);
-    if (!isNaN(rawRasio) && rawRasio > 0) {
-      rasioPercent = (rawRasio * 100).toFixed(2) + "%";
-    }
-    
-    let targetText = (item.nilai1 || item.nilai2) ? `${item.kategoriNilai || "-"}` : "-";
-    
     tr.innerHTML = `
       <td style="text-align: center; color: var(--muted);">${index + 1}</td>
-      <td>${item.ptn}</td>
-      <td style="color: var(--blue);">${item.prodi}</td>
-      <td style="text-align: right;">${rasioPercent}</td>
-      <td style="text-align: right; font-weight: 800;">${targetText}</td>
+      <td style="color: var(--blue);">${prodi}</td>
     `;
     tbody.appendChild(tr);
   });
-}
-
-// Logika fungsi filter pencarian dinamis (Filter Kampus & Filter Kategori Nilai)
-function filterPeminatanTable() {
-  let searchKeyword = document.getElementById("searchPeminatanPTN").value.toLowerCase().trim();
-  let targetFilterValue = document.getElementById("filterPeminatanTarget").value.toUpperCase();
-  
-  let finalFiltered = filteredPeminatanRows.filter(item => {
-    let matchPTN = true;
-    let matchTarget = true;
-    
-    if (searchKeyword !== "") {
-      let ptnName = item.ptn ? item.ptn.toLowerCase() : "";
-      matchPTN = ptnName.includes(searchKeyword);
-    }
-    
-    if (targetFilterValue !== "") {
-      let katNilai = item.kategoriNilai ? item.kategoriNilai.toUpperCase().trim() : "";
-      matchTarget = (katNilai === targetFilterValue);
-    }
-    
-    return matchPTN && matchTarget;
-  });
-  
-  renderPeminatanTableData(finalFiltered);
 }
 
 
@@ -2272,6 +2213,22 @@ function toggleMenu() {
   document.getElementById('overlay').classList.toggle('active');
 }
 
+// Menutup menu jika user klik dimanapun di luar sidebar & tombol menu
+document.addEventListener('click', function(event) {
+  const sidebar = document.getElementById('sidebarMenu');
+  const menuBtn = document.querySelector('.menu-btn');
+  if (!sidebar || !sidebar.classList.contains('active')) return;
+
+  const clickedInsideSidebar = sidebar.contains(event.target);
+  const clickedMenuBtn = menuBtn && menuBtn.contains(event.target);
+
+  if (!clickedInsideSidebar && !clickedMenuBtn) {
+    sidebar.classList.remove('active');
+    const overlay = document.getElementById('overlay');
+    if (overlay) overlay.classList.remove('active');
+  }
+});
+
 // Deteksi Status Internet Browser secara real-time
 window.addEventListener('offline', function() {
   alert("❌ Anda tidak terhubung internet! Sistem mendeteksi status offline.");
@@ -2415,7 +2372,7 @@ function forceLogout() {
 // PENANDA TAMPILKAN / SEMBUNYIKAN FOOTER
 // Ubah nilainya: true = footer tampil, false = footer disembunyikan
 // ---------------------------------------------------------
-const SHOW_FOOTER = false;
+const SHOW_FOOTER = true;
 
 (function terapkanFooterToggle() {
   let footerEl = document.querySelector(".footer");
