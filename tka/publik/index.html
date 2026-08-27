@@ -359,7 +359,6 @@ header h1 {
   box-shadow: var(--shadow); margin-bottom: 25px;
   display: flex; flex-direction: column; gap: 15px;
 }
-/* --- EDIT DROPDOWN JADI SEARCHABLE (KOTAK INPUT STYLE) --- */
 .filter-group {
   position: relative;
   display: flex;
@@ -371,45 +370,66 @@ header h1 {
   font-size: 14px;
   color: var(--text);
 }
-/* Input pencarian text menggantikan select konvensional */
+/* --- KOTAK PTN / PRODI DI MENU RASIONALISASI: GAYA SAMA SEPERTI ADMIN SNBP, SUSUNAN ATAS-BAWAH --- */
+#rasionalisasiMenuContent > .filter-container {
+  background: transparent;
+  padding: 0;
+  box-shadow: none;
+  border-radius: 0;
+  flex-direction: column;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+#rasionalisasiMenuContent > .filter-container .filter-group {
+  flex: 1;
+}
+/* Input pencarian text menggantikan select konvensional (gaya sama seperti admin SNBP) */
 .search-select-input {
-  padding: 12px 15px;
-  border-radius: 10px;
-  border: 2px solid #e2e8f0;
+  width: 100%;
+  padding: 14px 18px;
+  border-radius: 16px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
   font-size: 15px;
   font-weight: 600;
-  color: var(--text);
+  color: #0f172a;
   outline: none;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+  box-sizing: border-box;
   transition: 0.2s;
-  background: #ffffff;
 }
 .search-select-input:focus {
   border-color: var(--blue);
 }
-/* Dropdown menu melayang untuk list searchable */
+/* Dropdown menu melayang untuk list searchable (gaya sama seperti admin SNBP) */
 .search-dropdown-list {
   position: absolute;
-  top: 100%;
+  top: 105%;
   left: 0;
-  width: 100%;
+  right: 0;
+  width: auto;
   max-height: 220px;
   overflow-y: auto;
   background: white;
-  border: 2px solid #e2e8f0;
-  border-top: none;
-  border-radius: 0 0 12px 12px;
-  z-index: 50;
-  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  z-index: 1000;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
   display: none;
 }
 .search-dropdown-item {
-  padding: 10px 15px;
+  padding: 12px 16px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   color: var(--text);
+  border-bottom: 1px solid #f1f5f9;
 }
 .search-dropdown-item:hover {
+  background: #f8fafc;
+  color: var(--blue);
+}
+.search-dropdown-item.active-keydown {
   background: #e8f2ff;
   color: var(--blue);
 }
@@ -417,13 +437,14 @@ header h1 {
 /* --- GRID KOTAK 3D TEGAS SEPERTI HEADER & FOOTER --- */
 .rasionalisasi-results-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 18px;
   margin-top: 25px;
 }
 
 /* KOTAK DENGAN STYLE 3D TIMBUL KELUAR */
 .result-card {
+  min-width: 0;
   border-radius: 20px;
   padding: 22px;
   display: flex;
@@ -461,19 +482,35 @@ header h1 {
 
 .result-item {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 15px;
-  font-weight: 600;
-  gap: 10px;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
 }
 
-/* FONT DOMINAN BESAR PADA DATA AKHIR */
+/* Label (statis: Kuota/Peminat/dst, ATAU dinamis: nama mapel pada lblTka1/lblTka2/lblPkk) */
+.result-item > span:first-child:not(.value) {
+  font-size: 12.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  opacity: 0.85;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  line-height: 1.35;
+}
+
+/* FONT DOMINAN BESAR PADA DATA AKHIR — SELALU MELIPAT KE BAWAH, TIDAK PERNAH MELUBER */
 .result-item span.value {
+  display: block;
   font-size: 22px; /* Diperbesar sangat dominan */
   font-weight: 900;
-  text-align: right;
+  text-align: left;
   letter-spacing: -0.5px;
+  min-width: 0;
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  line-height: 1.2;
 }
 
 /* --- TEMA WARNA 3D TEGAS (OUTSET HARD SHADOW) --- */
@@ -804,16 +841,11 @@ header h1 {
   align-items: center;
   gap: 12px;
   box-shadow: inset 0 -2px 0px #e2e8f0; /* Efek kedalaman 3D tipis */
-  transition: transform 0.2s ease, background 0.2s ease;
-}
-.submateri-item:hover {
-  background: #f1f5f9;
-  transform: translateX(3px);
-  color: var(--text);
+  cursor: default;
 }
 .submateri-item i {
   color: #a0aec0;
-  font-size: 12px;
+  font-size: 8px;
 }
 
 /* --- CSS BARU: LOGOUT MERAH & MODAL POPUP --- */
@@ -972,7 +1004,7 @@ header h1 {
   </div>
 </header>
 
-<div class="overlay" onclick="toggleMenu()"></div>
+<div class="overlay" id="overlay" onclick="toggleMenu()"></div>
 
 <div class="sidebar" id="sidebarMenu">
   <a href="#" class="active-menu" id="menuLinkProfil" onclick="switchMenu('profil')"><i class="fas fa-user"></i> Profil</a>
@@ -1006,13 +1038,13 @@ header h1 {
   <div class="filter-container">
     <div class="filter-group">
       <label><i class="fas fa-university"></i> Perguruan Tinggi Negeri (PTN)</label>
-      <input type="text" id="searchPTN" class="search-select-input" placeholder="Ketik nama PTN / Kampus..." oninput="filterPTNAction()" onfocus="showPTNDropdown()" onkeydown="handlePTNKeydown(event)">
+      <input type="text" id="searchPTN" class="search-select-input" placeholder="Ketik nama PTN / Kampus..." autocomplete="off" oninput="filterPTNAction()" onfocus="showPTNDropdown()" onkeydown="handlePTNKeydown(event)">
       <div id="listPTNDropdown" class="search-dropdown-list"></div>
     </div>
     
     <div class="filter-group">
       <label><i class="fas fa-book-open"></i> Program Studi (Prodi)</label>
-      <input type="text" id="searchProdi" class="search-select-input" placeholder="-- Pilih PTN Terlebih Dahulu --" oninput="filterProdiAction()" onfocus="showProdiDropdown()" onkeydown="handleProdiKeydown(event)" disabled>
+      <input type="text" id="searchProdi" class="search-select-input" placeholder="-- Pilih PTN Terlebih Dahulu --" autocomplete="off" oninput="filterProdiAction()" onfocus="showProdiDropdown()" onkeydown="handleProdiKeydown(event)" disabled>
       <div id="listProdiDropdown" class="search-dropdown-list"></div>
     </div>
   </div>
@@ -1061,10 +1093,19 @@ header h1 {
 
   <div class="filter-container" style="flex-direction: column; gap: 5px;">
     <h3 style="font-size: 15px; font-weight: 800; color: var(--text); text-transform: uppercase; margin-bottom: 10px;">
-      <i class="fas fa-list-check"></i> Silahkan Pilih Mata Pelajaran Pilihan
+      <i class="fas fa-list-check"></i> Silahkan Pilih Jenjang &amp; Mata Pelajaran/Program Keahlian
     </h3>
-    
-    <div class="peminatan-grid">
+
+    <div class="filter-group">
+      <label>Pilih Jenjang</label>
+      <select id="jenjangPeminatan" class="peminatan-select" onchange="onJenjangChanged()">
+        <option value="">-- Pilih Jenjang --</option>
+        <option value="SMA">SMA/MA</option>
+        <option value="SMK">SMK/MK</option>
+      </select>
+    </div>
+
+    <div class="peminatan-grid" id="smaMapelWrapper" style="display: none;">
       <div class="filter-group">
         <label>Mata Pelajaran Pilihan 1</label>
         <select id="mapelPilihan1" class="peminatan-select" onchange="onMapel1Changed()">
@@ -1079,47 +1120,32 @@ header h1 {
         </select>
       </div>
     </div>
+
+    <div class="filter-group" id="smkKeahlianWrapper" style="display: none;">
+      <label>Program Keahlian</label>
+      <select id="programKeahlian" class="peminatan-select" onchange="generatePeminatanResult()">
+        <option value="">-- Pilih Program Keahlian --</option>
+      </select>
+    </div>
   </div>
 
   <div class="peminatan-result-box">
     <div id="peminatanPlaceholder" class="info-placeholder">
       <i class="fas fa-circle-info" style="font-size: 24px; margin-bottom: 10px; display: block; color: var(--blue);"></i>
-      Silahkan pilih terlebih dahulu Mata Pelajaran Pilihan yang diinginkan.
+      Silahkan pilih Jenjang, lalu Mata Pelajaran Pilihan (SMA/MA) atau Program Keahlian (SMK/MK) terlebih dahulu.
     </div>
 
     <div id="peminatanResultSection" style="display: none;">
       <h3 style="font-size: 15px; font-weight: 800; color: var(--text); text-transform: uppercase; margin-bottom: 15px; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px;">
-        <i class="fas fa-sliders"></i> Filter Pencarian Hasil
+        <i class="fas fa-list-ol"></i> Daftar Program Studi
       </h3>
-      
-      <div class="filter-container" style="margin-bottom: 20px; padding: 0; box-shadow: none; background: transparent;">
-        <div class="filter-group" style="flex: 1;">
-          <label><i class="fas fa-university"></i> Filter PTN</label>
-          <input type="text" id="searchPeminatanPTN" class="search-select-input" placeholder="Ketik nama PTN untuk menyaring..." oninput="filterPeminatanTable()">
-          <div id="listPeminatanPTNDropdown" class="search-dropdown-list"></div>
-        </div>
-        
-        <div class="filter-group" style="flex: 1;">
-          <label><i class="fas fa-gauge-high"></i> Filter Target TKA</label>
-          <select id="filterPeminatanTarget" class="peminatan-select" onchange="filterPeminatanTable()">
-            <option value="">-- Semua Kategori Nilai --</option>
-            <option value="KURANG">KURANG</option>
-            <option value="MEMADAI">MEMADAI</option>
-            <option value="BAIK">BAIK</option>
-            <option value="ISTIMEWA">ISTIMEWA</option>
-          </select>
-        </div>
-      </div>
 
       <div class="table-scroll-container">
         <table class="peminatan-table">
           <thead>
             <tr>
-              <th style="width: 50px; text-align: center;">No</th>
-              <th>PTN</th>
+              <th style="width: 60px; text-align: center;">No.</th>
               <th>Prodi</th>
-              <th style="text-align: right;">Keketatan SNBP</th>
-              <th style="text-align: right;">Target TKA (Kategori)</th>
             </tr>
           </thead>
           <tbody id="peminatanTableBody">
@@ -1267,7 +1293,7 @@ header h1 {
 </div>
 
 <script>
-const API = "https://script.google.com/macros/s/AKfycbxQj4llNOlzINB59yuZQv-33mq-Eq359SrDzBmy4L5yH-WSsQSYkWzqs6_rjrJDDK0s/exec";
+const API = "https://script.google.com/macros/s/AKfycby6_2CLW7PSAKZq0mKmAEz9dY5zsKAe1sX1FLbZKZ0SPKhwlyItaS694elld5tqt-sW/exec";
 
 //FUNGSI RASIONALISASI PRODI
 
@@ -1293,7 +1319,7 @@ function switchMenu(menuName) {
   } else if (menuName === "peminatan") {
     document.getElementById("peminatanMenuContent").style.display = "block";
     document.getElementById("menuLinkPeminatan").classList.add("active-menu");
-    if (masterProdiData.length === 0) loadSpreadsheetPTNData(); else initMapelPilihanOptions();
+    if (masterProdiData.length === 0) loadSpreadsheetPTNData();
   } else if (menuName === "statistik") {
     document.getElementById("statistikMenuContent").style.display = "block";
     document.getElementById("menuLinkStatistik").classList.add("active-menu");
@@ -1340,11 +1366,6 @@ function loadSpreadsheetPTNData() {
         // Tetap jalankan dropdown Rasionalisasi Prodi jika elemennya ada
         if (typeof populatePTNDropdown === "function") {
           populatePTNDropdown();
-        }
-        
-        // PERBAIKAN AMAN: Mengisi dropdown Menu Peminatan jika fungsi sudah ready
-        if (typeof initMapelPilihanOptions === "function") {
-          initMapelPilihanOptions();
         }
         
       } else {
@@ -1420,6 +1441,9 @@ function onPTNSelectedAction() {
   let filteredProdi = masterProdiData.filter(item => item.ptn === selectedPTNName);
   filteredProdi.sort((a,b) => a.prodi.localeCompare(b.prodi));
   renderProdiList(filteredProdi);
+
+  // Langsung pindah fokus ke kotak Prodi supaya bisa lanjut pilih tanpa klik/tab manual
+  prodiInput.focus();
 }
 
 function renderProdiList(dataArray) {
@@ -1681,65 +1705,134 @@ function animateCountUp(targetId, targetValue, isDecimal = false) {
 
 // FUNGSI MENU PEMINATAN PRODI
 
-let filteredPeminatanRows = []; // Menyimpan baris data hasil penyaringan mapel
+// Daftar tetap Mata Pelajaran Pilihan untuk jenjang SMA/MA
+const SMA_MAPEL_LIST = [
+  "Matematika Tingkat Lanjut",
+  "Bahasa Inggris Tingkat Lanjut",
+  "Fisika",
+  "Kimia",
+  "Biologi",
+  "Pendidikan Pancasila dan Kewarganegaraan",
+  "Ekonomi",
+  "Geografi",
+  "Sosiologi",
+  "Sejarah",
+  "Antropologi",
+  "Bahasa Prancis",
+  "Bahasa Jerman",
+  "Bahasa Jepang",
+  "Bahasa Mandarin",
+  "Bahasa Korea",
+  "Bahasa Arab"
+];
 
-// Mengisi data pilihan unik Mata Pelajaran ke Kotak 1
-function initMapelPilihanOptions() {
+// Daftar tetap Program Keahlian untuk jenjang SMK/MK
+const SMK_KEAHLIAN_LIST = [
+  "SMK - Produk atau Projek Kreatif dan Kewirausahaan",
+  "SMK - Teknik Perawatan Gedung",
+  "SMK - Konstruksi dan Perawatan Bangunan Sipil",
+  "SMK - Teknik Konstruksi dan Perumahan",
+  "SMK - Desain Pemodelan dan Informasi Bangunan",
+  "SMK - Teknik Furnitur",
+  "SMK - Teknik Mesin",
+  "SMK - Teknik Otomotif",
+  "SMK - Teknik Pengelasan dan Fabrikasi Logam",
+  "SMK - Teknik Logistik",
+  "SMK - Teknik Elektronika",
+  "SMK - Teknik Pesawat Udara",
+  "SMK - Teknik Konstruksi Kapal",
+  "SMK - Kimia Analisis",
+  "SMK - Teknik Kimia Industri",
+  "SMK - Teknik Tekstil",
+  "SMK - Teknik Ketenagalistrikan",
+  "SMK - Teknik Energi Terbarukan",
+  "SMK - Teknik Geospasial",
+  "SMK - Teknik Geologi Pertambangan",
+  "SMK - Teknik Perminyakan",
+  "SMK - Pengembangan Perangkat Lunak dan Gim",
+  "SMK - Teknik Jaringan Komputer dan Telekomunikasi",
+  "SMK - Layanan Kesehatan",
+  "SMK - Teknik Laboratorium Medik",
+  "SMK - Teknologi Farmasi",
+  "SMK - Pekerjaan Sosial",
+  "SMK - Agribisnis Tanaman",
+  "SMK - Agribisnis Ternak",
+  "SMK - Agribisnis Perikanan",
+  "SMK - Usaha Pertanian Terpadu",
+  "SMK - Agriteknologi Pengolahan Hasil Pertanian",
+  "SMK - Kehutanan",
+  "SMK - Teknika Kapal Penangkap Ikan",
+  "SMK - Nautika Kapal Penangkap Ikan",
+  "SMK - Teknika Kapal Niaga",
+  "SMK - Nautika Kapal Niaga",
+  "SMK - Pemasaran",
+  "SMK - Manajemen Perkantoran dan Layanan Bisnis",
+  "SMK - Akuntansi dan Keuangan Lembaga",
+  "SMK - Usaha Layanan Pariwisata",
+  "SMK - Perhotelan",
+  "SMK - Kuliner",
+  "SMK - Kecantikan dan Spa",
+  "SMK - Seni Rupa",
+  "SMK - Desain Komunikasi Visual",
+  "SMK - Desain dan Produksi Kriya",
+  "SMK - Seni Pertunjukan",
+  "SMK - Broadcasting dan Perfilman",
+  "SMK - Animasi",
+  "SMK - Busana"
+];
+
+// Terpicu saat dropdown Jenjang diganti
+function onJenjangChanged() {
+  const jenjang = document.getElementById("jenjangPeminatan").value;
+  const smaWrap = document.getElementById("smaMapelWrapper");
+  const smkWrap = document.getElementById("smkKeahlianWrapper");
   const m1Select = document.getElementById("mapelPilihan1");
-  if (!m1Select || masterProdiData.length === 0) return;
-  
-  // Ambil semua dari tka1, bersihkan spasi, cari yang unik, lalu sorting abjad
-  let mapelSet = new Set();
-  masterProdiData.forEach(item => {
-    if (item.tka1) mapelSet.add(item.tka1.trim());
-  });
-  
-  // Tambah entitas khusus "PKK"
-  mapelSet.add("PKK");
-  
-  let uniqueMapel = [...mapelSet];
-  uniqueMapel.sort((a, b) => a.localeCompare(b));
-  
-  // Masukkan ke element select
-  m1Select.innerHTML = '<option value="">-- Pilih Mapel 1 --</option>';
-  uniqueMapel.forEach(m => {
-    let opt = document.createElement("option");
-    opt.value = m;
-    opt.innerText = m;
-    m1Select.appendChild(opt);
-  });
-  
-  // Reset Kotak 2 ke kondisi default mula-mula
   const m2Select = document.getElementById("mapelPilihan2");
+  const pkSelect = document.getElementById("programKeahlian");
+
+  // Reset semua isi & kondisi ke awal setiap ganti jenjang
+  m1Select.innerHTML = '<option value="">-- Pilih Mapel 1 --</option>';
   m2Select.innerHTML = '<option value="">-- Pilih Mapel 2 --</option>';
   m2Select.disabled = true;
+  pkSelect.innerHTML = '<option value="">-- Pilih Program Keahlian --</option>';
   resetPeminatToPlaceholder();
+
+  if (jenjang === "SMA") {
+    smaWrap.style.display = "grid";
+    smkWrap.style.display = "none";
+    SMA_MAPEL_LIST.forEach(m => {
+      let opt = document.createElement("option");
+      opt.value = m; opt.innerText = m;
+      m1Select.appendChild(opt);
+    });
+  } else if (jenjang === "SMK") {
+    smaWrap.style.display = "none";
+    smkWrap.style.display = "flex";
+    SMK_KEAHLIAN_LIST.forEach(pk => {
+      let opt = document.createElement("option");
+      opt.value = pk; opt.innerText = pk;
+      pkSelect.appendChild(opt);
+    });
+  } else {
+    smaWrap.style.display = "none";
+    smkWrap.style.display = "none";
+  }
 }
 
-// Terpicu saat Kotak 1 ditentukan nilainya
+// Terpicu saat Kotak Mapel 1 (SMA/MA) ditentukan nilainya
 function onMapel1Changed() {
   const val1 = document.getElementById("mapelPilihan1").value;
   const m2Select = document.getElementById("mapelPilihan2");
-  
+
+  m2Select.innerHTML = '<option value="">-- Pilih Mapel 2 --</option>';
+
   if (!val1) {
-    m2Select.innerHTML = '<option value="">-- Pilih Mapel 2 --</option>';
     m2Select.disabled = true;
     resetPeminatToPlaceholder();
     return;
   }
-  
-  // Regenerasi opsi untuk kotak 2 (Kecuali item yang sudah dipilih di kotak 1)
-  let mapelSet = new Set();
-  masterProdiData.forEach(item => {
-    if (item.tka1) mapelSet.add(item.tka1.trim());
-  });
-  mapelSet.add("PKK");
-  
-  let uniqueMapel = [...mapelSet];
-  uniqueMapel.sort((a, b) => a.localeCompare(b));
-  
-  m2Select.innerHTML = '<option value="">-- Pilih Mapel 2 --</option>';
-  uniqueMapel.forEach(m => {
+
+  SMA_MAPEL_LIST.forEach(m => {
     if (m !== val1) { // Proteksi filter pengecualian item kotak 1
       let opt = document.createElement("option");
       opt.value = m;
@@ -1747,7 +1840,7 @@ function onMapel1Changed() {
       m2Select.appendChild(opt);
     }
   });
-  
+
   m2Select.disabled = false;
   resetPeminatToPlaceholder();
 }
@@ -1755,104 +1848,72 @@ function onMapel1Changed() {
 function resetPeminatToPlaceholder() {
   document.getElementById("peminatanPlaceholder").style.display = "block";
   document.getElementById("peminatanResultSection").style.display = "none";
-  document.getElementById("searchPeminatanPTN").value = "";
-  document.getElementById("filterPeminatanTarget").value = "";
 }
 
-// Fungsi Evaluasi Utama Penyaringan Kompleks Kombinasi Mapel
+// Fungsi Evaluasi Utama: menyaring data sesuai Jenjang yang aktif
 function generatePeminatanResult() {
-  const m1 = document.getElementById("mapelPilihan1").value;
-  const m2 = document.getElementById("mapelPilihan2").value;
-  
-  if (!m1 || !m2) {
+  const jenjang = document.getElementById("jenjangPeminatan").value;
+  let filteredRows = [];
+
+  if (jenjang === "SMA") {
+    const m1 = document.getElementById("mapelPilihan1").value;
+    const m2 = document.getElementById("mapelPilihan2").value;
+    if (!m1 || !m2) { resetPeminatToPlaceholder(); return; }
+
+    let checkM1 = m1.toLowerCase().trim();
+    let checkM2 = m2.toLowerCase().trim();
+
+    filteredRows = masterProdiData.filter(item => {
+      let t1 = item.tka1 ? item.tka1.toLowerCase().trim() : "";
+      let t2 = item.tka2 ? item.tka2.toLowerCase().trim() : "";
+      // Mendukung Bolak-Balik: AB == AB atau AB == BA
+      return (t1 === checkM1 && t2 === checkM2) || (t1 === checkM2 && t2 === checkM1);
+    });
+
+  } else if (jenjang === "SMK") {
+    const pk = document.getElementById("programKeahlian").value;
+    if (!pk) { resetPeminatToPlaceholder(); return; }
+
+    let checkPK = pk.toLowerCase().trim();
+
+    filteredRows = masterProdiData.filter(item => {
+      let s = item.smk ? item.smk.toLowerCase().trim() : "";
+      return s === checkPK;
+    });
+
+  } else {
     resetPeminatToPlaceholder();
     return;
   }
-  
+
   document.getElementById("peminatanPlaceholder").style.display = "none";
   document.getElementById("peminatanResultSection").style.display = "block";
-  
-  let checkM1 = m1.toLowerCase().trim();
-  let checkM2 = m2.toLowerCase().trim();
-  
-  // Memulai kalkulasi filter array data master
-  filteredPeminatanRows = masterProdiData.filter(item => {
-    let t1 = item.tka1 ? item.tka1.toLowerCase().trim() : "";
-    let t2 = item.tka2 ? item.tka2.toLowerCase().trim() : "";
-    
-    // KONDISI A: Salah satu atau kedua kotak memilih PKK
-    if (checkM1 === "pkk" || checkM2 === "pkk") {
-      let nonPkkSearch = checkM1 === "pkk" ? checkM2 : checkM1;
-      // Jika kedua-duanya memilih PKK (kasus langka), loloskan semua data
-      if (checkM1 === "pkk" && checkM2 === "pkk") return true;
-      // Loloskan data jika tka1 atau tka2 mengandung mapel non-pkk tersebut
-      return (t1 === nonPkkSearch || t2 === nonPkkSearch);
-    }
-    
-    // KONDISI B: Mapel Umum Normal (Mendukung Bolak-Balik AB == AB atau AB == BA)
-    return (t1 === checkM1 && t2 === checkM2) || (t1 === checkM2 && t2 === checkM1);
-  });
-  
-  // Render data hasil akhir ke struktur tabel HTML
-  renderPeminatanTableData(filteredPeminatanRows);
+
+  renderPeminatanTableData(filteredRows);
 }
 
-// Memproses visualisasi array data ke dalam element tbody tabel
+// Memproses visualisasi ke tabel HTML: hanya No. & Prodi, sudah di-unique-kan
 function renderPeminatanTableData(dataArray) {
   const tbody = document.getElementById("peminatanTableBody");
   tbody.innerHTML = "";
-  
-  if (dataArray.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--muted); padding:30px;">Tidak ada data prodi yang cocok dengan kriteria mapel pilihan.</td></tr>';
+
+  // Unique-kan nama prodi supaya tidak ada data berganda
+  let uniqueProdi = [...new Set(dataArray.map(item => (item.prodi || "").trim()).filter(p => p !== ""))];
+  uniqueProdi.sort((a, b) => a.localeCompare(b));
+
+  if (uniqueProdi.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="2" style="text-align:center; color:var(--muted); padding:30px;">Tidak ada data prodi yang cocok dengan kriteria yang dipilih.</td></tr>';
     return;
   }
-  
-  dataArray.forEach((item, index) => {
+
+  uniqueProdi.forEach((prodi, index) => {
     let tr = document.createElement("tr");
-    
-    // Format persen keketatan SNBP
-    let rasioPercent = "-";
-    let rawRasio = parseFloat(item.rasioSnbp);
-    if (!isNaN(rawRasio) && rawRasio > 0) {
-      rasioPercent = (rawRasio * 100).toFixed(2) + "%";
-    }
-    
-    let targetText = (item.nilai1 || item.nilai2) ? `${item.kategoriNilai || "-"}` : "-";
-    
     tr.innerHTML = `
       <td style="text-align: center; color: var(--muted);">${index + 1}</td>
-      <td>${item.ptn}</td>
-      <td style="color: var(--blue);">${item.prodi}</td>
-      <td style="text-align: right;">${rasioPercent}</td>
-      <td style="text-align: right; font-weight: 800;">${targetText}</td>
+      <td style="color: var(--blue); font-weight: 700;">${prodi}</td>
     `;
     tbody.appendChild(tr);
   });
-}
-
-// Logika fungsi filter pencarian dinamis (Filter Kampus & Filter Kategori Nilai)
-function filterPeminatanTable() {
-  let searchKeyword = document.getElementById("searchPeminatanPTN").value.toLowerCase().trim();
-  let targetFilterValue = document.getElementById("filterPeminatanTarget").value.toUpperCase();
-  
-  let finalFiltered = filteredPeminatanRows.filter(item => {
-    let matchPTN = true;
-    let matchTarget = true;
-    
-    if (searchKeyword !== "") {
-      let ptnName = item.ptn ? item.ptn.toLowerCase() : "";
-      matchPTN = ptnName.includes(searchKeyword);
-    }
-    
-    if (targetFilterValue !== "") {
-      let katNilai = item.kategoriNilai ? item.kategoriNilai.toUpperCase().trim() : "";
-      matchTarget = (katNilai === targetFilterValue);
-    }
-    
-    return matchPTN && matchTarget;
-  });
-  
-  renderPeminatanTableData(finalFiltered);
 }
 
 
@@ -2142,7 +2203,7 @@ function onMateriMapelChanged() {
       subMateris.forEach(sub => {
         let li = document.createElement("li");
         li.className = "submateri-item";
-        li.innerHTML = `<i class="fas fa-circle-play"></i> <span>${sub}</span>`;
+        li.innerHTML = `<i class="fas fa-circle"></i> <span>${sub}</span>`;
         ul.appendChild(li);
       });
     }
@@ -2458,6 +2519,26 @@ if (localStorage.getItem("email")) {
 
   <div class="footer-part"></div>
 </div>
+
+<script>
+// ---------------------------------------------------------
+// PENANDA TAMPILKAN / SEMBUNYIKAN FOOTER
+// Ubah nilainya: true = footer tampil, false = footer disembunyikan
+// ---------------------------------------------------------
+const SHOW_FOOTER = true;
+
+(function terapkanFooterToggle() {
+  let footerEl = document.querySelector(".footer");
+  if (!footerEl) return;
+  if (SHOW_FOOTER) {
+    footerEl.style.display = "grid";
+    document.body.style.paddingBottom = "70px";
+  } else {
+    footerEl.style.display = "none";
+    document.body.style.paddingBottom = "0px";
+  }
+})();
+</script>
 
 </body>
 </body>
