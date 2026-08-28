@@ -2258,6 +2258,13 @@ function selectProdi(ptn, prodiName, prodiData) {
 }
 
 function showDropdown(type) {
+  // Tutup dropdown pasangannya dulu supaya tidak tumpang tindih / nyangkut kebuka
+  const pasangan = { ptn: "prodi", prodi: "ptn", simPtn: "simProdi", simProdi: "simPtn" };
+  if (pasangan[type]) {
+    let listLain = document.getElementById(pasangan[type] + "List");
+    if (listLain) listLain.style.display = "none";
+  }
+
   document.getElementById(type + "List").style.display = "block";
   activeDropdownIndex = -1;
   clearDropdownActiveHighlight(type + "List");
