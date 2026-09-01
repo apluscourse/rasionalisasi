@@ -741,7 +741,7 @@ function login() {
 
 /* WA ADMIN: tombol di bawah "Langganan Sekarang" */
 function openAdminWA(nomor) {
-  const pesan = encodeURIComponent("Beli Aplikasi TKA");
+  const pesan = encodeURIComponent("");
   window.open(`https://wa.me/${nomor}?text=${pesan}`, '_blank');
 }
 
@@ -767,7 +767,7 @@ const pkmModal = document.getElementById('packageModal');
    ============================================================ */
 const USE_WA_DIRECT = false;
 const ADMIN_WA = "6285740062544";
-const WA_DIRECT_MESSAGE = "Beli Aplikasi TKA";
+const WA_DIRECT_MESSAGE = "";
 
 function openPackageModal() {
   if (USE_WA_DIRECT) {
