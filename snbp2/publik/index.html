@@ -4633,10 +4633,18 @@ function hapusRiwayat(rownum, e) {
 
 
 
+// FLAG: true selama proses ganti password berlangsung, dipakai untuk
+// mencegah ping scheduler salah men-trigger blokir akibat race condition
+// (pass lama vs pass baru yang belum sinkron di localStorage/server).
+let isChangingPassword = false;
+
 function startPingScheduler() {
   if (pingInterval) clearInterval(pingInterval);
 
   pingInterval = setInterval(() => {
+    // FIX: skip siklus ping ini kalau sedang di tengah proses ganti password
+    if (isChangingPassword) return;
+
     if (!navigator.onLine) {
       alert("Anda sedang offline");
       logout();
@@ -4662,6 +4670,10 @@ function startPingScheduler() {
     })
       .then(r => r.json())
       .then(res => {
+        // FIX: kalau respons ping ini "telat" datang saat proses ganti
+        // password sudah/sedang selesai, abaikan saja
+        if (isChangingPassword) return;
+
         if (res.status === "multi_device") {
           alert("Anda membuka aplikasi di 2 perangkat atau lebih");
           logout();
@@ -4704,6 +4716,11 @@ function prosesGantiKataSandi() {
     return;
   }
 
+  // FIX: pause pengecekan ping selama request ganti password berlangsung,
+  // supaya ping yang kebetulan jalan di tengah proses tidak memakai pass
+  // lama yang sudah tidak valid di server dan memicu blokir salah.
+  isChangingPassword = true;
+
   callApi("change_password", { email, pass, role, oldPass, newPass })
     .then(res => {
       if (res.status === "ok") {
@@ -4716,7 +4733,12 @@ function prosesGantiKataSandi() {
         alert("Gagal mengganti kata sandi. Periksa kata sandi lama Anda.");
       }
     })
-    .catch(() => alert("Terjadi kesalahan jaringan."));
+    .catch(() => alert("Terjadi kesalahan jaringan."))
+    .finally(() => {
+      // localStorage("pass") sudah pasti sinkron (baru jika sukses, lama jika gagal)
+      // sebelum ping dilanjutkan lagi.
+      isChangingPassword = false;
+    });
 }
 
 function openLogoutModal() {
