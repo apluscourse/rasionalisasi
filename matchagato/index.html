@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Jost:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     :root{
       --cream:#f7f2e7; --panel:#faf6ec; --line:#8a7a5c; --line-soft:#cdbf9e;
@@ -91,6 +93,15 @@
     #strukArea hr{border:none; border-top:1px dashed #000; margin:8px 0;}
     #strukArea .row{display:flex; justify-content:space-between;}
     #strukArea .center{text-align:center;}
+
+    .aksi-struk-admin{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:14px;}
+    .aksi-struk-admin button{margin:0; width:100%;}
+
+    @media print{
+      body *{visibility:hidden;}
+      #strukArea, #strukArea *{visibility:visible;}
+      #strukArea{position:absolute; top:0; left:0; width:100%;}
+    }
     /* ---------- LOADING OVERLAY ---------- */
     .loading-overlay{
       position:fixed; inset:0; background:var(--cream); z-index:100;
@@ -208,7 +219,13 @@
     <div class="modal">
       <h2>Struk Order</h2>
       <div id="strukArea"></div>
-      <button class="primary" style="width:100%; margin-top:14px;" onclick="tutupModal('modalStruk')">Tutup</button>
+      <div class="aksi-struk-admin">
+        <button class="secondary" onclick="cetakStrukAdmin()">🖨️ Cetak</button>
+        <button class="secondary" onclick="unduhPDFAdmin()">⬇️ PDF</button>
+        <button class="secondary" onclick="unduhJPEGAdmin()">⬇️ JPG</button>
+        <button class="danger" onclick="hapusStrukOrder()">🗑️ Hapus</button>
+      </div>
+      <button class="primary" style="width:100%; margin-top:10px;" onclick="tutupModal('modalStruk')">Tutup</button>
     </div>
   </div>
 
@@ -219,7 +236,7 @@
   // contoh: https://script.google.com/macros/s/AKfycb.../exec
   // HARUS SAMA dengan yang dipakai di kasir.html
   // ============================================================
-  var API_URL = 'https://script.google.com/macros/s/AKfycbwxQgEd2u_BvkTEW6d4NkNsj1VA36bl8lZqB4d1g8M5vuozwZbFoqV75k6qtEoJHFFu/exec';
+  var API_URL = 'https://script.google.com/macros/s/AKfycbx_Oy3gCmYewaa7vottJ6TUD4NFdX1zyyADdtY50Z2aljHCvxhCP12VZfrueA879Pv0/exec';
 
   function callGet(action, params){
     params = params || {};
@@ -409,7 +426,9 @@
   }
 
   // Detail struk juga langsung dari cache -> instan, tanpa panggil server.
+  var currentStrukOrderId = null;
   function lihatStruk(orderId){
+    currentStrukOrderId = orderId;
     var items = semuaLaporan.filter(function(r){ return String(r.orderId) === String(orderId); });
     if(!items.length){ showError(new Error('Order tidak ditemukan')); return; }
     var total = items.reduce(function(s,it){ return s + it.subtotal; }, 0);
@@ -426,6 +445,39 @@
     html += '<div class="center" style="font-weight:bold;">No. Order: '+orderId+'</div>';
     document.getElementById('strukArea').innerHTML = html;
     document.getElementById('modalStruk').classList.remove('hidden');
+  }
+
+  // ================= AKSI STRUK: CETAK / UNDUH / HAPUS =================
+  function cetakStrukAdmin(){ window.print(); }
+
+  function unduhJPEGAdmin(){
+    html2canvas(document.getElementById('strukArea'), {backgroundColor:'#ffffff', scale:2}).then(function(canvas){
+      var link = document.createElement('a');
+      link.download = 'struk-'+currentStrukOrderId+'.jpg';
+      link.href = canvas.toDataURL('image/jpeg', 0.95);
+      link.click();
+    });
+  }
+
+  function unduhPDFAdmin(){
+    html2canvas(document.getElementById('strukArea'), {backgroundColor:'#ffffff', scale:2}).then(function(canvas){
+      var imgData = canvas.toDataURL('image/png');
+      var jsPDF = window.jspdf.jsPDF;
+      var pdf = new jsPDF({ unit:'px', format:[canvas.width, canvas.height] });
+      pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+      pdf.save('struk-'+currentStrukOrderId+'.pdf');
+    });
+  }
+
+  function hapusStrukOrder(){
+    if(!currentStrukOrderId) return;
+    if(!confirm('Hapus order '+currentStrukOrderId+'? Data transaksi ini akan dihapus permanen dari Laporan.')) return;
+    callPost('hapusPesanan', { orderId: currentStrukOrderId }).then(function(){
+      // Buang dari cache lokal supaya laporan & dropdown ikut update tanpa reload
+      semuaLaporan = semuaLaporan.filter(function(r){ return String(r.orderId) !== String(currentStrukOrderId); });
+      tutupModal('modalStruk');
+      muatLaporan();
+    }).catch(showError);
   }
 
   function showError(err){
