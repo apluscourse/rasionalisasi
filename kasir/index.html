@@ -134,6 +134,10 @@
     }
     button.secondary:hover{background:var(--sage); color:#fff;}
 
+    .field-label{display:block; font-size:12.5px; color:var(--muted); margin:14px 0 4px;}
+    .select-metode{width:100%; padding:11px; border:1px solid var(--border); border-radius:10px; font-size:14px; font-family:'Jost',sans-serif; background:#fff; color:var(--ink);}
+    .select-metode:focus{outline:none; border-color:var(--sage);}
+
     /* ---------- CART BAR ---------- */
     .cartbar{
       position:fixed; bottom:0; left:0; right:0; background:var(--sage-dark); color:#fff;
@@ -329,7 +333,12 @@
       <p style="color:var(--muted); font-size:13px; margin-top:-6px;">Pastikan pesanan sudah benar sebelum diproses.</p>
       <div id="konfirmasiLines"></div>
       <div class="total-row"><span>Total</span><span>Rp <span id="konfirmasiTotal">0</span></span></div>
-      <button class="primary" id="btnKonfirmasi" onclick="prosesPesanan()">Ya, Pesanan Sudah Benar</button>
+      <label class="field-label">Metode Pembayaran</label>
+      <select id="metodePembayaran" class="select-metode">
+        <option value="TUNAI">TUNAI</option>
+        <option value="QRIS">QRIS</option>
+      </select>
+      <button class="primary" id="btnKonfirmasi" style="margin-top:14px;" onclick="prosesPesanan()">Ya, Pesanan Sudah Benar</button>
       <button class="secondary" onclick="tutupModal('modalKonfirmasi')">Batal, Kembali Edit</button>
     </div>
   </div>
@@ -340,7 +349,7 @@
   // Ganti URL di bawah dengan URL Web App hasil deploy Anda,
   // contoh: https://script.google.com/macros/s/AKfycb.../exec
   // ============================================================
-  var API_URL = 'https://script.google.com/macros/s/AKfycbwxQgEd2u_BvkTEW6d4NkNsj1VA36bl8lZqB4d1g8M5vuozwZbFoqV75k6qtEoJHFFu/exec';
+  var API_URL = 'https://script.google.com/macros/s/AKfycby1jyEOagQqfem7Ol0YWs87hNUI9tsnDhXFoI65g-sKX58dJkc6bwvgZ_KGnZccXZDe/exec';
 
   function callGet(action, params){
     params = params || {};
@@ -537,6 +546,7 @@
     if(cart.length===0) return;
     renderCartLines('konfirmasiLines', false);
     document.getElementById('konfirmasiTotal').innerText = formatRp(totalCart());
+    document.getElementById('metodePembayaran').value = 'TUNAI';
     document.getElementById('modalKonfirmasi').classList.remove('hidden');
   }
 
@@ -546,8 +556,9 @@
 
   function prosesPesanan(){
     var btn = document.getElementById('btnKonfirmasi');
+    var metode = document.getElementById('metodePembayaran').value;
     btn.disabled = true; btn.innerText = 'Memproses...';
-    callPost('buatPesanan', cart).then(function(res){
+    callPost('buatPesanan', { items: cart, metodePembayaran: metode }).then(function(res){
       btn.disabled = false; btn.innerText = 'Ya, Pesanan Sudah Benar';
       tutupModal('modalKonfirmasi');
       tampilkanStruk(res);
@@ -568,6 +579,7 @@
     });
     html += '<hr>';
     html += '<div class="row"><b>TOTAL</b><b>Rp '+formatRp(res.total)+'</b></div>';
+    html += '<div class="row item-sub"><span>Metode Bayar</span><span>'+res.metodePembayaran+'</span></div>';
     html += '<hr>';
     html += '<div class="center">'+res.tanggal+' '+res.waktu+'</div>';
     html += '<div class="orderid">No. Order: '+res.orderId+'</div>';
