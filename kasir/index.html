@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Jost:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    :root{
+      --cream:#f7f2e7;
+      --panel:#faf6ec;
+      --line:#8a7a5c;
+      --line-soft:#cdbf9e;
+      --ink:#3f3527;
+      --muted:#8f8267;
+      --sage:#6b7455;
+      --sage-dark:#4f5a3d;
+      --gold:#b08d4f;
+      --border:#e4d9c2;
+    }
+    *{box-sizing:border-box;}
+    html,body{height:100%;}
+    body{
+      margin:0; font-family:'Jost',sans-serif; background:var(--cream); color:var(--ink);
+      padding-bottom:96px; position:relative; overflow-x:hidden;
+    }
+    h1,h2,h3,.serif{font-family:'Cormorant Garamond',serif;}
+
+    /* ---------- DEKORASI SULUR DAUN ---------- */
+    .branch-decor{position:fixed; pointer-events:none; z-index:0; opacity:.4;}
+    .branch-decor svg{width:100%; height:100%; display:block;}
+    .branch-decor.tl{top:-10px; left:-10px; width:150px; height:150px; transform-origin:0 0;}
+    .branch-decor.br{bottom:-10px; right:-10px; width:170px; height:170px; transform:scale(-1,-1); transform-origin:100% 100%;}
+    .leaf-sway{animation:sway 7s ease-in-out infinite alternate;}
+    @keyframes sway{
+      0%{ transform:rotate(-1.2deg); }
+      100%{ transform:rotate(1.2deg); }
+    }
+    @media (max-width:520px){
+      .branch-decor.tl{width:100px; height:100px;}
+      .branch-decor.br{width:110px; height:110px;}
+    }
+
+    /* ---------- HEADER ---------- */
+    header{
+      position:relative; z-index:2; text-align:center; padding:22px 16px 14px;
+    }
+    header h1{margin:0; font-size:26px; font-weight:600; letter-spacing:.5px; color:var(--sage-dark);}
+    .divider-orn{
+      display:flex; align-items:center; justify-content:center; gap:10px; margin-top:8px;
+    }
+    .divider-orn .ln{height:1px; width:60px; background:linear-gradient(90deg, transparent, var(--line-soft) 40%, var(--line-soft) 60%, transparent);
+      position:relative; overflow:hidden;}
+    .divider-orn .ln::after{
+      content:''; position:absolute; top:0; left:-60%; width:60%; height:100%;
+      background:linear-gradient(90deg, transparent, var(--gold), transparent);
+      animation:shimmer 4.5s ease-in-out infinite;
+    }
+    @keyframes shimmer{ 0%{left:-60%;} 55%{left:110%;} 100%{left:110%;} }
+    .divider-orn svg{width:22px; height:22px;}
+    .btn-back-header{
+      background:transparent; border:1px solid var(--line-soft); color:var(--sage-dark); padding:8px 14px;
+      border-radius:20px; cursor:pointer; font-size:13px; font-family:'Jost',sans-serif; transition:.2s;
+    }
+    .btn-back-header:hover{background:var(--sage); color:#fff; border-color:var(--sage);}
+
+    .container{padding:14px 16px 4px; max-width:640px; margin:0 auto; position:relative; z-index:2;}
+
+    /* ---------- FRAME PANEL (motif utama dari referensi) ---------- */
+    .frame{
+      position:relative; background:var(--panel); border:1px solid var(--line-soft); border-radius:22px;
+      padding:22px 18px; box-shadow:0 4px 18px rgba(90,75,45,.06);
+    }
+    .frame .corner{position:absolute; width:34px; height:34px; opacity:.8;}
+    .frame .corner.c-tl{top:8px; left:8px;}
+    .frame .corner.c-br{bottom:8px; right:8px; transform:scale(-1,-1);}
+
+    /* entrance animation */
+    .view-enter{animation:fadeRise .45s cubic-bezier(.2,.7,.3,1) both;}
+    @keyframes fadeRise{
+      from{ opacity:0; transform:translateY(14px); }
+      to{ opacity:1; transform:translateY(0); }
+    }
+
+    /* ---------- MENU KATEGORI ---------- */
+    .kategori-grid{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+    .kategori-card{
+      background:var(--cream); border:1px solid var(--border); border-radius:16px; padding:26px 14px; text-align:center;
+      cursor:pointer; transition:.2s; opacity:0; animation:fadeRise .5s ease both;
+    }
+    .kategori-card:hover{border-color:var(--sage); transform:translateY(-3px); box-shadow:0 6px 16px rgba(95,107,69,.12);}
+    .kategori-card .emoji{font-size:32px; display:block; margin-bottom:8px;}
+    .kategori-card h3{margin:0; font-size:19px; font-weight:600; color:var(--ink);}
+
+    /* ---------- VARIAN LIST ---------- */
+    .varian-item{
+      background:var(--cream); border:1px solid var(--border); border-radius:14px; padding:14px 16px; margin-bottom:10px;
+      display:flex; justify-content:space-between; align-items:center; cursor:pointer; transition:.2s;
+    }
+    .varian-item:hover{border-color:var(--sage); background:#fffdf7;}
+    .varian-item .nama{font-weight:500; font-size:15px;}
+    .varian-item .harga{color:var(--sage-dark); font-weight:700; font-size:14px; font-family:'Jost',sans-serif;}
+    .rp-bold{font-family:'Jost',sans-serif; font-weight:700;}
+
+    /* ---------- DETAIL / TOPPING ---------- */
+    .panel{
+      background:var(--cream); border:1px solid var(--border); border-radius:14px; padding:16px; margin-bottom:16px;
+    }
+    .panel h3{margin:0 0 12px; font-size:19px; font-weight:600;}
+    .topping-row{display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px dashed var(--border);}
+    .topping-row:last-child{border-bottom:none;}
+    .topping-row label{flex:1; font-size:14px;}
+    .topping-row input[type="checkbox"]{accent-color:var(--sage);}
+    .qty-row{display:flex; align-items:center; justify-content:space-between; margin-top:10px;}
+    .qty-stepper{display:flex; align-items:center; gap:12px;}
+    .qty-stepper button{
+      width:34px; height:34px; border-radius:50%; border:1px solid var(--sage);
+      background:#fff; color:var(--sage-dark); font-size:18px; cursor:pointer; transition:.15s;
+    }
+    .qty-stepper button:active{transform:scale(.9); background:var(--sage); color:#fff;}
+    .qty-stepper span{min-width:20px; text-align:center; font-weight:600;}
+
+    button.primary{
+      background:var(--sage); color:#fff; border:none; padding:14px; border-radius:26px;
+      font-size:15px; font-weight:500; font-family:'Jost',sans-serif; cursor:pointer; width:100%;
+      transition:.2s; box-shadow:0 3px 10px rgba(95,107,69,.25);
+    }
+    button.primary:hover{background:var(--sage-dark); box-shadow:0 5px 16px rgba(95,107,69,.35);}
+    button.secondary{
+      background:transparent; color:var(--sage-dark); border:1.4px solid var(--sage); padding:11px;
+      border-radius:24px; font-size:14px; font-weight:500; cursor:pointer; width:100%; margin-top:8px; transition:.2s;
+    }
+    button.secondary:hover{background:var(--sage); color:#fff;}
+
+    /* ---------- CART BAR ---------- */
+    .cartbar{
+      position:fixed; bottom:0; left:0; right:0; background:var(--sage-dark); color:#fff;
+      padding:14px 18px; display:flex; align-items:center; justify-content:space-between;
+      z-index:30; box-shadow:0 -4px 16px rgba(0,0,0,.15); border-top:1px solid rgba(255,255,255,.15);
+    }
+    .cartbar.hidden{display:none;}
+    .cartbar.show{animation:slideUp .35s cubic-bezier(.2,.8,.3,1) both;}
+    @keyframes slideUp{ from{ transform:translateY(100%); } to{ transform:translateY(0); } }
+    .cartbar .info{font-size:13px; line-height:1.35; font-family:'Jost',sans-serif;}
+    .cartbar .info b{font-size:16px; display:block; font-family:'Jost',sans-serif; font-weight:700;}
+    .cartbar .info u{cursor:pointer;}
+    .cartbar button{
+      background:#fff; color:var(--sage-dark); border:none; padding:12px 20px; border-radius:24px; font-weight:600;
+      cursor:pointer; font-family:'Jost',sans-serif; animation:pulseGlow 2.6s ease-in-out infinite;
+    }
+    @keyframes pulseGlow{
+      0%,100%{ box-shadow:0 0 0 0 rgba(255,255,255,.5); }
+      50%{ box-shadow:0 0 0 7px rgba(255,255,255,0); }
+    }
+
+    /* ---------- MODAL ---------- */
+    .overlay{
+      position:fixed; inset:0; background:rgba(63,53,39,.45); display:flex; align-items:flex-end;
+      justify-content:center; z-index:50; backdrop-filter:blur(1px);
+    }
+    .overlay.hidden{display:none;}
+    .overlay:not(.hidden) .modal{animation:fadeRise .3s ease both;}
+    .modal{
+      background:var(--panel); width:100%; max-width:640px; border-radius:22px 22px 0 0; padding:22px;
+      max-height:85vh; overflow-y:auto; border-top:1px solid var(--line-soft);
+    }
+    .modal h2{margin-top:0; font-size:21px; font-weight:600;}
+    .cart-line{display:flex; justify-content:space-between; align-items:flex-start; padding:11px 0; border-bottom:1px dashed var(--border); gap:10px;}
+    .cart-line .desc{font-size:13.5px;}
+    .cart-line .desc b{font-size:14.5px; font-weight:500;}
+    .cart-line .desc .sub{color:var(--muted); font-size:12.5px;}
+    .cart-line .harga{font-weight:700; white-space:nowrap; font-family:'Jost',sans-serif; font-size:15px;}
+    .cart-line .hapus{background:none; border:none; color:#a14; font-size:12px; cursor:pointer; padding:0; margin-top:4px;}
+    .total-row{display:flex; justify-content:space-between; font-size:18px; font-weight:700; margin:14px 0; font-family:'Jost',sans-serif;}
+
+    /* ---------- STRUK ---------- */
+    #view-struk{display:none;}
+    .struk-wrap{background:var(--panel); border:1px solid var(--line-soft); border-radius:20px; padding:18px; position:relative;}
+    #strukArea{
+      background:#fff; color:#000; font-family:'Courier New', monospace; padding:18px 14px;
+      font-size:12.5px; line-height:1.55; border-radius:4px;
+    }
+    #strukArea .center{text-align:center;}
+    #strukArea hr{border:none; border-top:1px dashed #000; margin:8px 0;}
+    #strukArea .row{display:flex; justify-content:space-between;}
+    #strukArea .item-nama{font-weight:bold;}
+    #strukArea .item-sub{padding-left:8px; color:#333;}
+    #strukArea .orderid{text-align:center; margin-top:10px; font-weight:bold; font-size:13px;}
+    .aksi-struk{display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-top:14px;}
+    .aksi-struk button.primary{grid-column:span 3;}
+
+    /* leaf falling flourish */
+    .leaf-fall{position:fixed; top:-30px; z-index:60; pointer-events:none; font-size:20px; animation:fall linear forwards;}
+    @keyframes fall{
+      0%{ transform:translateY(0) rotate(0deg); opacity:0; }
+      10%{ opacity:1; }
+      100%{ transform:translateY(100vh) rotate(340deg); opacity:0; }
+    }
+
+    @media print{
+      body *{visibility:hidden;}
+      #strukArea, #strukArea *{visibility:visible;}
+      #strukArea{position:absolute; top:0; left:0; width:100%;}
+    }
+    /* ---------- LOADING OVERLAY ---------- */
+    .loading-overlay{
+      position:fixed; inset:0; background:var(--cream); z-index:100;
+      display:flex; align-items:center; justify-content:center;
+      transition:opacity .35s ease;
+    }
+    .loading-overlay.hidden{ opacity:0; pointer-events:none; }
+    .loading-box{ text-align:center; }
+    .spinner{
+      width:44px; height:44px; margin:0 auto 14px;
+      border:4px solid var(--border); border-top-color:var(--sage);
+      border-radius:50%; animation:spin .8s linear infinite;
+    }
+    @keyframes spin{ to{ transform:rotate(360deg); } }
+    .loading-box p{ font-family:'Jost',sans-serif; color:var(--muted); font-size:14px; margin:0; }
+  </style>
+</head>
+<body>
+
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-box">
+      <div class="spinner"></div>
+      <p>Menyiapkan menu, mohon tunggu...</p>
+    </div>
+  </div>
+
+  <div class="branch-decor tl"><svg class="leaf-sway" viewBox="0 0 150 150">
+    <path d="M8,140 C 30,110 25,80 45,55 C 60,38 78,28 100,12" fill="none" stroke="#6b7455" stroke-width="1.3"/>
+    <path d="M45,55 C 36,47 33,36 41,27 C 50,36 49,48 45,55 Z" fill="#6b7455"/>
+    <path d="M62,38 C 53,32 49,22 56,13 C 65,20 65,31 62,38 Z" fill="#6b7455" opacity=".85"/>
+    <path d="M80,26 C 71,21 67,12 73,4 C 82,10 82,20 80,26 Z" fill="#6b7455" opacity=".7"/>
+    <path d="M28,90 C 18,86 12,77 17,67 C 27,71 29,82 28,90 Z" fill="#6b7455" opacity=".8"/>
+  </svg></div>
+  <div class="branch-decor br"><svg class="leaf-sway" viewBox="0 0 170 170">
+    <path d="M8,160 C 32,128 28,95 50,68 C 66,49 86,38 110,20" fill="none" stroke="#6b7455" stroke-width="1.3"/>
+    <path d="M50,68 C 40,59 36,47 45,37 C 55,47 54,60 50,68 Z" fill="#6b7455"/>
+    <path d="M69,46 C 59,39 55,28 63,18 C 73,26 72,39 69,46 Z" fill="#6b7455" opacity=".85"/>
+    <path d="M90,32 C 80,26 76,16 83,7 C 93,14 93,25 90,32 Z" fill="#6b7455" opacity=".7"/>
+    <path d="M30,105 C 19,100 13,90 19,79 C 30,84 32,96 30,105 Z" fill="#6b7455" opacity=".8"/>
+  </svg></div>
+
+  <header>
+    <h1 id="pageTitle">Choco Berry &amp; Matcha</h1>
+    <div class="divider-orn">
+      <span class="ln"></span>
+      <svg viewBox="0 0 24 24"><path d="M12,22 C12,16 10,12 12,4 C14,12 12,16 12,22 Z" fill="none" stroke="#8a7a5c" stroke-width="1"/><path d="M12,10 C9,9 7,6 8,3 C11,4 13,7 12,10 Z" fill="#6b7455"/><path d="M12,10 C15,9 17,6 16,3 C13,4 11,7 12,10 Z" fill="#6b7455"/></svg>
+      <span class="ln"></span>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="frame">
+      <svg class="corner c-tl" viewBox="0 0 40 40"><path d="M4,36 C14,28 12,18 20,10" fill="none" stroke="#8a7a5c" stroke-width="1"/><path d="M20,10 C16,7 15,3 18,0 C22,3 22,7 20,10 Z" fill="#6b7455"/></svg>
+      <svg class="corner c-br" viewBox="0 0 40 40"><path d="M4,36 C14,28 12,18 20,10" fill="none" stroke="#8a7a5c" stroke-width="1"/><path d="M20,10 C16,7 15,3 18,0 C22,3 22,7 20,10 Z" fill="#6b7455"/></svg>
+
+      <!-- VIEW: MENU KATEGORI -->
+      <div id="view-menu">
+        <div class="kategori-grid" id="kategoriGrid"></div>
+      </div>
+
+      <!-- VIEW: VARIAN -->
+      <div id="view-varian" style="display:none;">
+        <button class="btn-back-header" style="margin-bottom:14px;" onclick="tampilkanMenu()">← Kembali ke Menu</button>
+        <div id="varianList"></div>
+      </div>
+
+      <!-- VIEW: DETAIL -->
+      <div id="view-detail" style="display:none;">
+        <button class="btn-back-header" style="margin-bottom:14px;" onclick="tampilkanVarian()">← Pilih Varian Lain</button>
+        <div class="panel">
+          <h3 id="detailNama"></h3>
+          <div id="toppingBox"></div>
+          <div class="qty-row">
+            <span>Jumlah</span>
+            <div class="qty-stepper">
+              <button onclick="ubahQty(-1)">−</button>
+              <span id="qtyLabel">1</span>
+              <button onclick="ubahQty(1)">+</button>
+            </div>
+          </div>
+        </div>
+        <button class="primary" onclick="tambahKeKeranjang()">Tambah ke Keranjang</button>
+      </div>
+
+      <!-- VIEW: STRUK -->
+      <div id="view-struk">
+        <div class="struk-wrap">
+          <div id="strukArea"></div>
+          <div class="aksi-struk">
+            <button class="secondary" onclick="cetakStruk()">🖨️ Cetak</button>
+            <button class="secondary" onclick="unduhJPEG()">⬇️ JPEG</button>
+            <button class="secondary" onclick="unduhPDF()">⬇️ PDF</button>
+            <button class="primary" onclick="kembaliKeMenu()">Kembali ke Halaman Awal</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CART BAR -->
+  <div class="cartbar hidden" id="cartBar">
+    <div class="info" onclick="bukaCart()">
+      🛒 <b><span id="cartCount">0</span> item — Rp <span id="cartTotal">0</span></b>
+      <u>lihat keranjang</u>
+    </div>
+    <button onclick="bukaKonfirmasi()">Buat Pesanan</button>
+  </div>
+
+  <!-- MODAL: CART -->
+  <div class="overlay hidden" id="modalCart">
+    <div class="modal">
+      <h2>Keranjang</h2>
+      <div id="cartLines"></div>
+      <div class="total-row"><span>Total</span><span>Rp <span id="cartModalTotal">0</span></span></div>
+      <button class="primary" onclick="tutupModal('modalCart')">Tutup</button>
+    </div>
+  </div>
+
+  <!-- MODAL: KONFIRMASI -->
+  <div class="overlay hidden" id="modalKonfirmasi">
+    <div class="modal">
+      <h2>Konfirmasi Pesanan</h2>
+      <p style="color:var(--muted); font-size:13px; margin-top:-6px;">Pastikan pesanan sudah benar sebelum diproses.</p>
+      <div id="konfirmasiLines"></div>
+      <div class="total-row"><span>Total</span><span>Rp <span id="konfirmasiTotal">0</span></span></div>
+      <button class="primary" id="btnKonfirmasi" onclick="prosesPesanan()">Ya, Pesanan Sudah Benar</button>
+      <button class="secondary" onclick="tutupModal('modalKonfirmasi')">Batal, Kembali Edit</button>
+    </div>
+  </div>
+
+<script>
+  // ============================================================
+  // KONEKSI KE BACKEND (Google Apps Script Web App)
+  // Ganti URL di bawah dengan URL Web App hasil deploy Anda,
+  // contoh: https://script.google.com/macros/s/AKfycb.../exec
+  // ============================================================
+  var API_URL = 'https://script.google.com/macros/s/AKfycbwxQgEd2u_BvkTEW6d4NkNsj1VA36bl8lZqB4d1g8M5vuozwZbFoqV75k6qtEoJHFFu/exec';
+
+  function callGet(action, params){
+    params = params || {};
+    var url = API_URL + '?action=' + encodeURIComponent(action);
+    Object.keys(params).forEach(function(k){
+      url += '&' + encodeURIComponent(k) + '=' + encodeURIComponent(params[k]);
+    });
+    return fetch(url).then(function(res){ return res.json(); }).then(function(json){
+      if(!json.success) throw new Error(json.error || 'Terjadi kesalahan pada server');
+      return json.data;
+    });
+  }
+
+  function callPost(action, payload){
+    return fetch(API_URL, {
+      method: 'POST',
+      // Sengaja pakai text/plain (BUKAN application/json) supaya browser
+      // tidak mengirim preflight OPTIONS -- Apps Script Web App tidak
+      // bisa membalas preflight itu.
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: action, payload: payload })
+    }).then(function(res){ return res.json(); }).then(function(json){
+      if(!json.success) throw new Error(json.error || 'Terjadi kesalahan pada server');
+      return json.data;
+    });
+  }
+
+  var produkData = [];
+  var kategoriAktif = null;
+  var varianAktif = null;
+  var qtyAktif = 1;
+  var cart = [];
+  var strukTerakhir = null;
+
+  var EMOJI = { 'Choco Berry':'🍓', 'Matcha':'🍵' };
+
+  function formatRp(n){ return Number(n).toLocaleString('id-ID'); }
+
+  function playEnter(el){
+    el.classList.remove('view-enter');
+    void el.offsetWidth;
+    el.classList.add('view-enter');
+  }
+
+  function hideLoading(){
+    var ov = document.getElementById('loadingOverlay');
+    if(ov) ov.classList.add('hidden');
+  }
+
+  callGet('getProduk').then(function(data){
+    initProduk(data);
+    hideLoading();
+  }).catch(function(err){
+    hideLoading();
+    showError(err);
+  });
+
+  function initProduk(data){
+    produkData = data;
+    var kategoriSet = {};
+    data.forEach(function(p){
+      if(p.kategori !== 'Topping') kategoriSet[p.kategori] = true;
+    });
+    var grid = document.getElementById('kategoriGrid');
+    grid.innerHTML = '';
+    var i = 0;
+    Object.keys(kategoriSet).forEach(function(kat){
+      var div = document.createElement('div');
+      div.className = 'kategori-card';
+      div.style.animationDelay = (i*0.08)+'s';
+      i++;
+      div.onclick = function(){ bukaKategori(kat); };
+      div.innerHTML = '<span class="emoji">'+(EMOJI[kat]||'🍰')+'</span><h3>'+kat+'</h3>';
+      grid.appendChild(div);
+    });
+  }
+
+  function bukaKategori(kat){
+    kategoriAktif = kat;
+    var list = produkData.filter(function(p){ return p.kategori === kat; });
+    var html = '';
+    list.forEach(function(p){
+      html += '<div class="varian-item" onclick="pilihVarian('+p.id+')">'+
+              '<span class="nama">'+p.nama+'</span>'+
+              '<span class="harga">Rp '+formatRp(p.harga)+'</span></div>';
+    });
+    document.getElementById('varianList').innerHTML = html;
+    document.getElementById('view-menu').style.display = 'none';
+    var v = document.getElementById('view-varian');
+    v.style.display = 'block'; playEnter(v);
+    document.getElementById('view-detail').style.display = 'none';
+    document.getElementById('pageTitle').innerText = kat;
+  }
+
+  function pilihVarian(id){
+    varianAktif = produkData.find(function(p){ return p.id === id; });
+    qtyAktif = 1;
+    document.getElementById('qtyLabel').innerText = qtyAktif;
+    document.getElementById('detailNama').innerHTML = varianAktif.nama + ' — <span class="rp-bold">Rp ' + formatRp(varianAktif.harga) + '</span>';
+
+    var toppingBox = document.getElementById('toppingBox');
+    if(kategoriAktif === 'Choco Berry'){
+      var toppings = produkData.filter(function(p){ return p.kategori === 'Topping'; });
+      var html = '<p style="margin:0 0 6px;font-size:13px;color:var(--muted);">Tambah topping (opsional)</p>';
+      toppings.forEach(function(t){
+        html += '<div class="topping-row">'+
+                '<input type="checkbox" id="top_'+t.id+'" value="'+t.id+'">'+
+                '<label for="top_'+t.id+'">'+t.nama+'</label>'+
+                '<span class="rp-bold">+Rp '+formatRp(t.harga)+'</span></div>';
+      });
+      toppingBox.innerHTML = html;
+    } else {
+      toppingBox.innerHTML = '';
+    }
+
+    document.getElementById('view-varian').style.display = 'none';
+    var d = document.getElementById('view-detail');
+    d.style.display = 'block'; playEnter(d);
+  }
+
+  function ubahQty(delta){
+    qtyAktif = Math.max(1, qtyAktif + delta);
+    document.getElementById('qtyLabel').innerText = qtyAktif;
+  }
+
+  function tambahKeKeranjang(){
+    var toppings = [];
+    if(kategoriAktif === 'Choco Berry'){
+      produkData.filter(function(p){ return p.kategori === 'Topping'; }).forEach(function(t){
+        var cb = document.getElementById('top_'+t.id);
+        if(cb && cb.checked) toppings.push({ nama:t.nama, harga:t.harga });
+      });
+    }
+    cart.push({
+      kategori: kategoriAktif,
+      nama: varianAktif.nama,
+      hargaSatuan: varianAktif.harga,
+      qty: qtyAktif,
+      toppings: toppings
+    });
+    updateCartBar();
+    tampilkanMenu();
+  }
+
+  function hitungSubtotal(it){
+    var toppingHarga = (it.toppings||[]).reduce(function(s,t){return s+Number(t.harga);},0);
+    return (Number(it.hargaSatuan) + toppingHarga) * Number(it.qty);
+  }
+  function totalCart(){
+    return cart.reduce(function(s,it){ return s + hitungSubtotal(it); }, 0);
+  }
+
+  function updateCartBar(){
+    var bar = document.getElementById('cartBar');
+    if(cart.length === 0){ bar.classList.add('hidden'); bar.classList.remove('show'); return; }
+    if(bar.classList.contains('hidden')){
+      bar.classList.remove('hidden');
+      bar.classList.add('show');
+    }
+    document.getElementById('cartCount').innerText = cart.reduce(function(s,it){return s+it.qty;},0);
+    document.getElementById('cartTotal').innerText = formatRp(totalCart());
+  }
+
+  function renderCartLines(containerId, allowHapus){
+    var html = '';
+    cart.forEach(function(it, idx){
+      var toppingTxt = (it.toppings||[]).map(function(t){return t.nama;}).join(', ');
+      html += '<div class="cart-line">'+
+              '<div class="desc"><b>'+it.nama+'</b> x'+it.qty+
+              (toppingTxt ? '<div class="sub">+ '+toppingTxt+'</div>' : '')+
+              (allowHapus ? '<button class="hapus" onclick="hapusItem('+idx+')">Hapus</button>' : '')+
+              '</div>'+
+              '<div class="harga">Rp '+formatRp(hitungSubtotal(it))+'</div>'+
+              '</div>';
+    });
+    document.getElementById(containerId).innerHTML = html;
+  }
+
+  function hapusItem(idx){
+    cart.splice(idx,1);
+    updateCartBar();
+    renderCartLines('cartLines', true);
+    document.getElementById('cartModalTotal').innerText = formatRp(totalCart());
+    if(cart.length===0) tutupModal('modalCart');
+  }
+
+  function bukaCart(){
+    renderCartLines('cartLines', true);
+    document.getElementById('cartModalTotal').innerText = formatRp(totalCart());
+    document.getElementById('modalCart').classList.remove('hidden');
+  }
+
+  function bukaKonfirmasi(){
+    if(cart.length===0) return;
+    renderCartLines('konfirmasiLines', false);
+    document.getElementById('konfirmasiTotal').innerText = formatRp(totalCart());
+    document.getElementById('modalKonfirmasi').classList.remove('hidden');
+  }
+
+  function tutupModal(id){
+    document.getElementById(id).classList.add('hidden');
+  }
+
+  function prosesPesanan(){
+    var btn = document.getElementById('btnKonfirmasi');
+    btn.disabled = true; btn.innerText = 'Memproses...';
+    callPost('buatPesanan', cart).then(function(res){
+      btn.disabled = false; btn.innerText = 'Ya, Pesanan Sudah Benar';
+      tutupModal('modalKonfirmasi');
+      tampilkanStruk(res);
+    }).catch(function(err){
+      btn.disabled = false; btn.innerText = 'Ya, Pesanan Sudah Benar';
+      showError(err);
+    });
+  }
+
+  function tampilkanStruk(res){
+    strukTerakhir = res;
+    var html = '<div class="center"><b>CHOCO BERRY & MATCHA</b><br>Struk Pesanan</div>';
+    html += '<hr>';
+    res.items.forEach(function(it){
+      html += '<div class="item-nama">'+it.nama+'</div>';
+      if(it.topping) html += '<div class="item-sub">+ '+it.topping+'</div>';
+      html += '<div class="row item-sub"><span>'+it.qty+' x Rp '+formatRp(it.hargaSatuan)+'</span><span>Rp '+formatRp(it.subtotal)+'</span></div>';
+    });
+    html += '<hr>';
+    html += '<div class="row"><b>TOTAL</b><b>Rp '+formatRp(res.total)+'</b></div>';
+    html += '<hr>';
+    html += '<div class="center">'+res.tanggal+' '+res.waktu+'</div>';
+    html += '<div class="orderid">No. Order: '+res.orderId+'</div>';
+    document.getElementById('strukArea').innerHTML = html;
+
+    document.getElementById('view-menu').style.display = 'none';
+    document.getElementById('view-varian').style.display = 'none';
+    document.getElementById('view-detail').style.display = 'none';
+    var sv = document.getElementById('view-struk');
+    sv.style.display = 'block'; playEnter(sv);
+    document.getElementById('cartBar').classList.add('hidden');
+    document.getElementById('pageTitle').innerText = 'Pesanan Berhasil';
+    leafFlourish();
+  }
+
+  function leafFlourish(){
+    var emojis = ['🍃','🌿','🍀'];
+    for(var i=0;i<10;i++){
+      (function(i){
+        setTimeout(function(){
+          var s = document.createElement('span');
+          s.className = 'leaf-fall';
+          s.innerText = emojis[i % emojis.length];
+          s.style.left = (Math.random()*90+5)+'vw';
+          s.style.animationDuration = (2.2 + Math.random()*1.4)+'s';
+          s.style.opacity = '.85';
+          document.body.appendChild(s);
+          setTimeout(function(){ s.remove(); }, 4000);
+        }, i*90);
+      })(i);
+    }
+  }
+
+  function cetakStruk(){ window.print(); }
+
+  function unduhJPEG(){
+    html2canvas(document.getElementById('strukArea'), {backgroundColor:'#ffffff', scale:2}).then(function(canvas){
+      var link = document.createElement('a');
+      link.download = 'struk-'+strukTerakhir.orderId+'.jpg';
+      link.href = canvas.toDataURL('image/jpeg', 0.95);
+      link.click();
+    });
+  }
+
+  function unduhPDF(){
+    html2canvas(document.getElementById('strukArea'), {backgroundColor:'#ffffff', scale:2}).then(function(canvas){
+      var imgData = canvas.toDataURL('image/png');
+      var jsPDF = window.jspdf.jsPDF;
+      var pdf = new jsPDF({ unit:'px', format:[canvas.width, canvas.height] });
+      pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+      pdf.save('struk-'+strukTerakhir.orderId+'.pdf');
+    });
+  }
+
+  function kembaliKeMenu(){
+    cart = [];
+    strukTerakhir = null;
+    updateCartBar();
+    document.getElementById('view-struk').style.display = 'none';
+    tampilkanMenu();
+  }
+
+  function tampilkanMenu(){
+    var m = document.getElementById('view-menu');
+    m.style.display = 'block'; playEnter(m);
+    document.getElementById('view-varian').style.display = 'none';
+    document.getElementById('view-detail').style.display = 'none';
+    document.getElementById('pageTitle').innerText = 'Choco Berry & Matcha';
+  }
+  function tampilkanVarian(){
+    var v = document.getElementById('view-varian');
+    v.style.display = 'block'; playEnter(v);
+    document.getElementById('view-detail').style.display = 'none';
+  }
+
+  function showError(err){
+    alert('Terjadi kesalahan: ' + (err.message || err));
+  }
+</script>
+</body>
+</html>
