@@ -343,39 +343,103 @@
     </div>
   </div>
 
+<script type="module">
+  // ============================================================
+  // KONEKSI KE FIREBASE (Firestore)
+  // ============================================================
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+  import {
+    getFirestore, collection, getDocs, doc, setDoc, query, where
+  } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBuxFMzDOd6nqKpt1-J6LPty7O3z17dgHw",
+    authDomain: "kasir-matchagato.firebaseapp.com",
+    projectId: "kasir-matchagato",
+    storageBucket: "kasir-matchagato.firebasestorage.app",
+    messagingSenderId: "174068944280",
+    appId: "1:174068944280:web:4af876debb4e061974afed"
+  };
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // Ambil semua produk dari koleksi 'produk'
+  window.ambilProduk = async function(){
+    var snap = await getDocs(collection(db, 'produk'));
+    var out = [];
+    snap.forEach(function(d){
+      var v = d.data();
+      out.push({ id: d.id, kategori: v.kategori, nama: v.nama, harga: Number(v.harga) });
+    });
+    return out;
+  };
+
+  function formatTanggalLokal(d){
+    var pad = function(n){ return n < 10 ? '0'+n : ''+n; };
+    return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
+  }
+  function formatWaktuLokal(d){
+    var pad = function(n){ return n < 10 ? '0'+n : ''+n; };
+    return pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
+  }
+
+  // Cari nomor urut order berikutnya untuk tanggal tsb (dipakai untuk
+  // bikin orderId format YYYYMMDD-001, sama seperti sistem lama).
+  async function generateOrderId(tanggalStr){
+    var prefix = tanggalStr.replace(/-/g, '');
+    var q = query(collection(db, 'pesanan'), where('tanggal', '==', tanggalStr));
+    var snap = await getDocs(q);
+    var maxSeq = 0;
+    snap.forEach(function(d){
+      var oid = d.id;
+      if(oid.indexOf(prefix) === 0){
+        var seq = parseInt(oid.split('-')[1], 10);
+        if(!isNaN(seq) && seq > maxSeq) maxSeq = seq;
+      }
+    });
+    var nextSeq = maxSeq + 1;
+    return prefix + '-' + ('000'+nextSeq).slice(-3);
+  }
+
+  // Simpan 1 dokumen pesanan ke Firestore (1 order = 1 dokumen,
+  // semua item digabung jadi array 'items' di dalamnya).
+  window.buatPesananFirestore = async function(items, metodePembayaran){
+    if(!items || !items.length) throw new Error('Keranjang kosong');
+    metodePembayaran = metodePembayaran ? String(metodePembayaran).trim().toUpperCase() : 'TUNAI';
+    var now = new Date();
+    var tanggal = formatTanggalLokal(now);
+    var waktu = formatWaktuLokal(now);
+    var orderId = await generateOrderId(tanggal);
+
+    var total = 0;
+    var itemsRingkas = [];
+    items.forEach(function(it){
+      var toppings = it.toppings || [];
+      var toppingNama = toppings.map(function(t){ return t.nama; }).join(', ');
+      var toppingHarga = toppings.reduce(function(s,t){ return s + Number(t.harga); }, 0);
+      var hargaSatuanTotal = Number(it.hargaSatuan) + toppingHarga;
+      var qty = Number(it.qty) || 1;
+      var subtotal = hargaSatuanTotal * qty;
+      total += subtotal;
+      itemsRingkas.push({
+        kategori: it.kategori, nama: it.nama, topping: toppingNama,
+        qty: qty, hargaSatuan: hargaSatuanTotal, subtotal: subtotal
+      });
+    });
+
+    await setDoc(doc(db, 'pesanan', orderId), {
+      tanggal: tanggal, waktu: waktu, metodePembayaran: metodePembayaran,
+      items: itemsRingkas, total: total
+    });
+
+    return { orderId: orderId, tanggal: tanggal, waktu: waktu, items: itemsRingkas, total: total, metodePembayaran: metodePembayaran };
+  };
+
+  // Kasih tahu script di bawah (yang jalan lebih dulu karena bukan
+  // type="module") bahwa Firebase sudah siap dipakai.
+  window.dispatchEvent(new Event('firebaseReady'));
+</script>
 <script>
-  // ============================================================
-  // KONEKSI KE BACKEND (Google Apps Script Web App)
-  // Ganti URL di bawah dengan URL Web App hasil deploy Anda,
-  // contoh: https://script.google.com/macros/s/AKfycb.../exec
-  // ============================================================
-  var API_URL = 'https://script.google.com/macros/s/AKfycby1jyEOagQqfem7Ol0YWs87hNUI9tsnDhXFoI65g-sKX58dJkc6bwvgZ_KGnZccXZDe/exec';
-
-  function callGet(action, params){
-    params = params || {};
-    var url = API_URL + '?action=' + encodeURIComponent(action);
-    Object.keys(params).forEach(function(k){
-      url += '&' + encodeURIComponent(k) + '=' + encodeURIComponent(params[k]);
-    });
-    return fetch(url).then(function(res){ return res.json(); }).then(function(json){
-      if(!json.success) throw new Error(json.error || 'Terjadi kesalahan pada server');
-      return json.data;
-    });
-  }
-
-  function callPost(action, payload){
-    return fetch(API_URL, {
-      method: 'POST',
-      // Sengaja pakai text/plain (BUKAN application/json) supaya browser
-      // tidak mengirim preflight OPTIONS -- Apps Script Web App tidak
-      // bisa membalas preflight itu.
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action: action, payload: payload })
-    }).then(function(res){ return res.json(); }).then(function(json){
-      if(!json.success) throw new Error(json.error || 'Terjadi kesalahan pada server');
-      return json.data;
-    });
-  }
 
   var produkData = [];
   var kategoriAktif = null;
@@ -399,13 +463,23 @@
     if(ov) ov.classList.add('hidden');
   }
 
-  callGet('getProduk').then(function(data){
-    initProduk(data);
-    hideLoading();
-  }).catch(function(err){
-    hideLoading();
-    showError(err);
-  });
+  function muatMenuAwal(){
+    window.ambilProduk().then(function(data){
+      initProduk(data);
+      hideLoading();
+    }).catch(function(err){
+      hideLoading();
+      showError(err);
+    });
+  }
+  // Firebase (script type="module") dieksekusi belakangan (ditunda),
+  // jadi kadang window.ambilProduk belum ada saat baris ini pertama
+  // kali jalan. Kalau belum siap, tunggu event 'firebaseReady' dulu.
+  if(window.ambilProduk){
+    muatMenuAwal();
+  } else {
+    window.addEventListener('firebaseReady', muatMenuAwal);
+  }
 
   function initProduk(data){
     produkData = data;
@@ -432,7 +506,7 @@
     var list = produkData.filter(function(p){ return p.kategori === kat; });
     var html = '';
     list.forEach(function(p){
-      html += '<div class="varian-item" onclick="pilihVarian('+p.id+')">'+
+      html += '<div class="varian-item" onclick="pilihVarian(\''+p.id+'\')">'+
               '<span class="nama">'+p.nama+'</span>'+
               '<span class="harga">Rp '+formatRp(p.harga)+'</span></div>';
     });
@@ -445,7 +519,7 @@
   }
 
   function pilihVarian(id){
-    varianAktif = produkData.find(function(p){ return p.id === id; });
+    varianAktif = produkData.find(function(p){ return String(p.id) === String(id); });
     qtyAktif = 1;
     document.getElementById('qtyLabel').innerText = qtyAktif;
     document.getElementById('detailNama').innerHTML = varianAktif.nama + ' — <span class="rp-bold">Rp ' + formatRp(varianAktif.harga) + '</span>';
@@ -558,7 +632,7 @@
     var btn = document.getElementById('btnKonfirmasi');
     var metode = document.getElementById('metodePembayaran').value;
     btn.disabled = true; btn.innerText = 'Memproses...';
-    callPost('buatPesanan', { items: cart, metodePembayaran: metode }).then(function(res){
+    window.buatPesananFirestore(cart, metode).then(function(res){
       btn.disabled = false; btn.innerText = 'Ya, Pesanan Sudah Benar';
       tutupModal('modalKonfirmasi');
       tampilkanStruk(res);
