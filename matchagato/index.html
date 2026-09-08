@@ -239,41 +239,82 @@
     </div>
   </div>
 
+<script type="module">
+  // ============================================================
+  // KONEKSI KE FIREBASE (Firestore)
+  // ============================================================
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+  import {
+    getFirestore, collection, getDocs, doc, addDoc, updateDoc, deleteDoc
+  } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBuxFMzDOd6nqKpt1-J6LPty7O3z17dgHw",
+    authDomain: "kasir-matchagato.firebaseapp.com",
+    projectId: "kasir-matchagato",
+    storageBucket: "kasir-matchagato.firebasestorage.app",
+    messagingSenderId: "174068944280",
+    appId: "1:174068944280:web:4af876debb4e061974afed"
+  };
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // -------- PRODUK --------
+  window.ambilProduk = async function(){
+    var snap = await getDocs(collection(db, 'produk'));
+    var out = [];
+    snap.forEach(function(d){
+      var v = d.data();
+      out.push({ id: d.id, kategori: v.kategori, nama: v.nama, harga: Number(v.harga) });
+    });
+    return out;
+  };
+  window.tambahProdukFirestore = async function(kategori, nama, harga){
+    var ref = await addDoc(collection(db, 'produk'), { kategori: kategori, nama: nama, harga: Number(harga) });
+    return ref.id;
+  };
+  window.updateProdukFirestore = async function(id, kategori, nama, harga){
+    await updateDoc(doc(db, 'produk', id), { kategori: kategori, nama: nama, harga: Number(harga) });
+  };
+  window.hapusProdukFirestore = async function(id){
+    await deleteDoc(doc(db, 'produk', id));
+  };
+
+  // -------- LAPORAN / PESANAN --------
+  // 1 dokumen pesanan = 1 order (berisi array 'items'). Fungsi ini
+  // meratakan (flatten) semua dokumen jadi baris per-item, PERSIS
+  // seperti bentuk data lama (getSemuaLaporan Apps Script), supaya
+  // semua logika laporan di bawah tidak perlu diubah sama sekali.
+  window.ambilSemuaLaporan = async function(){
+    var snap = await getDocs(collection(db, 'pesanan'));
+    var out = [];
+    snap.forEach(function(d){
+      var v = d.data();
+      (v.items || []).forEach(function(it){
+        out.push({
+          orderId: d.id, tanggal: v.tanggal, waktu: v.waktu,
+          kategori: it.kategori, nama: it.nama, topping: it.topping,
+          qty: it.qty, hargaSatuan: it.hargaSatuan, subtotal: it.subtotal,
+          metodePembayaran: v.metodePembayaran
+        });
+      });
+    });
+    return out;
+  };
+  window.hapusPesananFirestore = async function(orderId){
+    await deleteDoc(doc(db, 'pesanan', orderId));
+  };
+  window.ambilHariIni = function(){
+    var now = new Date();
+    var pad = function(n){ return n < 10 ? '0'+n : ''+n; };
+    return now.getFullYear() + '-' + pad(now.getMonth()+1) + '-' + pad(now.getDate());
+  };
+
+  // Kasih tahu script di bawah (yang jalan lebih dulu karena bukan
+  // type="module") bahwa Firebase sudah siap dipakai.
+  window.dispatchEvent(new Event('firebaseReady'));
+</script>
 <script>
-  // ============================================================
-  // KONEKSI KE BACKEND (Google Apps Script Web App)
-  // Ganti URL di bawah dengan URL Web App hasil deploy Anda,
-  // contoh: https://script.google.com/macros/s/AKfycb.../exec
-  // HARUS SAMA dengan yang dipakai di kasir.html
-  // ============================================================
-  var API_URL = 'https://script.google.com/macros/s/AKfycby1jyEOagQqfem7Ol0YWs87hNUI9tsnDhXFoI65g-sKX58dJkc6bwvgZ_KGnZccXZDe/exec';
-
-  function callGet(action, params){
-    params = params || {};
-    var url = API_URL + '?action=' + encodeURIComponent(action);
-    Object.keys(params).forEach(function(k){
-      url += '&' + encodeURIComponent(k) + '=' + encodeURIComponent(params[k]);
-    });
-    return fetch(url).then(function(res){ return res.json(); }).then(function(json){
-      if(!json.success) throw new Error(json.error || 'Terjadi kesalahan pada server');
-      return json.data;
-    });
-  }
-
-  function callPost(action, payload){
-    return fetch(API_URL, {
-      method: 'POST',
-      // Sengaja pakai text/plain (BUKAN application/json) supaya browser
-      // tidak mengirim preflight OPTIONS -- Apps Script Web App tidak
-      // bisa membalas preflight itu.
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action: action, payload: payload })
-    }).then(function(res){ return res.json(); }).then(function(json){
-      if(!json.success) throw new Error(json.error || 'Terjadi kesalahan pada server');
-      return json.data;
-    });
-  }
-
   function formatRp(n){ return Number(n).toLocaleString('id-ID'); }
   function tutupModal(id){ document.getElementById(id).classList.add('hidden'); }
   function playEnter(el){ el.classList.remove('view-enter'); void el.offsetWidth; el.classList.add('view-enter'); }
@@ -290,7 +331,7 @@
 
   // ================= PRODUK =================
   function muatProduk(){
-    callGet('getProduk').then(renderProduk).catch(showError);
+    window.ambilProduk().then(renderProduk).catch(showError);
   }
   function renderProduk(data){
     var tbody = document.querySelector('#tabelProduk tbody');
@@ -300,7 +341,7 @@
       tr.innerHTML = '<td>'+p.kategori+'</td><td>'+p.nama+'</td><td class="rp-bold">Rp '+formatRp(p.harga)+'</td>'+
         '<td class="actions">'+
         '<button class="secondary" onclick=\'bukaModalProduk('+JSON.stringify(p)+')\'>Edit</button>'+
-        '<button class="danger" onclick="hapusProduk('+p.id+')">Hapus</button></td>';
+        '<button class="danger" onclick="hapusProduk(\''+p.id+'\')">Hapus</button></td>';
       tbody.appendChild(tr);
     });
   }
@@ -322,11 +363,11 @@
     if(!kategori || !nama || !harga){ alert('Lengkapi semua field'); return; }
 
     if(id){
-      callPost('updateProduk', { id: id, kategori: kategori, nama: nama, harga: harga }).then(function(){
+      window.updateProdukFirestore(id, kategori, nama, harga).then(function(){
         tutupModal('modalProduk'); muatProduk();
       }).catch(showError);
     } else {
-      callPost('addProduk', { kategori: kategori, nama: nama, harga: harga }).then(function(){
+      window.tambahProdukFirestore(kategori, nama, harga).then(function(){
         tutupModal('modalProduk'); muatProduk();
       }).catch(showError);
     }
@@ -334,7 +375,7 @@
 
   function hapusProduk(id){
     if(!confirm('Hapus produk ini?')) return;
-    callPost('deleteProduk', { id: id }).then(muatProduk).catch(showError);
+    window.hapusProdukFirestore(id).then(muatProduk).catch(showError);
   }
 
   // ================= LAPORAN (dihitung lokal dari cache) =================
@@ -490,7 +531,7 @@
   function hapusStrukOrder(){
     if(!currentStrukOrderId) return;
     if(!confirm('Hapus order '+currentStrukOrderId+'? Data transaksi ini akan dihapus permanen dari Laporan.')) return;
-    callPost('hapusPesanan', { orderId: currentStrukOrderId }).then(function(){
+    window.hapusPesananFirestore(currentStrukOrderId).then(function(){
       // Buang dari cache lokal supaya laporan & dropdown ikut update tanpa reload
       semuaLaporan = semuaLaporan.filter(function(r){ return String(r.orderId) !== String(currentStrukOrderId); });
       tutupModal('modalStruk');
@@ -514,9 +555,9 @@
   // baru masuk, refresh manual halaman untuk memuat ulang cache-nya.
   function initApp(){
     Promise.all([
-      callGet('getProduk'),
-      callGet('getSemuaLaporan'),
-      callGet('getHariIni')
+      window.ambilProduk(),
+      window.ambilSemuaLaporan(),
+      Promise.resolve(window.ambilHariIni())
     ]).then(function(hasil){
       renderProduk(hasil[0]);
       semuaLaporan = hasil[1];
@@ -528,7 +569,14 @@
     });
   }
 
-  initApp();
+  // Firebase (script type="module") dieksekusi belakangan (ditunda),
+  // jadi kadang window.ambilProduk dkk belum ada saat baris di bawah
+  // ini pertama kali jalan. Kalau belum siap, tunggu 'firebaseReady'.
+  if(window.ambilProduk){
+    initApp();
+  } else {
+    window.addEventListener('firebaseReady', initApp);
+  }
 </script>
 </body>
 </html>
