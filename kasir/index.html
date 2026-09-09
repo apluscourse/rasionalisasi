@@ -191,7 +191,7 @@
     #strukArea .row{display:flex; justify-content:space-between;}
     #strukArea .item-nama{font-weight:bold;}
     #strukArea .item-sub{padding-left:8px; color:#333;}
-    #strukArea .orderid{text-align:center; margin-top:10px; font-weight:bold; font-size:13px;}
+    #strukArea .orderid{text-align:center; margin-top:10px; font-weight:800; font-size:20px;}
     .aksi-struk{display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-top:14px;}
     .aksi-struk button.primary{grid-column:span 3;}
 
@@ -349,7 +349,7 @@
   // ============================================================
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
   import {
-    getFirestore, collection, getDocs, doc, setDoc, query, where
+    getFirestore, collection, getDocs, doc, setDoc, runTransaction, arrayUnion
   } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -383,22 +383,30 @@
     return pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
   }
 
-  // Cari nomor urut order berikutnya untuk tanggal tsb (dipakai untuk
-  // bikin orderId format YYYYMMDD-001, sama seperti sistem lama).
+  // Cari nomor urut order berikutnya untuk tanggal tsb, pakai 1 dokumen
+  // counter per tanggal (koleksi 'counters') supaya SELALU 1 baca + 1 tulis,
+  // berapa pun banyaknya order hari itu -- bukan query yang membesar terus
+  // seperti sebelumnya. Dokumen counters/{tanggal} dibuat otomatis sendiri
+  // (mulai dari 0) saat tanggal itu dipakai pertama kali.
   async function generateOrderId(tanggalStr){
     var prefix = tanggalStr.replace(/-/g, '');
-    var q = query(collection(db, 'pesanan'), where('tanggal', '==', tanggalStr));
-    var snap = await getDocs(q);
-    var maxSeq = 0;
-    snap.forEach(function(d){
-      var oid = d.id;
-      if(oid.indexOf(prefix) === 0){
-        var seq = parseInt(oid.split('-')[1], 10);
-        if(!isNaN(seq) && seq > maxSeq) maxSeq = seq;
-      }
+    var counterRef = doc(db, 'counters', tanggalStr);
+    var nextSeq = await runTransaction(db, async function(tx){
+      var snap = await tx.get(counterRef);
+      var last = snap.exists() ? (Number(snap.data().last) || 0) : 0;
+      var next = last + 1;
+      tx.set(counterRef, { last: next }, { merge: true });
+      return next;
     });
-    var nextSeq = maxSeq + 1;
     return prefix + '-' + ('000'+nextSeq).slice(-3);
+  }
+
+  // Catat tanggal ini ke daftar tanggal (dipakai dropdown laporan admin)
+  // supaya admin tidak perlu baca SELURUH koleksi pesanan cuma untuk tahu
+  // tanggal apa saja yang pernah ada transaksi. arrayUnion aman dipanggil
+  // berkali-kali (tidak akan dobel).
+  async function catatTanggal(tanggalStr){
+    await setDoc(doc(db, 'meta', 'ringkasan'), { tanggalList: arrayUnion(tanggalStr) }, { merge: true });
   }
 
   // Simpan 1 dokumen pesanan ke Firestore (1 order = 1 dokumen,
@@ -431,6 +439,7 @@
       tanggal: tanggal, waktu: waktu, metodePembayaran: metodePembayaran,
       items: itemsRingkas, total: total
     });
+    catatTanggal(tanggal); // tidak perlu ditunggu (await), tidak menghalangi struk tampil
 
     return { orderId: orderId, tanggal: tanggal, waktu: waktu, items: itemsRingkas, total: total, metodePembayaran: metodePembayaran };
   };
@@ -642,9 +651,15 @@
     });
   }
 
+  function nomorUrutSaja(orderId){
+    // orderId format 'YYYYMMDD-NNN' -> ambil 'NNN' saja
+    var parts = String(orderId).split('-');
+    return parts.length > 1 ? parts[1] : orderId;
+  }
+
   function tampilkanStruk(res){
     strukTerakhir = res;
-    var html = '<div class="center"><b>CHOCO BERRY & MATCHA</b><br>Struk Pesanan</div>';
+    var html = '<div class="center"><b>Chocoberry & Matcha</b><br>by matchagato</div>';
     html += '<hr>';
     res.items.forEach(function(it){
       html += '<div class="item-nama">'+it.nama+'</div>';
@@ -656,7 +671,7 @@
     html += '<div class="row item-sub"><span>Metode Bayar</span><span>'+res.metodePembayaran+'</span></div>';
     html += '<hr>';
     html += '<div class="center">'+res.tanggal+' '+res.waktu+'</div>';
-    html += '<div class="orderid">No. Order: '+res.orderId+'</div>';
+    html += '<div class="orderid">No. Order : '+nomorUrutSaja(res.orderId)+'</div>';
     document.getElementById('strukArea').innerHTML = html;
 
     document.getElementById('view-menu').style.display = 'none';
