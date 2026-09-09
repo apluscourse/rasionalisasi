@@ -245,7 +245,7 @@
   // ============================================================
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
   import {
-    getFirestore, collection, getDocs, doc, addDoc, updateDoc, deleteDoc
+    getFirestore, collection, getDocs, doc, addDoc, updateDoc, deleteDoc, query, where, getDoc
   } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -282,11 +282,9 @@
 
   // -------- LAPORAN / PESANAN --------
   // 1 dokumen pesanan = 1 order (berisi array 'items'). Fungsi ini
-  // meratakan (flatten) semua dokumen jadi baris per-item, PERSIS
-  // seperti bentuk data lama (getSemuaLaporan Apps Script), supaya
-  // semua logika laporan di bawah tidak perlu diubah sama sekali.
-  window.ambilSemuaLaporan = async function(){
-    var snap = await getDocs(collection(db, 'pesanan'));
+  // meratakan (flatten) dokumen jadi baris per-item, PERSIS seperti
+  // bentuk data lama, supaya logika ringkasan di bawah tidak perlu diubah.
+  function flattenPesanan(snap){
     var out = [];
     snap.forEach(function(d){
       var v = d.data();
@@ -300,6 +298,19 @@
       });
     });
     return out;
+  }
+
+  // Hanya baca transaksi TANGGAL TERPILIH saja (bukan semua histori).
+  window.ambilLaporanTanggal = async function(tanggal){
+    var q = query(collection(db, 'pesanan'), where('tanggal', '==', tanggal));
+    var snap = await getDocs(q);
+    return flattenPesanan(snap);
+  };
+  // Baca SEMUA histori -- sengaja dipisah, cuma dipanggil kalau admin
+  // benar-benar pilih "Semua Hari" di dropdown, bukan otomatis tiap buka halaman.
+  window.ambilLaporanSemua = async function(){
+    var snap = await getDocs(collection(db, 'pesanan'));
+    return flattenPesanan(snap);
   };
   window.hapusPesananFirestore = async function(orderId){
     await deleteDoc(doc(db, 'pesanan', orderId));
@@ -308,6 +319,16 @@
     var now = new Date();
     var pad = function(n){ return n < 10 ? '0'+n : ''+n; };
     return now.getFullYear() + '-' + pad(now.getMonth()+1) + '-' + pad(now.getDate());
+  };
+  // Baca daftar tanggal untuk dropdown dari 1 dokumen kecil (meta/ringkasan),
+  // BUKAN dengan scan semua dokumen pesanan. Kalau dokumennya belum ada sama
+  // sekali (belum pernah di-bootstrap), balikin array kosong -- nanti
+  // fallback ke "hari ini" saja, tidak error.
+  window.ambilDaftarTanggal = async function(){
+    var snap = await getDoc(doc(db, 'meta', 'ringkasan'));
+    if(!snap.exists()) return [];
+    var list = snap.data().tanggalList || [];
+    return list.slice().sort().reverse();
   };
 
   // Kasih tahu script di bawah (yang jalan lebih dulu karena bukan
@@ -388,32 +409,27 @@
     return tanggal + ' ' + (BULAN_ID[bulan] || parts[1]) + ' ' + tahun;
   }
 
-  var semuaLaporan = [];   // cache seluruh baris transaksi, diisi sekali saat halaman dibuka
+  var laporanCache = [];  // cache baris transaksi UNTUK TANGGAL YANG SEDANG DIPILIH SAJA
+  var daftarTanggalCache = [];
   var hariIniGlobal = '';
   var laporanInit = false;
+  var sedangMuatLaporan = false;
 
-  function daftarTanggalDariCache(){
-    var set = {};
-    semuaLaporan.forEach(function(r){ set[r.tanggal] = true; });
-    return Object.keys(set).sort().reverse();
-  }
-
-  // Dipanggil tiap ganti tab ke Laporan -- hanya membangun dropdown tanggal
-  // dari cache (tanpa panggil server lagi), makanya langsung instan.
+  // Dipanggil tiap ganti tab ke Laporan. Daftar tanggal dropdown diambil dari
+  // 1 dokumen kecil (meta/ringkasan) -- bukan dari scan semua transaksi.
   function initLaporan(){
     if(laporanInit) return;
     laporanInit = true;
-    var list = daftarTanggalDariCache();
     var sel = document.getElementById('selectTanggal');
     sel.innerHTML = '<option value="all">Semua Hari</option>';
-    list.forEach(function(tgl){
+    daftarTanggalCache.forEach(function(tgl){
       var opt = document.createElement('option');
       opt.value = tgl;
       opt.innerText = formatTanggalIndo(tgl) + (tgl === hariIniGlobal ? ' (Hari Ini)' : '');
       if(tgl === hariIniGlobal) opt.selected = true;
       sel.appendChild(opt);
     });
-    if(list.indexOf(hariIniGlobal) === -1){
+    if(daftarTanggalCache.indexOf(hariIniGlobal) === -1){
       var opt2 = document.createElement('option');
       opt2.value = hariIniGlobal; opt2.innerText = formatTanggalIndo(hariIniGlobal) + ' (Hari Ini)';
       opt2.selected = true;
@@ -422,13 +438,24 @@
     muatLaporan();
   }
 
-  // Ganti tanggal -> filter & hitung ringkasan langsung di browser (instan,
-  // tidak memanggil server). Kalau ada order baru masuk sesudah halaman
-  // dibuka, refresh manual halaman untuk melihatnya di cache terbaru.
+  // Ganti tanggal -> baca ULANG dari Firestore, TAPI difilter tanggal itu
+  // saja (query 'where tanggal == ...'), kecuali pilih "Semua Hari" baru
+  // baca semua histori. Jadi tidak lagi baca seluruh riwayat tiap buka admin.
   function muatLaporan(){
+    if(sedangMuatLaporan) return;
+    sedangMuatLaporan = true;
     var tgl = document.getElementById('selectTanggal').value;
-    var rows = (tgl === 'all') ? semuaLaporan : semuaLaporan.filter(function(r){ return r.tanggal === tgl; });
+    var tbody = document.querySelector('#tabelLaporan tbody');
+    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:var(--muted);">Memuat...</td></tr>';
 
+    var p = (tgl === 'all') ? window.ambilLaporanSemua() : window.ambilLaporanTanggal(tgl);
+    p.then(function(rows){
+      laporanCache = rows;
+      hitungDanRenderLaporan(rows);
+    }).catch(showError).finally(function(){ sedangMuatLaporan = false; });
+  }
+
+  function hitungDanRenderLaporan(rows){
     var ringkasanMap = {};
     var orderIdsSet = {};
     var totalPendapatan = 0;
@@ -485,14 +512,20 @@
 
   // Detail struk juga langsung dari cache -> instan, tanpa panggil server.
   var currentStrukOrderId = null;
+  function nomorUrutSaja(orderId){
+    // orderId format 'YYYYMMDD-NNN' -> ambil 'NNN' saja
+    var parts = String(orderId).split('-');
+    return parts.length > 1 ? parts[1] : orderId;
+  }
+
   function lihatStruk(orderId){
     currentStrukOrderId = orderId;
-    var items = semuaLaporan.filter(function(r){ return String(r.orderId) === String(orderId); });
+    var items = laporanCache.filter(function(r){ return String(r.orderId) === String(orderId); });
     if(!items.length){ showError(new Error('Order tidak ditemukan')); return; }
     var total = items.reduce(function(s,it){ return s + it.subtotal; }, 0);
     var tanggal = items[0].tanggal, waktu = items[0].waktu;
 
-    var html = '<div class="center"><b>CHOCO BERRY & MATCHA</b><br>Struk Pesanan</div><hr>';
+    var html = '<div class="center"><b>Chocoberry & Matcha</b><br>by matchagato</div><hr>';
     items.forEach(function(it){
       html += '<div><b>'+it.nama+'</b></div>';
       if(it.topping) html += '<div>+ '+it.topping+'</div>';
@@ -501,7 +534,7 @@
     html += '<hr><div class="row"><b>TOTAL</b><b>Rp '+formatRp(total)+'</b></div>';
     html += '<div class="row"><span>Metode Bayar</span><span>'+(items[0].metodePembayaran || '-')+'</span></div><hr>';
     html += '<div class="center">'+tanggal+' '+waktu+'</div>';
-    html += '<div class="center" style="font-weight:bold;">No. Order: '+orderId+'</div>';
+    html += '<div class="center" style="font-weight:800; font-size:20px; margin-top:10px;">No. Order : '+nomorUrutSaja(orderId)+'</div>';
     document.getElementById('strukArea').innerHTML = html;
     document.getElementById('modalStruk').classList.remove('hidden');
   }
@@ -532,10 +565,8 @@
     if(!currentStrukOrderId) return;
     if(!confirm('Hapus order '+currentStrukOrderId+'? Data transaksi ini akan dihapus permanen dari Laporan.')) return;
     window.hapusPesananFirestore(currentStrukOrderId).then(function(){
-      // Buang dari cache lokal supaya laporan & dropdown ikut update tanpa reload
-      semuaLaporan = semuaLaporan.filter(function(r){ return String(r.orderId) !== String(currentStrukOrderId); });
       tutupModal('modalStruk');
-      muatLaporan();
+      muatLaporan(); // baca ulang tanggal yang lagi dipilih (murah, cuma tanggal itu)
     }).catch(showError);
   }
 
@@ -549,18 +580,18 @@
   }
 
   // ================= LOAD AWAL =================
-  // Semua data (produk + seluruh transaksi + tanggal hari ini) ditarik
-  // SEKALI di sini saat halaman dibuka. Sesudah ini, ganti tab/tanggal dan
-  // lihat detail order semuanya proses lokal (instan). Kalau ada order
-  // baru masuk, refresh manual halaman untuk memuat ulang cache-nya.
+  // Produk + daftar tanggal (dari 1 dokumen kecil) + hari ini ditarik SEKALI
+  // di sini. Transaksi (koleksi 'pesanan') SENGAJA TIDAK dibaca semua di
+  // sini -- baru dibaca per tanggal saat tab Laporan dibuka (lihat initLaporan
+  // & muatLaporan), supaya tidak baca seluruh riwayat penjualan tiap buka admin.
   function initApp(){
     Promise.all([
       window.ambilProduk(),
-      window.ambilSemuaLaporan(),
+      window.ambilDaftarTanggal(),
       Promise.resolve(window.ambilHariIni())
     ]).then(function(hasil){
       renderProduk(hasil[0]);
-      semuaLaporan = hasil[1];
+      daftarTanggalCache = hasil[1];
       hariIniGlobal = hasil[2];
       hideLoading();
     }).catch(function(err){
