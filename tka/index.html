@@ -350,6 +350,12 @@ button:disabled {
   transform: translateY(4px) !important;
 }
 
+/* PAKET MODE LIHAT-SAJA (saat PAKET_BISA_DIPESAN = false) */
+.package-item-disabled {
+  cursor: default;
+  pointer-events: none;
+}
+
 .package-top {
   display: flex;
   justify-content: space-between;
@@ -796,6 +802,18 @@ function closeModalOutside(event) {
      TIDAK dicoret (dianggap tidak sedang promo).
    - Atur harga promo tiap paket di HARGA_PROMO di bawah ini.
    ============================================================ */
+/* ============================================================
+   SAKLAR MODE PAKET SAAT POPUP LANGGANAN DIBUKA
+   true  = kondisi seperti sekarang: semua paket (ekonomis,
+           reguler, eksklusif, platinum) bisa diklik untuk pesan,
+           dan tombol "PESAN SEKARANG" di paket bundling tampil.
+   false = paket individual HANYA bisa dilihat (tidak bisa diklik/
+           tidak bisa pesan). Tombol "Paket Bundling" tetap bisa
+           diklik dan paket bundling tetap bisa dipilih, tapi
+           tombol "PESAN SEKARANG" disembunyikan.
+   ============================================================ */
+const PAKET_BISA_DIPESAN = false;
+
 const PROMO_AKTIF = false;
 
 const HARGA_NORMAL = {
@@ -848,9 +866,11 @@ function renderPackages() {
       ? `<span class="feature-badge"><i class="fas fa-star"></i> ${p.extraBadge}</span>`
       : '';
     const topBadgeClass = (isPromo || p.bestSeller) ? 'has-topbadge' : '';
+    const disabledClass = PAKET_BISA_DIPESAN ? '' : 'package-item-disabled';
+    const clickAttr = PAKET_BISA_DIPESAN ? `onclick="orderPackage('${p.key}')"` : '';
 
     return `
-      <button class="package-item ${p.cls} ${topBadgeClass}" onclick="orderPackage('${p.key}')">
+      <button class="package-item ${p.cls} ${topBadgeClass} ${disabledClass}" ${clickAttr}>
           ${bestSellerHtml}
           ${promoBadgeHtml}
           <div class="package-top">
@@ -959,6 +979,7 @@ function openBundlingModal() {
   bundlingSelected = {};
   renderBundlingApps();
   updateBundlingTotal();
+  document.getElementById('bundlingSubmitBtn').style.display = PAKET_BISA_DIPESAN ? '' : 'none';
   document.getElementById('bundlingModal').classList.add('active');
 }
 
