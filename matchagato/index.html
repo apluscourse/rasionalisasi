@@ -96,6 +96,24 @@
 
     .aksi-struk-admin{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:14px;}
     .aksi-struk-admin button{margin:0; width:100%;}
+    .aksi-struk-admin .span2{grid-column:span 2;}
+
+    /* ---------- EDIT ORDER ---------- */
+    .edit-line{background:var(--cream); border:1px solid var(--border); border-radius:14px; padding:12px 14px; margin-bottom:10px;}
+    .edit-head{display:flex; justify-content:space-between; align-items:flex-start; gap:10px; font-size:14.5px;}
+    .edit-sub{font-size:12.5px; color:var(--muted); margin-top:2px;}
+    .edit-topping{display:flex; flex-wrap:wrap; gap:6px; margin-top:8px;}
+    .topping-chip{display:inline-flex; align-items:center; gap:5px; font-size:12px; border:1px solid var(--border);
+      background:#fff; border-radius:16px; padding:5px 10px; cursor:pointer; transition:.15s;}
+    .topping-chip.aktif{border-color:var(--sage); background:#eef1e6; color:var(--sage-dark); font-weight:500;}
+    .topping-chip input{width:auto; margin:0; accent-color:var(--sage);}
+    .edit-aksi{display:flex; align-items:center; justify-content:space-between; margin-top:10px;}
+    .qty-stepper{display:flex; align-items:center; gap:12px;}
+    .qty-stepper button{width:32px; height:32px; border-radius:50%; border:1px solid var(--sage);
+      background:#fff; color:var(--sage-dark); font-size:17px; cursor:pointer; transition:.15s; padding:0;}
+    .qty-stepper button:active{transform:scale(.9); background:var(--sage); color:#fff;}
+    .qty-stepper span{min-width:20px; text-align:center; font-weight:600;}
+    .total-row{display:flex; justify-content:space-between; font-size:17px; font-weight:700; margin:14px 0 4px; font-family:'Jost',sans-serif;}
 
     @media print{
       body *{visibility:hidden;}
@@ -230,12 +248,46 @@
       <h2>Struk Order</h2>
       <div id="strukArea"></div>
       <div class="aksi-struk-admin">
+        <button class="secondary span2" onclick="bukaEditOrder()">✏️ Edit Orderan</button>
         <button class="secondary" onclick="cetakStrukAdmin()">🖨️ Cetak</button>
         <button class="secondary" onclick="unduhPDFAdmin()">⬇️ PDF</button>
         <button class="secondary" onclick="unduhJPEGAdmin()">⬇️ JPG</button>
         <button class="danger" onclick="hapusStrukOrder()">🗑️ Hapus</button>
       </div>
       <button class="primary" style="width:100%; margin-top:10px;" onclick="tutupModal('modalStruk')">Tutup</button>
+    </div>
+  </div>
+
+  <!-- MODAL EDIT ORDER -->
+  <div class="overlay hidden" id="modalEditOrder">
+    <div class="modal">
+      <h2>Edit Orderan <span id="editOrderLabel" style="font-size:14px; color:var(--muted); font-family:'Jost',sans-serif;"></span></h2>
+      <p style="color:var(--muted); font-size:12.5px; margin-top:-8px;">Ubah jumlah, topping, atau tambah/hapus item. Total dihitung otomatis.</p>
+
+      <div id="editItemList"></div>
+
+      <div class="card">
+        <div style="font-weight:600; font-size:14px;">+ Tambah Item</div>
+        <label class="field">Produk</label>
+        <select id="editProdukBaru" onchange="renderToppingBaru()"></select>
+        <div id="editToppingBaru"></div>
+        <label class="field">Jumlah</label>
+        <input type="number" id="editQtyBaru" value="1" min="1">
+        <button class="secondary" style="margin-top:12px;" onclick="tambahItemEdit()">Tambahkan ke Order</button>
+      </div>
+
+      <label class="field">Metode Pembayaran</label>
+      <select id="editMetode">
+        <option value="TUNAI">TUNAI</option>
+        <option value="QRIS">QRIS</option>
+      </select>
+
+      <div class="total-row"><span>Total</span><span id="editTotal">Rp 0</span></div>
+
+      <div style="display:flex; gap:8px; margin-top:14px;">
+        <button class="primary" style="flex:1;" id="btnSimpanEdit" onclick="simpanEditOrder()">Simpan Perubahan</button>
+        <button class="secondary" style="flex:1;" onclick="batalEditOrder()">Batal</button>
+      </div>
     </div>
   </div>
 
@@ -312,6 +364,16 @@
     var snap = await getDocs(collection(db, 'pesanan'));
     return flattenPesanan(snap);
   };
+  // Simpan hasil edit 1 order. Struktur dokumen tetap sama seperti yang
+  // dibuat kasir.html (items[] + total + metodePembayaran), tanggal & waktu
+  // SENGAJA tidak diubah supaya order tetap masuk laporan hari yang sama.
+  window.updatePesananFirestore = async function(orderId, items, total, metodePembayaran){
+    await updateDoc(doc(db, 'pesanan', orderId), {
+      items: items,
+      total: Number(total),
+      metodePembayaran: String(metodePembayaran || 'TUNAI').trim().toUpperCase()
+    });
+  };
   window.hapusPesananFirestore = async function(orderId){
     await deleteDoc(doc(db, 'pesanan', orderId));
   };
@@ -354,7 +416,9 @@
   function muatProduk(){
     window.ambilProduk().then(renderProduk).catch(showError);
   }
+  var produkCache = [];   // dipakai modal Edit Orderan (harga & daftar topping)
   function renderProduk(data){
+    produkCache = data || [];
     var tbody = document.querySelector('#tabelProduk tbody');
     tbody.innerHTML = '';
     data.forEach(function(p){
@@ -441,7 +505,9 @@
   // Ganti tanggal -> baca ULANG dari Firestore, TAPI difilter tanggal itu
   // saja (query 'where tanggal == ...'), kecuali pilih "Semua Hari" baru
   // baca semua histori. Jadi tidak lagi baca seluruh riwayat tiap buka admin.
-  function muatLaporan(){
+  // cb (opsional) dipanggil setelah data selesai dimuat -- dipakai setelah
+  // edit order supaya struk bisa langsung dibuka ulang dengan data terbaru.
+  function muatLaporan(cb){
     if(sedangMuatLaporan) return;
     sedangMuatLaporan = true;
     var tgl = document.getElementById('selectTanggal').value;
@@ -452,6 +518,7 @@
     p.then(function(rows){
       laporanCache = rows;
       hitungDanRenderLaporan(rows);
+      if(typeof cb === 'function') cb();
     }).catch(showError).finally(function(){ sedangMuatLaporan = false; });
   }
 
@@ -537,6 +604,235 @@
     html += '<div class="center" style="font-weight:800; font-size:20px; margin-top:10px;">No. Order : '+nomorUrutSaja(orderId)+'</div>';
     document.getElementById('strukArea').innerHTML = html;
     document.getElementById('modalStruk').classList.remove('hidden');
+  }
+
+  // ================= EDIT ORDERAN =================
+  // Alur & aturan harga mengikuti kasir.html:
+  //   hargaSatuan yang disimpan = harga produk + total harga topping
+  //   subtotal                  = hargaSatuan x qty
+  //   topping hanya untuk kategori 'Choco Berry'
+  var editOrder = null;
+
+  function daftarTopping(){
+    return produkCache.filter(function(p){ return p.kategori === 'Topping'; });
+  }
+  function cariProdukByNama(nama){
+    return produkCache.filter(function(p){ return p.nama === nama; })[0];
+  }
+  function cariProdukById(id){
+    return produkCache.filter(function(p){ return String(p.id) === String(id); })[0];
+  }
+  function hargaSatuanEdit(it){
+    return Number(it.hargaBase) + it.toppings.reduce(function(s,t){ return s + Number(t.harga); }, 0);
+  }
+  function subtotalItemEdit(it){ return hargaSatuanEdit(it) * Number(it.qty); }
+
+  // Baris laporan (hasil flatten) -> bentuk yang bisa diedit.
+  // hargaSatuan tersimpan sudah termasuk topping, jadi harga dasarnya diambil
+  // ulang dari data produk; kalau produknya sudah dihapus/ganti nama, harga
+  // dasar dihitung mundur dari hargaSatuan dikurangi topping.
+  function bacaItemKeEdit(it){
+    var p = cariProdukByNama(it.nama);
+    var toppings = String(it.topping || '').split(',').map(function(s){ return s.trim(); })
+      .filter(function(s){ return s.length > 0; })
+      .map(function(nm){
+        var t = daftarTopping().filter(function(x){ return x.nama === nm; })[0];
+        return { id: t ? t.id : null, nama: nm, harga: t ? Number(t.harga) : 0 };
+      });
+    var totalTopping = toppings.reduce(function(s,t){ return s + Number(t.harga); }, 0);
+    var hargaBase = p ? Number(p.harga) : Math.max(0, Number(it.hargaSatuan) - totalTopping);
+    return {
+      kategori: p ? p.kategori : (it.kategori || ''),
+      nama: it.nama,
+      hargaBase: hargaBase,
+      toppings: toppings,
+      qty: Number(it.qty) || 1
+    };
+  }
+
+  function bukaEditOrder(){
+    if(!currentStrukOrderId) return;
+    var rows = laporanCache.filter(function(r){ return String(r.orderId) === String(currentStrukOrderId); });
+    if(!rows.length){ showError(new Error('Order tidak ditemukan')); return; }
+
+    editOrder = {
+      orderId: currentStrukOrderId,
+      items: rows.map(bacaItemKeEdit)
+    };
+    document.getElementById('editOrderLabel').innerText = 'No. ' + nomorUrutSaja(currentStrukOrderId);
+    var metode = String(rows[0].metodePembayaran || 'TUNAI').toUpperCase();
+    document.getElementById('editMetode').value = (metode === 'QRIS') ? 'QRIS' : 'TUNAI';
+    document.getElementById('editQtyBaru').value = 1;
+
+    isiPilihanProdukBaru();
+    renderEditItems();
+    tutupModal('modalStruk');
+    document.getElementById('modalEditOrder').classList.remove('hidden');
+  }
+
+  function renderEditItems(){
+    var box = document.getElementById('editItemList');
+    if(!editOrder.items.length){
+      box.innerHTML = '<p style="color:var(--muted); font-size:13px;">Semua item terhapus. Tambahkan minimal 1 item sebelum menyimpan.</p>';
+      hitungTotalEdit();
+      return;
+    }
+    var html = '';
+    editOrder.items.forEach(function(it, idx){
+      html += '<div class="edit-line">';
+      html += '<div class="edit-head"><b>'+it.nama+'</b><span class="rp-bold">Rp '+formatRp(subtotalItemEdit(it))+'</span></div>';
+      html += '<div class="edit-sub">Rp '+formatRp(hargaSatuanEdit(it))+' / item'+(it.kategori ? ' &middot; '+it.kategori : '')+'</div>';
+
+      if(it.kategori === 'Choco Berry' && daftarTopping().length){
+        html += '<div class="edit-topping">';
+        daftarTopping().forEach(function(t){
+          var aktif = it.toppings.some(function(x){ return x.nama === t.nama; });
+          html += '<label class="topping-chip'+(aktif ? ' aktif' : '')+'">'+
+                  '<input type="checkbox" '+(aktif ? 'checked' : '')+
+                  ' onchange="toggleToppingEdit('+idx+', \''+t.id+'\', this.checked)">'+
+                  t.nama+' +Rp '+formatRp(t.harga)+'</label>';
+        });
+        html += '</div>';
+      }
+
+      html += '<div class="edit-aksi">'+
+              '<div class="qty-stepper">'+
+              '<button onclick="ubahQtyEdit('+idx+',-1)">−</button>'+
+              '<span>'+it.qty+'</span>'+
+              '<button onclick="ubahQtyEdit('+idx+',1)">+</button>'+
+              '</div>'+
+              '<button class="danger" onclick="hapusItemEdit('+idx+')">Hapus</button>'+
+              '</div>';
+      html += '</div>';
+    });
+    box.innerHTML = html;
+    hitungTotalEdit();
+  }
+
+  function toggleToppingEdit(idx, toppingId, dicentang){
+    var it = editOrder.items[idx];
+    var t = cariProdukById(toppingId);
+    if(!t) return;
+    if(dicentang){
+      if(!it.toppings.some(function(x){ return x.nama === t.nama; })){
+        it.toppings.push({ id: t.id, nama: t.nama, harga: Number(t.harga) });
+      }
+    } else {
+      it.toppings = it.toppings.filter(function(x){ return x.nama !== t.nama; });
+    }
+    renderEditItems();
+  }
+
+  function ubahQtyEdit(idx, delta){
+    var it = editOrder.items[idx];
+    it.qty = Math.max(1, Number(it.qty) + delta);
+    renderEditItems();
+  }
+
+  function hapusItemEdit(idx){
+    if(!confirm('Hapus item ini dari order?')) return;
+    editOrder.items.splice(idx, 1);
+    renderEditItems();
+  }
+
+  function isiPilihanProdukBaru(){
+    var sel = document.getElementById('editProdukBaru');
+    sel.innerHTML = '';
+    produkCache.filter(function(p){ return p.kategori !== 'Topping'; })
+      .forEach(function(p){
+        var opt = document.createElement('option');
+        opt.value = p.id;
+        opt.innerText = p.nama + ' — Rp ' + formatRp(p.harga);
+        sel.appendChild(opt);
+      });
+    renderToppingBaru();
+  }
+
+  function renderToppingBaru(){
+    var box = document.getElementById('editToppingBaru');
+    var p = cariProdukById(document.getElementById('editProdukBaru').value);
+    if(!p || p.kategori !== 'Choco Berry' || !daftarTopping().length){ box.innerHTML = ''; return; }
+    var html = '<label class="field">Topping (opsional)</label><div class="edit-topping">';
+    daftarTopping().forEach(function(t){
+      html += '<label class="topping-chip">'+
+              '<input type="checkbox" class="topping-baru" value="'+t.id+'" onchange="this.parentNode.classList.toggle(\'aktif\', this.checked)"> '+
+              t.nama+' +Rp '+formatRp(t.harga)+'</label>';
+    });
+    html += '</div>';
+    box.innerHTML = html;
+  }
+
+  function tambahItemEdit(){
+    if(!editOrder) return;
+    var p = cariProdukById(document.getElementById('editProdukBaru').value);
+    if(!p){ alert('Pilih produk dulu'); return; }
+    var qty = Math.max(1, Number(document.getElementById('editQtyBaru').value) || 1);
+
+    var toppings = [];
+    if(p.kategori === 'Choco Berry'){
+      var cbs = document.querySelectorAll('#editToppingBaru .topping-baru');
+      Array.prototype.forEach.call(cbs, function(cb){
+        if(cb.checked){
+          var t = cariProdukById(cb.value);
+          if(t) toppings.push({ id: t.id, nama: t.nama, harga: Number(t.harga) });
+        }
+      });
+    }
+
+    editOrder.items.push({
+      kategori: p.kategori, nama: p.nama, hargaBase: Number(p.harga),
+      toppings: toppings, qty: qty
+    });
+
+    document.getElementById('editQtyBaru').value = 1;
+    renderToppingBaru(); // reset centang topping
+    renderEditItems();
+  }
+
+  function hitungTotalEdit(){
+    var total = editOrder.items.reduce(function(s,it){ return s + subtotalItemEdit(it); }, 0);
+    document.getElementById('editTotal').innerText = 'Rp ' + formatRp(total);
+    return total;
+  }
+
+  function simpanEditOrder(){
+    if(!editOrder) return;
+    if(!editOrder.items.length){ alert('Order harus berisi minimal 1 item. Kalau mau menghapus semuanya, pakai tombol Hapus di struk.'); return; }
+
+    var metode = document.getElementById('editMetode').value;
+    var items = editOrder.items.map(function(it){
+      return {
+        kategori: it.kategori,
+        nama: it.nama,
+        topping: it.toppings.map(function(t){ return t.nama; }).join(', '),
+        qty: Number(it.qty),
+        hargaSatuan: hargaSatuanEdit(it),
+        subtotal: subtotalItemEdit(it)
+      };
+    });
+    var total = items.reduce(function(s,i){ return s + i.subtotal; }, 0);
+    var orderId = editOrder.orderId;
+
+    var btn = document.getElementById('btnSimpanEdit');
+    btn.disabled = true; btn.innerText = 'Menyimpan...';
+    window.updatePesananFirestore(orderId, items, total, metode).then(function(){
+      btn.disabled = false; btn.innerText = 'Simpan Perubahan';
+      tutupModal('modalEditOrder');
+      editOrder = null;
+      // muat ulang laporan (tanggal yang sedang dipilih saja), lalu buka struk
+      // versi terbaru supaya langsung kelihatan hasil editnya.
+      muatLaporan(function(){ lihatStruk(orderId); });
+    }).catch(function(err){
+      btn.disabled = false; btn.innerText = 'Simpan Perubahan';
+      showError(err);
+    });
+  }
+
+  function batalEditOrder(){
+    var orderId = editOrder ? editOrder.orderId : currentStrukOrderId;
+    editOrder = null;
+    tutupModal('modalEditOrder');
+    if(orderId) lihatStruk(orderId);
   }
 
   // ================= AKSI STRUK: CETAK / UNDUH / HAPUS =================
