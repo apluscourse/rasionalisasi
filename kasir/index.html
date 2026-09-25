@@ -24,7 +24,7 @@
     html,body{height:100%;}
     body{
       margin:0; font-family:'Jost',sans-serif; background:var(--cream); color:var(--ink);
-      padding-bottom:96px; position:relative; overflow-x:hidden;
+      padding-bottom:24px; position:relative; overflow-x:hidden;
     }
     h1,h2,h3,.serif{font-family:'Cormorant Garamond',serif;}
 
@@ -141,27 +141,7 @@
     #stepMetode.hidden, #stepKonfirmasi.hidden{display:none;}
     #modalKonfirmasi{align-items:center;}
     #modalKonfirmasi .modal{border-radius:22px;}
-
-    /* ---------- CART BAR ---------- */
-    .cartbar{
-      position:fixed; bottom:0; left:0; right:0; background:var(--sage-dark); color:#fff;
-      padding:14px 18px; display:flex; align-items:center; justify-content:space-between;
-      z-index:30; box-shadow:0 -4px 16px rgba(0,0,0,.15); border-top:1px solid rgba(255,255,255,.15);
-    }
-    .cartbar.hidden{display:none;}
-    .cartbar.show{animation:slideUp .35s cubic-bezier(.2,.8,.3,1) both;}
-    @keyframes slideUp{ from{ transform:translateY(100%); } to{ transform:translateY(0); } }
-    .cartbar .info{font-size:13px; line-height:1.35; font-family:'Jost',sans-serif;}
-    .cartbar .info b{font-size:16px; display:block; font-family:'Jost',sans-serif; font-weight:700;}
-    .cartbar .info u{cursor:pointer;}
-    .cartbar button{
-      background:#fff; color:var(--sage-dark); border:none; padding:12px 20px; border-radius:24px; font-weight:600;
-      cursor:pointer; font-family:'Jost',sans-serif; animation:pulseGlow 2.6s ease-in-out infinite;
-    }
-    @keyframes pulseGlow{
-      0%,100%{ box-shadow:0 0 0 0 rgba(255,255,255,.5); }
-      50%{ box-shadow:0 0 0 7px rgba(255,255,255,0); }
-    }
+    #btnLihatPesanan.hidden{display:none;}
 
     /* ---------- MODAL ---------- */
     .overlay{
@@ -270,6 +250,7 @@
       <!-- VIEW: MENU KATEGORI -->
       <div id="view-menu">
         <div class="kategori-grid" id="kategoriGrid"></div>
+        <button class="primary hidden" id="btnLihatPesanan" style="margin-top:16px;" onclick="bukaKonfirmasi()">LIHAT PESANAN</button>
       </div>
 
       <!-- VIEW: VARIAN -->
@@ -308,25 +289,6 @@
           </div>
         </div>
       </div>
-    </div>
-  </div>
-
-  <!-- CART BAR -->
-  <div class="cartbar hidden" id="cartBar">
-    <div class="info" onclick="bukaCart()">
-      🛒 <b><span id="cartCount">0</span> item — Rp <span id="cartTotal">0</span></b>
-      <u>lihat keranjang</u>
-    </div>
-    <button onclick="bukaKonfirmasi()">Buat Pesanan</button>
-  </div>
-
-  <!-- MODAL: CART -->
-  <div class="overlay hidden" id="modalCart">
-    <div class="modal">
-      <h2>Keranjang</h2>
-      <div id="cartLines"></div>
-      <div class="total-row"><span>Total</span><span>Rp <span id="cartModalTotal">0</span></span></div>
-      <button class="primary" onclick="tutupModal('modalCart')">Tutup</button>
     </div>
   </div>
 
@@ -597,14 +559,12 @@
   }
 
   function updateCartBar(){
-    var bar = document.getElementById('cartBar');
-    if(cart.length === 0){ bar.classList.add('hidden'); bar.classList.remove('show'); return; }
-    if(bar.classList.contains('hidden')){
-      bar.classList.remove('hidden');
-      bar.classList.add('show');
+    var btn = document.getElementById('btnLihatPesanan');
+    if(cart.length === 0){
+      btn.classList.add('hidden');
+      return;
     }
-    document.getElementById('cartCount').innerText = cart.reduce(function(s,it){return s+it.qty;},0);
-    document.getElementById('cartTotal').innerText = formatRp(totalCart());
+    btn.classList.remove('hidden');
   }
 
   function renderCartLines(containerId, allowHapus){
@@ -625,20 +585,17 @@
   function hapusItem(idx){
     cart.splice(idx,1);
     updateCartBar();
-    renderCartLines('cartLines', true);
-    document.getElementById('cartModalTotal').innerText = formatRp(totalCart());
-    if(cart.length===0) tutupModal('modalCart');
-  }
-
-  function bukaCart(){
-    renderCartLines('cartLines', true);
-    document.getElementById('cartModalTotal').innerText = formatRp(totalCart());
-    document.getElementById('modalCart').classList.remove('hidden');
+    if(cart.length===0){
+      tutupModal('modalKonfirmasi');
+      return;
+    }
+    renderCartLines('konfirmasiLines', true);
+    document.getElementById('konfirmasiTotal').innerText = formatRp(totalCart());
   }
 
   function bukaKonfirmasi(){
     if(cart.length===0) return;
-    renderCartLines('konfirmasiLines', false);
+    renderCartLines('konfirmasiLines', true);
     document.getElementById('konfirmasiTotal').innerText = formatRp(totalCart());
     document.getElementById('stepKonfirmasi').classList.remove('hidden');
     document.getElementById('stepMetode').classList.add('hidden');
@@ -702,7 +659,7 @@
     document.getElementById('view-detail').style.display = 'none';
     var sv = document.getElementById('view-struk');
     sv.style.display = 'block'; playEnter(sv);
-    document.getElementById('cartBar').classList.add('hidden');
+    document.getElementById('btnLihatPesanan').classList.add('hidden');
     document.getElementById('pageTitle').innerText = 'Pesanan Berhasil';
     leafFlourish();
   }
