@@ -137,6 +137,10 @@
     .field-label{display:block; font-size:12.5px; color:var(--muted); margin:14px 0 4px;}
     .select-metode{width:100%; padding:11px; border:1px solid var(--border); border-radius:10px; font-size:14px; font-family:'Jost',sans-serif; background:#fff; color:var(--ink);}
     .select-metode:focus{outline:none; border-color:var(--sage);}
+    .aksi-metode{display:grid; grid-template-columns:1fr; gap:8px; margin-top:10px;}
+    #stepMetode.hidden, #stepKonfirmasi.hidden{display:none;}
+    #modalKonfirmasi{align-items:center;}
+    #modalKonfirmasi .modal{border-radius:22px;}
 
     /* ---------- CART BAR ---------- */
     .cartbar{
@@ -333,13 +337,20 @@
       <p style="color:var(--muted); font-size:13px; margin-top:-6px;">Pastikan pesanan sudah benar sebelum diproses.</p>
       <div id="konfirmasiLines"></div>
       <div class="total-row"><span>Total</span><span>Rp <span id="konfirmasiTotal">0</span></span></div>
-      <label class="field-label">Metode Pembayaran</label>
-      <select id="metodePembayaran" class="select-metode">
-        <option value="TUNAI">TUNAI</option>
-        <option value="QRIS">QRIS</option>
-      </select>
-      <button class="primary" id="btnKonfirmasi" style="margin-top:14px;" onclick="prosesPesanan()">Ya, Pesanan Sudah Benar</button>
-      <button class="secondary" onclick="tutupModal('modalKonfirmasi')">Batal, Kembali Edit</button>
+
+      <div id="stepKonfirmasi">
+        <button class="primary" style="margin-top:14px;" onclick="bukaMetodePembayaran()">Lanjutkan Pembayaran</button>
+        <button class="secondary" onclick="tutupModal('modalKonfirmasi')">Batal, Kembali Edit</button>
+      </div>
+
+      <div id="stepMetode" class="hidden">
+        <label class="field-label">Pilih Metode Pembayaran</label>
+        <div class="aksi-metode">
+          <button class="primary" id="btnTunai" onclick="prosesPesanan('TUNAI')">TUNAI</button>
+          <button class="primary" id="btnQris" onclick="prosesPesanan('QRIS')">QRIS</button>
+          <button class="secondary" id="btnBatalMetode" onclick="tutupModal('modalKonfirmasi')">BATAL</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -629,24 +640,36 @@
     if(cart.length===0) return;
     renderCartLines('konfirmasiLines', false);
     document.getElementById('konfirmasiTotal').innerText = formatRp(totalCart());
-    document.getElementById('metodePembayaran').value = 'TUNAI';
+    document.getElementById('stepKonfirmasi').classList.remove('hidden');
+    document.getElementById('stepMetode').classList.add('hidden');
     document.getElementById('modalKonfirmasi').classList.remove('hidden');
+  }
+
+  function bukaMetodePembayaran(){
+    document.getElementById('stepKonfirmasi').classList.add('hidden');
+    document.getElementById('stepMetode').classList.remove('hidden');
   }
 
   function tutupModal(id){
     document.getElementById(id).classList.add('hidden');
   }
 
-  function prosesPesanan(){
-    var btn = document.getElementById('btnKonfirmasi');
-    var metode = document.getElementById('metodePembayaran').value;
-    btn.disabled = true; btn.innerText = 'Memproses...';
+  function prosesPesanan(metode){
+    var btnTunai = document.getElementById('btnTunai');
+    var btnQris = document.getElementById('btnQris');
+    var btnBatalMetode = document.getElementById('btnBatalMetode');
+    var btnAktif = (metode === 'TUNAI') ? btnTunai : btnQris;
+    var labelAsli = btnAktif.innerText;
+    btnTunai.disabled = true; btnQris.disabled = true; btnBatalMetode.disabled = true;
+    btnAktif.innerText = 'Memproses...';
     window.buatPesananFirestore(cart, metode).then(function(res){
-      btn.disabled = false; btn.innerText = 'Ya, Pesanan Sudah Benar';
+      btnTunai.disabled = false; btnQris.disabled = false; btnBatalMetode.disabled = false;
+      btnAktif.innerText = labelAsli;
       tutupModal('modalKonfirmasi');
       tampilkanStruk(res);
     }).catch(function(err){
-      btn.disabled = false; btn.innerText = 'Ya, Pesanan Sudah Benar';
+      btnTunai.disabled = false; btnQris.disabled = false; btnBatalMetode.disabled = false;
+      btnAktif.innerText = labelAsli;
       showError(err);
     });
   }
