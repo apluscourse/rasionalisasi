@@ -94,14 +94,21 @@
     .kategori-card .emoji{font-size:32px; display:block; margin-bottom:8px;}
     .kategori-card h3{margin:0; font-size:19px; font-weight:600; color:var(--ink);}
 
-    /* ---------- VARIAN LIST ---------- */
-    .varian-item{
-      background:var(--cream); border:1px solid var(--border); border-radius:14px; padding:14px 16px; margin-bottom:10px;
-      display:flex; justify-content:space-between; align-items:center; cursor:pointer; transition:.2s;
+    /* ---------- VARIAN LIST (KARTU) ---------- */
+    .varian-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(135px, 1fr)); gap:14px;}
+    .varian-card{
+      background:var(--cream); border:1px solid var(--border); border-radius:16px; padding:14px 12px;
+      display:flex; flex-direction:column; align-items:center; text-align:center; cursor:pointer; transition:.2s;
     }
-    .varian-item:hover{border-color:var(--sage); background:#fffdf7;}
-    .varian-item .nama{font-weight:500; font-size:15px;}
-    .varian-item .harga{color:var(--sage-dark); font-weight:700; font-size:14px; font-family:'Jost',sans-serif;}
+    .varian-card:hover{border-color:var(--sage); background:#fffdf7; transform:translateY(-3px); box-shadow:0 6px 16px rgba(95,107,69,.12);}
+    .varian-card .nama{font-weight:600; font-size:14px; line-height:1.3; margin-bottom:10px;}
+    .varian-img-wrap{
+      width:100%; aspect-ratio:1/1; border-radius:12px; margin-bottom:10px; overflow:hidden;
+      display:flex; align-items:center; justify-content:center; background:#fff; border:1px solid var(--border);
+    }
+    .varian-img-wrap img{width:100%; height:100%; object-fit:contain; display:block;}
+    .varian-img-wrap .noimg{font-size:38px; opacity:.5;}
+    .varian-card .harga{color:var(--sage-dark); font-weight:700; font-size:14px; font-family:'Jost',sans-serif;}
     .rp-bold{font-family:'Jost',sans-serif; font-weight:700;}
 
     /* ---------- DETAIL / TOPPING ---------- */
@@ -109,6 +116,7 @@
       background:var(--cream); border:1px solid var(--border); border-radius:14px; padding:16px; margin-bottom:16px;
     }
     .panel h3{margin:0 0 12px; font-size:19px; font-weight:600;}
+    .detail-gambar{width:100%; max-height:200px; object-fit:contain; border-radius:14px; margin-bottom:14px; display:block;}
     .topping-row{display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px dashed var(--border);}
     .topping-row:last-child{border-bottom:none;}
     .topping-row label{flex:1; font-size:14px;}
@@ -256,13 +264,14 @@
       <!-- VIEW: VARIAN -->
       <div id="view-varian" style="display:none;">
         <button class="btn-back-header" style="margin-bottom:14px;" onclick="tampilkanMenu()">← Kembali ke Menu</button>
-        <div id="varianList"></div>
+        <div id="varianList" class="varian-grid"></div>
       </div>
 
       <!-- VIEW: DETAIL -->
       <div id="view-detail" style="display:none;">
         <button class="btn-back-header" style="margin-bottom:14px;" onclick="tampilkanVarian()">← Pilih Varian Lain</button>
         <div class="panel">
+          <div id="detailGambarWrap"></div>
           <h3 id="detailNama"></h3>
           <div id="toppingBox"></div>
           <div class="qty-row">
@@ -342,7 +351,7 @@
     var out = [];
     snap.forEach(function(d){
       var v = d.data();
-      out.push({ id: d.id, kategori: v.kategori, nama: v.nama, harga: Number(v.harga) });
+      out.push({ id: d.id, kategori: v.kategori, nama: v.nama, harga: Number(v.harga), gambar: v.gambar || '' });
     });
     return out;
   };
@@ -488,8 +497,12 @@
     var list = produkData.filter(function(p){ return p.kategori === kat; });
     var html = '';
     list.forEach(function(p){
-      html += '<div class="varian-item" onclick="pilihVarian(\''+p.id+'\')">'+
+      var thumb = p.gambar ?
+        '<img src="'+p.gambar+'" alt="" onerror="this.parentNode.innerHTML=\'<span class=&quot;noimg&quot;>'+(EMOJI[p.kategori]||'🍰')+'</span>\'">' :
+        '<span class="noimg">'+(EMOJI[p.kategori]||'🍰')+'</span>';
+      html += '<div class="varian-card" onclick="pilihVarian(\''+p.id+'\')">'+
               '<span class="nama">'+p.nama+'</span>'+
+              '<div class="varian-img-wrap">'+thumb+'</div>'+
               '<span class="harga">Rp '+formatRp(p.harga)+'</span></div>';
     });
     document.getElementById('varianList').innerHTML = html;
@@ -505,6 +518,8 @@
     qtyAktif = 1;
     document.getElementById('qtyLabel').innerText = qtyAktif;
     document.getElementById('detailNama').innerHTML = varianAktif.nama + ' — <span class="rp-bold">Rp ' + formatRp(varianAktif.harga) + '</span>';
+    document.getElementById('detailGambarWrap').innerHTML = varianAktif.gambar ?
+      '<img class="detail-gambar" src="'+varianAktif.gambar+'" alt="" onerror="this.parentNode.innerHTML=\'\'">' : '';
 
     var toppingBox = document.getElementById('toppingBox');
     if(kategoriAktif === 'Choco Berry'){
