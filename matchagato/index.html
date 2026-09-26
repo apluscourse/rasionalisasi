@@ -183,7 +183,7 @@
         <button class="primary" onclick="bukaModalProduk()">+ Tambah Produk</button>
         <div class="table-wrap">
           <table id="tabelProduk">
-            <thead><tr><th>Kategori</th><th>Nama</th><th>Harga</th><th>Aksi</th></tr></thead>
+            <thead><tr><th>Gambar</th><th>Kategori</th><th>Nama</th><th>Harga</th><th>Aksi</th></tr></thead>
             <tbody></tbody>
           </table>
         </div>
@@ -235,6 +235,8 @@
       <input type="text" id="produkNama" placeholder="Contoh: Chocoberry Kunafa">
       <label class="field">Harga (Rp)</label>
       <input type="number" id="produkHarga" placeholder="25000">
+      <label class="field">URL Gambar (opsional)</label>
+      <input type="text" id="produkGambar" placeholder="https://... (link gambar dari internet)">
       <div style="display:flex; gap:8px; margin-top:16px;">
         <button class="primary" style="flex:1;" onclick="simpanProduk()">Simpan</button>
         <button class="secondary" style="flex:1;" onclick="tutupModal('modalProduk')">Batal</button>
@@ -317,16 +319,16 @@
     var out = [];
     snap.forEach(function(d){
       var v = d.data();
-      out.push({ id: d.id, kategori: v.kategori, nama: v.nama, harga: Number(v.harga) });
+      out.push({ id: d.id, kategori: v.kategori, nama: v.nama, harga: Number(v.harga), gambar: v.gambar || '' });
     });
     return out;
   };
-  window.tambahProdukFirestore = async function(kategori, nama, harga){
-    var ref = await addDoc(collection(db, 'produk'), { kategori: kategori, nama: nama, harga: Number(harga) });
+  window.tambahProdukFirestore = async function(kategori, nama, harga, gambar){
+    var ref = await addDoc(collection(db, 'produk'), { kategori: kategori, nama: nama, harga: Number(harga), gambar: gambar || '' });
     return ref.id;
   };
-  window.updateProdukFirestore = async function(id, kategori, nama, harga){
-    await updateDoc(doc(db, 'produk', id), { kategori: kategori, nama: nama, harga: Number(harga) });
+  window.updateProdukFirestore = async function(id, kategori, nama, harga, gambar){
+    await updateDoc(doc(db, 'produk', id), { kategori: kategori, nama: nama, harga: Number(harga), gambar: gambar || '' });
   };
   window.hapusProdukFirestore = async function(id){
     await deleteDoc(doc(db, 'produk', id));
@@ -423,7 +425,8 @@
     tbody.innerHTML = '';
     data.forEach(function(p){
       var tr = document.createElement('tr');
-      tr.innerHTML = '<td>'+p.kategori+'</td><td>'+p.nama+'</td><td class="rp-bold">Rp '+formatRp(p.harga)+'</td>'+
+      var thumb = p.gambar ? '<img src="'+p.gambar+'" style="width:40px;height:40px;object-fit:cover;border-radius:8px;" onerror="this.style.display=\'none\'">' : '—';
+      tr.innerHTML = '<td>'+thumb+'</td><td>'+p.kategori+'</td><td>'+p.nama+'</td><td class="rp-bold">Rp '+formatRp(p.harga)+'</td>'+
         '<td class="actions">'+
         '<button class="secondary" onclick=\'bukaModalProduk('+JSON.stringify(p)+')\'>Edit</button>'+
         '<button class="danger" onclick="hapusProduk(\''+p.id+'\')">Hapus</button></td>';
@@ -437,6 +440,7 @@
     document.getElementById('produkKategori').value = p ? p.kategori : '';
     document.getElementById('produkNama').value = p ? p.nama : '';
     document.getElementById('produkHarga').value = p ? p.harga : '';
+    document.getElementById('produkGambar').value = p ? (p.gambar || '') : '';
     document.getElementById('modalProduk').classList.remove('hidden');
   }
 
@@ -445,14 +449,15 @@
     var kategori = document.getElementById('produkKategori').value.trim();
     var nama = document.getElementById('produkNama').value.trim();
     var harga = Number(document.getElementById('produkHarga').value);
+    var gambar = document.getElementById('produkGambar').value.trim();
     if(!kategori || !nama || !harga){ alert('Lengkapi semua field'); return; }
 
     if(id){
-      window.updateProdukFirestore(id, kategori, nama, harga).then(function(){
+      window.updateProdukFirestore(id, kategori, nama, harga, gambar).then(function(){
         tutupModal('modalProduk'); muatProduk();
       }).catch(showError);
     } else {
-      window.tambahProdukFirestore(kategori, nama, harga).then(function(){
+      window.tambahProdukFirestore(kategori, nama, harga, gambar).then(function(){
         tutupModal('modalProduk'); muatProduk();
       }).catch(showError);
     }
