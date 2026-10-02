@@ -134,22 +134,22 @@
         </div>
         <div class="modal-options">
             
-            <a href="/tka/" class="menu-option" onclick="sendToSpreadsheet('tka')">
+            <a href="/tka/" class="menu-option" data-menu="tka" onclick="sendToSpreadsheet('tka')">
                 <span class="menu-title"><i class="fas fa-graduation-cap" style="color: var(--blue); margin-right: 8px;"></i> Rasionalisasi TKA</span>
                 <span class="menu-desc">Ketahui target nilai TKAmu untuk lolos SNBP</span>
             </a>
 
-            <a href="/snbp/" class="menu-option" onclick="sendToSpreadsheet('snbp')">
+            <a href="/snbp/" class="menu-option" data-menu="snbp" onclick="sendToSpreadsheet('snbp')">
                 <span class="menu-title"><i class="fas fa-graduation-cap" style="color: #ff9f43; margin-right: 8px;"></i> Rasionalisasi SNBP</span>
                 <span class="menu-desc">Simulasikan Nilai Raportmu, ketahui seberapa besar peluang lolosnya</span>
               </a>
 
-            <a href="/login" class="menu-option" onclick="sendToSpreadsheet('snbt')">
+            <a href="/login" class="menu-option" data-menu="snbt" onclick="sendToSpreadsheet('snbt')">
                 <span class="menu-title"><i class="fas fa-pen-alt" style="color: #2db7f5; margin-right: 8px;"></i> Rasionalisasi SNBT</span>
                 <span class="menu-desc">Ketahui target skor SNBT dan latihan soal disini</span>
             </a>
 
-            <a href="https://cbt.rasionalisasiaplus.id" class="menu-option" target="_blank" rel="noopener noreferrer" onclick="sendToSpreadsheet('tryout')">
+            <a href="https://cbt.rasionalisasiaplus.id" class="menu-option" target="_blank" rel="noopener noreferrer" data-menu="tryout" onclick="sendToSpreadsheet('tryout')">
                 <span class="menu-title"><i class="fas fa-laptop-code" style="color: #20c997; margin-right: 8px;"></i> Tryout Aplus Course</span>
                 <span class="menu-desc">Ujian Online Cerdas & Mandiri</span>
             </a>
@@ -222,6 +222,21 @@
 
 <script>
     const modal = document.getElementById('analysisModal');
+
+    // ===== PENANDA TAMPIL / SEMBUNYI MENU POPUP =====
+    // true = menu tampil, false = menu disembunyikan
+    const MENU_VISIBLE = {
+        tka:    true,
+        snbp:   true,
+        snbt:   true,
+        tryout: false
+    };
+
+    document.querySelectorAll('.menu-option[data-menu]').forEach(el => {
+        if (MENU_VISIBLE[el.dataset.menu] === false) {
+            el.style.display = 'none';
+        }
+    });
     
     // Pastikan URL Apps Script Anda di sini sudah benar
     const SPREADSHEET_URL = "https://script.google.com/macros/s/AKfycbzfMfdYWXzzABpJ_AoGmcVo5XzAPxVVPcD0Fwflvc93aKrN6sdwm1oeEn1RuWHI2-3g/exec";
