@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>APLIKASI RASIONALISASI SNBT 2026</title>
+<title>APLIKASI RASIONALISASI SNBT</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -731,7 +731,7 @@ select,input{
 </div> -->
 
   <div class="header-text">
-    <h1>APLIKASI RASIONALISASI SNBT 2026</h1>
+    <h1>APLIKASI RASIONALISASI SNBT</h1>
     <p>Sistem Analisis Peluang & Rasionalisasi Jurusan</p>
   </div>
 
@@ -1020,7 +1020,7 @@ function showData(){
   <div class="result-grid">
 
     <div class="info-card blue span-2 skor">
-      <small>SKOR AMAN 2026</small>
+      <small>SKOR AMAN</small>
       <div id="skorVal">0</div>
     </div>
 
@@ -1040,12 +1040,12 @@ function showData(){
     </div>
 
     <div class="info-card green kuota">
-      <small>Kuota 2026</small>
+      <small>Kuota</small>
       <div id="kuotaVal" style="font-size:22px">0</div>
     </div>
 
     <div class="info-card orange peminat">
-      <small>Peminat 2025</small>
+      <small>Peminat </small>
       <div id="peminatVal" style="font-size:22px">0</div>
     </div>
 
@@ -1712,7 +1712,7 @@ function loadTarget() {
 
   document.getElementById("content").innerHTML = `
     <div class="card">
-      <h3 style="margin-bottom:0;">🎯 Analisis Target Belajar SNBT 2026</h3>
+      <h3 style="margin-bottom:0;">🎯 Analisis Target Belajar SNBT</h3>
                 
       <div style="margin-bottom:20px;">
         <input list="ptnTargetList" id="filterPtnTarget" placeholder="Pilih PTN..." oninput="updateProdiTarget()" style="width:100%; padding:12px; border-radius:12px; border:1px solid #ddd; margin-bottom:10px;">
@@ -1892,7 +1892,7 @@ function loadStatistik() {
   </style>
 
   <div class="card">
-    <h3 style="margin-bottom:0;">📊 Statistik & Analisis Tren Prodi 2026</h3>
+    <h3 style="margin-bottom:0;">📊 Statistik & Analisis Tren Prodi</h3>
     
     <div style="margin-bottom:20px; margin-top:15px;">
         <input list="ptnStatsList" id="filterPtnStats" placeholder="Pilih PTN..." oninput="updateProdiStats()" style="width:100%; padding:12px; border-radius:12px; border:1px solid #ddd; margin-bottom:10px;">
@@ -2005,17 +2005,17 @@ function renderAnalisisStatistik() {
 
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:20px;">
           <div style="background:#f0fdf4; border:1px solid #bbf7d0; padding:15px; border-radius:12px; text-align:center;">
-            <small style="font-weight:bold; color:#166534;">Prediksi Peminat 2026</small>
+            <small style="font-weight:bold; color:#166534;">Prediksi Peminat</small>
             <div style="font-size:24px; font-weight:800; color:#14532d;">${d.p26} <small style="font-size:12px;">siswa</small></div>
             <small style="color:${selisihPeminat > 0 ? '#dc2626' : '#16a34a'}; font-weight:bold;">
-              Peminat ${selisihPeminat > 0 ? 'Naik' : 'Turun'} ${Math.abs(selisihPeminat)} dari 2025
+              Peminat ${selisihPeminat > 0 ? 'Naik' : 'Turun'} ${Math.abs(selisihPeminat)} dari 
             </small>
           </div>
           <div style="background:#fff1f2; border:1px solid #fecaca; padding:15px; border-radius:12px; text-align:center;">
-            <small style="font-weight:bold; color:#9f1239;">Prediksi Keketatan 2026</small>
+            <small style="font-weight:bold; color:#9f1239;">Prediksi Keketatan</small>
             <div style="font-size:24px; font-weight:800; color:#881337;">${toPersen(d.k26)}%</div>
             <small style="color:${selisihKet > 0 ? '#16a34a' : '#dc2626'}; font-weight:bold;">
-              Keketatan ${selisihKet > 0 ? 'Naik' : 'Turun'} ${Math.abs(selisihKet)}% dari 2025
+              Keketatan ${selisihKet > 0 ? 'Naik' : 'Turun'} ${Math.abs(selisihKet)}% dari 
             </small>
           </div>
         </div>
@@ -2023,7 +2023,7 @@ function renderAnalisisStatistik() {
 <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px; margin-bottom:15px; font-family: sans-serif; text-align: center;">
   
   <div class="mini-card-modern" style="background: #f0f7ff; border: 1px solid #e0e7ff; display: flex; flex-direction: column; justify-content: center;">
-    <small style="color: #64748b; font-size: 11px; font-weight: 600;">Kuota 2026</small>
+    <small style="color: #64748b; font-size: 11px; font-weight: 600;">Kuota</small>
     <span style="font-size: 22px; font-weight: 800; color: #1e40af;">${d.kuota26}</span>
   </div>
 
@@ -2033,12 +2033,12 @@ function renderAnalisisStatistik() {
   </div>
 
   <div class="mini-card-modern" style="background: ${colorBg}; border: 1px solid ${colorBorder}; display: flex; flex-direction: column; justify-content: center;">
-    <small style="color: ${colorText}; font-size: 11px; font-weight: 600;">Keketatan 2025</small>
+    <small style="color: ${colorText}; font-size: 11px; font-weight: 600;">Keketatan </small>
     <span style="font-size: 22px; font-weight: 800; color: ${colorText};">${toPersen(d.k25)}%</span>
   </div>
 
   <div class="mini-card-modern" style="background: #f8fafc; border: 1px solid #e2e8f0; display: flex; flex-direction: column; justify-content: center;">
-    <small style="color: #64748b; font-size: 11px; font-weight: 600;">Peminat 2025</small>
+    <small style="color: #64748b; font-size: 11px; font-weight: 600;">Peminat </small>
     <span style="font-size: 22px; font-weight: 800; color: #334155;">${d.p25}</span>
   </div>
 
@@ -2066,7 +2066,7 @@ function renderAnalisisStatistik() {
         <div class="card" style="background:#fffbeb; border-left:4px solid #d97706; margin-bottom:20px; padding:12px;">
           <b>Insight Analisis:</b><br>
           <p style="font-size:13px; margin:5px 0 0;">
-            ${ptn} Prodi ${prodi} diperkirakan terjadi ${selisihPeminat > 0 ? 'kenaikan' : 'penurunan'} peminat sebesar ${Math.abs(selisihPeminat)} siswa dan prediksi keketatan 2026 menjadi ${toPersen(d.k26)}%.
+            ${ptn} Prodi ${prodi} diperkirakan terjadi ${selisihPeminat > 0 ? 'kenaikan' : 'penurunan'} peminat sebesar ${Math.abs(selisihPeminat)} siswa dan prediksi keketatan menjadi ${toPersen(d.k26)}%.
             Fokus ke materi <b>${d.m1}</b> & <b>${d.m2}</b>, targetkan skor <b>${d.skor}</b>.
           </p>
         </div>
@@ -2110,7 +2110,7 @@ function renderAnalisisStatistik() {
 }
 
 function renderDoubleCharts(r, histPeminat, p26, k26) {
-  const labels = ['2021', '2022', '2023', '2024', '2025', 'Prediksi'];
+  const labels = ['2021', '2022', '2023', '2024', '', 'Prediksi'];
   const histKet = [
     ((r[12]/r[13])*100).toFixed(2), ((r[14]/r[15])*100).toFixed(2),
     ((r[16]/r[17])*100).toFixed(2), ((r[18]/r[19])*100).toFixed(2),
