@@ -2030,6 +2030,18 @@ function callApi(action, params) {
   }).then(r => r.json());
 }
 
+// Helper pemanggil Edge Function "simulasi" (Cek Peluang SNBP). Perhitungan skor & peluang dilakukan di server.
+function callSimulasi(action, params) {
+  return fetch(`${SUPABASE_URL}/functions/v1/simulasi`, {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${ANON_KEY}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ action, ...(params || {}) })
+  }).then(r => r.json());
+}
+
 // ---------------------------------------------------------
 // PROTEKSI: LARANG KLIK KANAN & MENYALIN TEKS
 // ---------------------------------------------------------
@@ -3305,7 +3317,7 @@ function initSimulasiMenu() {
   let email = localStorage.getItem("email");
   let pass = localStorage.getItem("pass");
 
-  callApi("get_simulasi_data", { email, pass })
+  callSimulasi("init", { email, pass })
     .then(res => {
       document.getElementById("simLoadingBox").style.display = "none";
       if (res.status === "ok") {
@@ -3334,7 +3346,7 @@ function reloadSimSiswaData() {
 
   let email = localStorage.getItem("email");
   let pass = localStorage.getItem("pass");
-  callApi("get_simulasi_data", { email, pass })
+  callSimulasi("init", { email, pass })
     .then(res => {
       if (res.status === "ok") {
         simNilaiList = res.userNilai || [];
@@ -3680,166 +3692,31 @@ function prosesSimulasi() {
     return;
   }
 
-  let d = simSelectedSiswa;
-  let p = simSelectedPtnProdi;
-  let pilihan = document.getElementById("simPilihan").value;
-  let s = simMapelStatus;
-
-  // NILAI RATAAN
-  let nilaiRataan = simToNum(d.RATAAN);
-
-  // NILAI PENDUKUNG
-  let matematika = simToNum(d["MATEMATIKA"]);
-  let nilaiPendukung;
-
-  if (s.m1Required && s.m2Required) {
-    if (s.has1 && s.has2) {
-      nilaiPendukung = (simToNum(s.val1) + simToNum(s.val2)) / 2;
-    } else if (s.has1 || s.has2) {
-      nilaiPendukung = s.has1 ? simToNum(s.val1) : simToNum(s.val2);
-    } else {
-      nilaiPendukung = matematika;
-    }
-  } else if (s.m1Required) {
-    nilaiPendukung = s.has1 ? simToNum(s.val1) : matematika;
-  } else {
-    nilaiPendukung = matematika;
-  }
-
-  // NILAI SERTIFIKAT
-  let bobotSum = 0;
-  for (let i = 1; i <= 3; i++) {
-    let sertVal = d[`SERTIFIKAT${i}`];
-    let exists = sertVal && String(sertVal).trim() !== "-" && String(sertVal).trim() !== "";
-    if (exists) {
-      let origBobot = simToNum(d[`BOBOT${i}`]);
-      let sebidang = !!simSertifikatState[i];
-      bobotSum += origBobot * (sebidang ? 1 : 0.8);
-    }
-  }
-  let nilaiSertifikat = bobotSum / 3;
-
-  // SKOR AKHIR
-  let adaPortofolio = simCekAdaPortofolio(p);
-  let skorAkhir;
-  if (adaPortofolio) {
-    skorAkhir = (0.5 * nilaiRataan) + (0.15 * nilaiPendukung) + (0.2 * nilaiSertifikat) + 10;
-  } else {
-    skorAkhir = (0.5 * nilaiRataan) + (0.3 * nilaiPendukung) + (0.2 * nilaiSertifikat);
-  }
-
-  // PELUANG AWAL (PA) & VARIABEL SKOR
-  let pa, varSkor;
-  if (skorAkhir < 70) {
-    pa = 30; varSkor = 0;
-  } else if (skorAkhir < 80) {
-    pa = 40; varSkor = skorAkhir - 70;
-  } else if (skorAkhir < 85) {
-    pa = 60; varSkor = skorAkhir - 80;
-  } else {
-    pa = 70; varSkor = skorAkhir - 85;
-  }
-
-  // VARIABEL TAMBAHAN
-  let varDomisili = simDomisiliStatus.match ? 5 : 0;
-  let varAlumni = simAlumniState.chk2 ? 3 : (simAlumniState.chk1 ? 2 : 0);
-
-  let ranking = parseFloat(String(d.RANKING || "").replace(",", "."));
-  let varRanking = 0;
-  if (!isNaN(ranking)) {
-    if (ranking <= 5) varRanking = 3;
-    else if (ranking <= 10) varRanking = 2;
-    else if (ranking <= 20) varRanking = 1;
-  }
-
-  let keketatanRaw = parseFloat(String(p.KEKETATAN || "0").replace(",", "."));
-  let varKeketatan = (isNaN(keketatanRaw) ? 0 : keketatanRaw) * 100;
-
-  let akreditasiUpper = String(d.AKREDITASI || "").trim().toUpperCase();
-  let varAkreditasi = akreditasiUpper === "A" ? 2 : (akreditasiUpper === "B" ? 1 : 0);
-
-  // Bonus dari sheet NILAI kolom KATEGORI1-5: ISTIMEWA (+1%), selain itu (+0%). Maksimal +5%.
-  let varKategoriTKA = 0;
-  for (let i = 1; i <= 5; i++) {
-    let katUpper = String(d[`KATEGORI${i}`] || "").trim().toUpperCase();
-    if (katUpper === "ISTIMEWA") varKategoriTKA += 1;
-  }
-
-  let varTambahan = varDomisili + varAlumni + varRanking + varKeketatan + varAkreditasi + varKategoriTKA;
-
-  // PELUANG FINAL (PF)
-  let pf = pa + varSkor + varTambahan;
-
-  // KONVERSI TOLERANSI (LINTAS MINAT)
-  // - Mapel Pendukung SESUAI (tombol hijau) -> TIDAK dikenakan konversi, Peluang = PF apa adanya
-  // - Mapel Pendukung TIDAK SESUAI (tombol merah) -> dikenakan konversi, Peluang = PF x LINTASMINAT (sheet PTN)
-  // s.sesuai diambil langsung dari simMapelStatus, variabel yang sama persis dengan penentu warna tombol Mapel Pendukung, agar selalu sinkron.
-  let toleransi = parseFloat(String(p.LINTASMINAT !== undefined && p.LINTASMINAT !== "" ? p.LINTASMINAT : "1").replace(",", "."));
-  if (isNaN(toleransi)) toleransi = 1;
-
-  let peluang = s.sesuai ? pf : (pf * toleransi);
-
-  // KONVERSI PENEMPATAN PILIHAN 2 + KATEGORI KETAT/SANGAT KETAT
-  let kategoriUpper = String(p.KATEGORI || "").toUpperCase();
-  let kenaPotonganPilihan2 = pilihan === "2" && kategoriUpper.includes("KETAT");
-  if (kenaPotonganPilihan2) {
-    peluang = peluang * 0.8;
-  }
-
-  if (peluang > 99) peluang = 99;
-  if (peluang < 0) peluang = 0;
-
-  // Simpan rincian perhitungan untuk popup penjelasan Skor & Peluang
-  simLastCalc = {
-    nilaiRataan, nilaiPendukung, nilaiSertifikat, adaPortofolio, skorAkhir,
-    pa, varSkor, varDomisili, varAlumni, varRanking, varKeketatan, varAkreditasi, varKategoriTKA, varTambahan, pf,
-    toleransi, mapelSesuai: s.sesuai, kenaPotonganPilihan2, peluang
-  };
-
-  let hasil = { skorAkhir, peluang, nilaiRataan, nilaiPendukung, nilaiSertifikat };
-  kirimSimulasi(hasil);
-}
-
-// ---------------------------------------------------------
-// KIRIM HASIL SIMULASI KE SHEET TERDAFTAR
-// ---------------------------------------------------------
-function kirimSimulasi(hasil) {
   document.getElementById("simSubmitLoading").style.display = "block";
   document.getElementById("btnSimulasikan").disabled = true;
 
-  let d = simSelectedSiswa;
-  let p = simSelectedPtnProdi;
   let email = localStorage.getItem("email");
   let pass = localStorage.getItem("pass");
-  let pilihan = document.getElementById("simPilihan").value;
 
-  let owned = getOwnedSertifikatIndexes();
-  let sertifikatText = owned.length > 0 ? `${owned.length} Sertifikat` : "Tidak Ada Sertifikat";
-
-  let payload = {
-    "USER": email,
-    "PTN": p.PTN,
-    "PRODI": p.PRODI,
-    "NAMA": d.NAMA || "-",
-    "ASAL SEKOLAH": d.SEKOLAH || "-",
-    "PILIHAN": pilihan,
-    "DOMISILI": d.PROV || "-",
-    "PENDUKUNG": simMapelStatus.sesuai ? "SESUAI" : "TIDAK SESUAI",
-    "ALUMNI": simAlumniState.chk2 ? "2" : (simAlumniState.chk1 ? "1" : "0"),
-    "SERTIFIKAT": sertifikatText,
-    "SKOR": hasil.skorAkhir.toFixed(2).replace(".", ","),
-    "PELUANG": hasil.peluang.toFixed(2).replace(".", ",")
-  };
-
-  callApi("save_simulasi_data", { email, pass, payload })
+  // Frontend hanya mengirim PILIHAN user. Skor & peluang dihitung dan disimpan di server.
+  callSimulasi("hitung", {
+    email, pass,
+    siswaId: simSelectedSiswa._ID,
+    ptn: simSelectedPtnProdi.PTN,
+    prodi: simSelectedPtnProdi.PRODI,
+    pilihan: document.getElementById("simPilihan").value,
+    alumni: simAlumniState.chk2 ? 2 : (simAlumniState.chk1 ? 1 : 0),
+    sertifikatSebidang: simSertifikatState
+  })
     .then(res => {
       document.getElementById("simSubmitLoading").style.display = "none";
       if (res.status === "ok") {
-        tampilkanHasilSimulasi(hasil);
+        simLastCalc = res.rincian; // rincian angka untuk popup penjelasan
+        tampilkanHasilSimulasi(res.rincian);
         kunciFormSimulasi();
       } else {
         document.getElementById("btnSimulasikan").disabled = false;
-        alert(res.message || "Gagal menyimpan data simulasi.");
+        alert(res.message || "Gagal memproses simulasi.");
       }
     })
     .catch(err => {
